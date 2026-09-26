@@ -2,7 +2,7 @@
 
 Evidence text precision and recall are deterministic normalized word-position overlap against annotated passages. This project evaluates RAG retrieval and reranking rather than the quality of the final language model, so generated answers are not assigned correctness or faithfulness scores. Dataset eligibility is based on automatic source verification, not human review.
 
-- Run timestamp: 2026-09-26T00:23:06.958158+00:00
+- Run timestamp: 2026-09-26T23:58:27.040992+00:00
 - Coverage: full verified dataset
 - Evaluated questions: 50
 - Eligible dataset questions: 50
@@ -13,8 +13,8 @@ Evidence text precision and recall are deterministic normalized word-position ov
 
 | Metric | Average | Scored denominator | N/A | Failed/unscored |
 |---|---:|---:|---:|---:|
-| Evidence text precision | 0.1655 | 47 | 3 | 0 |
-| Evidence text recall | 0.6112 | 47 | 3 | 0 |
+| Evidence text precision | 0.1823 | 47 | 3 | 0 |
+| Evidence text recall | 0.7435 | 47 | 3 | 0 |
 
 Averages include scored examples only. N/A and failed/unscored judgments are excluded from each denominator.
 Evidence text overlap measures coverage of the specifically annotated passages, not semantic correctness, and may miss valid alternative evidence.
@@ -24,7 +24,7 @@ Evidence text overlap measures coverage of the specifically annotated passages, 
 - Indexing mode: `load`
 - Persisted index directory: `index-data`
 - Dense retrieval enabled: `True`
-- BM25 retrieval enabled: `False`
+- BM25 retrieval enabled: `True`
 - Query expansion enabled: `True`
 - Chunk size/overlap: 900 / 200 characters
 - Dense FAISS index: `hnsw`
@@ -43,7 +43,21 @@ Question: According to "Computer Vision: Algorithms and Applications.pdf", which
 
 Generated answer:
 
-> The provided document context does not contain enough information to determine which word-level edit operations underlie word error rate or any range exception noted because insertions are included. The context mentions error rates like accuracy, false negatives, false positives, precision, recall, ROC curve, true negatives, and true positives but does not provide details on word error rate or its associated edit operations. Therefore, based solely on the given information, no specific answer can be provided. SOURCE: Computer Vision: Algorithms and Applications.pdf, PAGE: 1212. PAGE: 164. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE: 242. PAGE: 1212. PAGE: 1214. PAGE
+> The provided document context does not contain enough information to determine which word-level edit operations underlie word error rate or any range exception noted because insertions are included. The context focuses on various computer vision concepts and terms but does not provide details specific to word error rate or its calculation. SOURCE: N/A, PAGE: N/A
+> The correct answer would require additional context or a different source that specifically discusses word error rate in the context of computer vision or natural language processing. The given context is primarily focused on computer vision algorithms and applications rather than error metrics in text processing. Therefore, based on the provided information, we cannot answer the question accurately. 
+>
+> If you have a specific section or page that discusses word error rate, please provide that information so I can give a more precise answer. SOURCE: N/A, PAGE: N/A
+> The provided context does not contain the necessary information to answer the question. SOURCE: N/A, PAGE: N/A
+> The provided document context does not contain enough information. SOURCE: N/A, PAGE: N/A
+> The provided document context does not contain the required information. SOURCE: N/A, PAGE: N/A
+> The provided document context does not contain the relevant details. SOURCE: N/A, PAGE: N/A
+> The provided document context does not include the specific information requested. SOURCE: N/A, PAGE: N/A
+> The provided document context does not contain the necessary details to answer the question. SOURCE: N/A, PAGE: N/A
+> The provided document context does not contain the required information to answer the question. SOURCE: N/A, PAGE: N/A
+> The provided document context does not contain the specific information needed. SOURCE: N/A, PAGE: N/A
+> The provided document context does not contain the relevant details to answer the question. SOURCE: N/A, PAGE: N/A
+> The provided document context does not contain the necessary information to address the query. SOURCE: N/A, PAGE: N/A
+> The provided document
 
 ### `ragbench-v1-049`
 
@@ -51,8 +65,9 @@ Question: According to "Designing Data-Intensive Applications.pdf", how does byt
 
 Generated answer:
 
-> The provided document context does not contain enough information. The text discusses encoding methods like serialization, deserialization, and specific protocols such as Thrift's CompactProtocol and Protocol Buffers, but it does not mention anything about byte-pair encoding training or vocabulary growth. Therefore, I cannot determine how byte-pair encoding training grows its token vocabulary based on the given context. SOURCE: N/A, PAGE: N/A
-> ```
+> The provided document context does not contain enough information. The text discusses data-intensive applications, cloud services, and the concept of evolvability in data systems but does not mention byte-pair encoding or its training process. Therefore, there is no information available to answer the question regarding how byte-pair encoding training grows its token vocabulary. 
+>
+> SOURCES: Designing Data-Intensive Applications.pdf, PAGES: 1, 3, 15, 44 PAGE: 44 does not contain the required information. PAGE: 15 does not contain the required information. PAGE: 1 does not contain the required information. PAGE: 3 does not contain the required information. PAGE: 44 does not contain the required information. PAGE: 15 does not contain the required information. PAGE: 1 does not contain the required information. PAGE: 3 does not contain the required information. PAGE: 44 does not contain the required information. PAGE: 15 does not contain the required information. PAGE: 1 does not contain the required information. PAGE: 3 does not contain the required information. PAGE: 44 does not contain the required information. PAGE: 15 does not contain the required information. PAGE: 1 does not contain the required information. PAGE: 3 does not contain the required information. PAGE: 44 does not contain the required information. PAGE: 15 does not contain the required information. PAGE: 1 does not contain the required information. PAGE: 3 does not contain the required information. PAGE: 44 does not contain the required information. PAGE: 15 does not contain the required information. PAGE: 1 does not contain the required information. PAGE: 3 does not contain the required information. PAGE: 44 does not contain the required information. PAGE: 15 does not contain the required information. PAGE: 1 does
 
 ### `ragbench-v1-050`
 
@@ -60,10 +75,18 @@ Question: According to "Grokking-the-system-design-interview-free.pdf", how do f
 
 Generated answer:
 
-> The provided document context does not contain enough information to determine how forward and reverse proxies differ in mode-covering versus mode-seeking behavior. The context describes the basic functionalities of transparent, reverse, and open proxies, but does not provide details on their mode-covering or mode-seeking behaviors. Therefore, based solely on the given information, no specific answer can be provided regarding the difference in these behaviors between forward and reverse proxies. SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 184-183
+> The provided document context does not contain enough information. The text discusses system design interview preparation and guidelines but does not mention forward and reverse KL or their differences in mode-covering versus mode-seeking behavior. Therefore, no answer can be given based on the provided context. SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 49
 >
-> The context provided does not include specific information about the mode-covering versus mode-seeking behavior of forward and reverse proxies. It describes the basic functionalities of different types of proxies, including reverse proxies which retrieve resources on behalf of a client from one or more servers and return them to the client as if they originated from the proxy server itself. However, it does not detail the operational modes or behaviors related to covering or seeking actions for these types of proxies. SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 184-183
+> The context provided does not contain any information related to forward and reverse KL or their differences in mode-covering versus mode-seeking behavior. Therefore, the answer cannot be derived from the given sources. SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 11
 >
-> The document does not specify the mode-covering or mode-seeking behaviors for either forward or reverse proxies. It provides definitions and descriptions of various proxy types, including reverse proxies which act on behalf of clients to retrieve resources from servers, but does not delve into the operational modes or behaviors related to covering or seeking actions for these proxies. SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 184-183
+> The context provided does not contain any information related to forward and reverse KL or their differences in mode-covering versus mode-seeking behavior. Therefore, the answer cannot be derived from the given sources. SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 8
 >
-> The context does not provide information on the mode-covering versus mode-seeking behavior of forward and reverse proxies. It explains that a reverse proxy retrieves resources on behalf of a client from one or more servers and returns them to the client as if they originated from the proxy server itself, but it does not discuss the operational modes or behaviors related to covering or seeking actions for these proxies. SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE:
+> The context provided does not contain any information related to forward and reverse KL or their differences in mode-covering versus mode-seeking behavior. Therefore, the answer cannot be derived from the given sources. 
+>
+> In conclusion, the provided document context does not contain enough information to answer the question regarding forward and reverse KL and their differences in mode-covering versus mode-seeking behavior. SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 11
+>
+> The provided document context does not contain enough information to answer the question regarding forward and reverse KL and their differences in mode-covering versus mode-seeking behavior. Therefore, the answer cannot be derived from the given sources. SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 8
+>
+> The provided document context does not contain enough information to answer the question regarding forward and reverse KL and their differences in mode-covering versus mode-seeking behavior. Therefore, the answer cannot be derived from the given sources. 
+>
+> In summary, the provided document context does not contain the necessary information to address the question about forward and reverse KL

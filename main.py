@@ -39,6 +39,14 @@ def find_explicit_sources(question, available_sources):
     return matched_sources
 
 
+class ConversationSession:
+    def __init__(self):
+        # Both roles are kept because a follow-up such as "explain the second one"
+        # may refer to content that appeared in the previous answer.
+        self.messages = []
+        self.active_sources = []
+
+
 class RAGPipeline:
     PERSISTENCE_FORMAT_VERSION = 1
 
@@ -60,6 +68,8 @@ class RAGPipeline:
                 "At least one of ablation.use_dense_retrieval or "
                 "ablation.use_bm25_retrieval must be enabled."
             )
+        if self.config["conversation"]["max_history_turns"] < 1:
+            raise ValueError("conversation.max_history_turns must be at least 1.")
 
         self.page_texts = {}
 
@@ -627,15 +637,79 @@ class RAGPipeline:
 
         return query_expansion, expanded_query
 
+    def rewrite_conversational_query(self, query, session):
+        if not session.messages:
+            return {
+                "is_follow_up": False,
+                "standalone_query": query,
+                "status": "first_turn",
+            }
+
+        max_history_messages = self.config["conversation"]["max_history_turns"] * 2
+        recent_messages = session.messages[-max_history_messages:]
+        conversation_history = "\n".join(
+            f"{message['role'].upper()}: {message['content']}"
+            for message in recent_messages
+        )
+        rewrite_prompt = self.config["conversation"]["rewrite_prompt"].format(
+            conversation_history=conversation_history,
+            active_sources=", ".join(session.active_sources) or "None",
+            query=query,
+        )
+        rewrite_response = self.llm.invoke(
+            rewrite_prompt,
+            pipeline_kwargs={
+                "max_new_tokens": self.config["conversation"][
+                    "rewrite_max_new_tokens"
+                ]
+            },
+        )
+        json_start = rewrite_response.find("{")
+
+        try:
+            parsed_rewrite, _ = json.JSONDecoder().raw_decode(
+                rewrite_response[json_start:]
+            ) if json_start != -1 else ({}, 0)
+        except json.JSONDecodeError:
+            parsed_rewrite = {}
+
+        is_follow_up = parsed_rewrite.get("is_follow_up")
+        standalone_query = parsed_rewrite.get("standalone_query")
+        if not isinstance(is_follow_up, bool) or not isinstance(
+            standalone_query, str
+        ) or not standalone_query.strip():
+            # A failed rewrite falls back to the user's exact message and does not
+            # inherit a source restriction based on an uncertain classification.
+            return {
+                "is_follow_up": False,
+                "standalone_query": query,
+                "status": "fallback",
+            }
+
+        return {
+            "is_follow_up": is_follow_up,
+            "standalone_query": standalone_query.strip(),
+            "status": "rewritten",
+        }
+
     #########################################################################################################################################
     # 6- Retrieve dense and sparse candidates, then merge them
     #########################################################################################################################################
-    def selected_sources(self, query):
+    def selected_sources(self, query, source_override=None):
+        if source_override:
+            unknown_sources = set(source_override) - set(self.available_sources)
+            if unknown_sources:
+                raise ValueError(
+                    "Unknown conversational source restriction: "
+                    + ", ".join(sorted(unknown_sources))
+                )
+            return source_override
+
         explicit_sources = find_explicit_sources(query, self.available_sources)
         return explicit_sources or self.available_sources
 
-    def retrieve_candidates(self, query, expanded_query):
-        sources = self.selected_sources(query)
+    def retrieve_candidates(self, query, expanded_query, source_override=None):
+        sources = self.selected_sources(query, source_override)
 
         # If a source was explicitly named, this searches only its chunks. Otherwise,
         # this searches all chunks from all sources.
@@ -862,7 +936,7 @@ class RAGPipeline:
     def generate_answer(self, formatted_prompt):
         return self.llm.invoke(formatted_prompt)
 
-    def run(self, query):
+    def run(self, query, source_override=None):
         query_expansion = {
             "key_terms": [],
             "acronyms": [],
@@ -872,7 +946,11 @@ class RAGPipeline:
         if self.use_bm25_retrieval and self.use_query_expansion:
             query_expansion, expanded_query = self.expand_query(query)
 
-        retrieval = self.retrieve_candidates(query, expanded_query)
+        retrieval = self.retrieve_candidates(
+            query,
+            expanded_query,
+            source_override,
+        )
         reranked_docs = self.rerank_candidates(
             query,
             retrieval["candidate_docs"]
@@ -892,6 +970,46 @@ class RAGPipeline:
             "generated_answer": response,
         }
 
+    def run_turn(self, query, session):
+        rewrite = self.rewrite_conversational_query(query, session)
+        explicit_sources = find_explicit_sources(query, self.available_sources)
+
+        if explicit_sources:
+            session.active_sources = explicit_sources
+            source_restriction_origin = "explicit_current_message"
+        elif rewrite["is_follow_up"] and session.active_sources:
+            source_restriction_origin = "inherited_from_previous_turn"
+        else:
+            session.active_sources = []
+            source_restriction_origin = "none"
+
+        standalone_query = rewrite["standalone_query"]
+        result = self.run(
+            standalone_query,
+            source_override=session.active_sources or None,
+        )
+
+        # Conversation history helps resolve future references, but it is not added
+        # to the retrieved document context or treated as source evidence.
+        session.messages.append({"role": "user", "content": query})
+        session.messages.append(
+            {"role": "assistant", "content": result["generated_answer"]}
+        )
+        max_history_messages = self.config["conversation"]["max_history_turns"] * 2
+        session.messages = session.messages[-max_history_messages:]
+
+        result.update(
+            {
+                "original_query": query,
+                "standalone_query": standalone_query,
+                "conversation_rewrite": rewrite,
+                "active_sources": list(session.active_sources),
+                "source_restriction_origin": source_restriction_origin,
+                "explicit_source_restriction_detected": bool(explicit_sources),
+            }
+        )
+        return result
+
 
 def main():
     with Path("config.yml").open(encoding="utf-8") as file:
@@ -906,17 +1024,52 @@ def main():
         # Load mode reads the corpus, chunks, metadata, and indexes from disk.
         pdf_paths = []
 
-    query = config["query"]
     pipeline = RAGPipeline(config, pdf_paths)
-    selected_sources = find_explicit_sources(query, pipeline.available_sources)
 
-    if selected_sources:
-        print("Source explicitly selected:", ", ".join(selected_sources))
+    if config["conversation"]["enabled"]:
+        session = ConversationSession()
+        exit_commands = {
+            command.lower()
+            for command in config["conversation"]["exit_commands"]
+        }
+        print("Conversation mode enabled. Type", ", ".join(sorted(exit_commands)), "to stop.")
+
+        while True:
+            try:
+                current_query = input("\nYou: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                print()
+                break
+
+            if current_query.lower() in exit_commands:
+                break
+            if not current_query:
+                continue
+
+            result = pipeline.run_turn(current_query, session)
+
+            if result["source_restriction_origin"] == "inherited_from_previous_turn":
+                print("Source restriction inherited:", ", ".join(result["active_sources"]))
+            elif result["active_sources"]:
+                print("Source explicitly selected:", ", ".join(result["active_sources"]))
+            else:
+                print("No source restriction; searching all sources.")
+
+            if result["standalone_query"] != current_query:
+                print("Standalone retrieval query:", result["standalone_query"])
+
+            print("\nAssistant:", result["generated_answer"])
     else:
-        print("No source explicitly selected; searching all sources.")
+        query = config["query"]
+        selected_sources = find_explicit_sources(query, pipeline.available_sources)
 
-    result = pipeline.run(query)
-    print(result["generated_answer"])
+        if selected_sources:
+            print("Source explicitly selected:", ", ".join(selected_sources))
+        else:
+            print("No source explicitly selected; searching all sources.")
+
+        result = pipeline.run(query)
+        print(result["generated_answer"])
 
 
 if __name__ == "__main__":

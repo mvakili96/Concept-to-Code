@@ -13,6 +13,7 @@ A compact, local pipeline for progressively exploring production RAG concepts ov
 | **Candidate fusion** | Chunk-ID deduplication |
 | **Reranking** | MiniLM cross-encoder |
 | **Generation** | `Qwen2.5-7B-Instruct` with source and page citations |
+| **Conversation** | Qwen follow-up rewriting, in-memory history, and active-source state |
 | **Persistence** | Reusable corpus, BM25, IndexFlat, and HNSW artifacts |
 | **Ablations** | Independent dense retrieval, BM25, and query-expansion toggles |
 | **Evaluation** | 50-question source-grounded benchmark with deterministic evidence-overlap metrics |
@@ -27,6 +28,8 @@ Use indexing mode `build` once to parse and chunk the complete corpus, build BM2
 
 `use_dense_retrieval`, `use_bm25_retrieval`, and `use_query_expansion` support retrieval ablations without rebuilding. At least one retriever must remain enabled, and query expansion runs only when BM25 is enabled.
 
+With `conversation.enabled`, every turn—including the first—is entered interactively in the terminal; the configured query is used only in single-turn mode. Later turns are rewritten into standalone retrieval queries using recent user and assistant messages. An explicitly named source is inherited only for a follow-up and cleared for a new topic. History resolves references but is not treated as document evidence; session state lasts only for the current process.
+
 ## Retrieval Sources
 
 - *Computer Vision: Algorithms and Applications* — computer vision methods and applications.
@@ -38,7 +41,7 @@ Use indexing mode `build` once to parse and chunk the complete corpus, build BM2
 
 ## Evaluation Dataset
 
-`evaluation-data/rag_benchmark_v1.jsonl` is a fixed, source-grounded benchmark of 50 answerable and controlled-unanswerable questions. It includes reference answers, atomic facts, exact PDF evidence with physical page numbers, source restrictions, terminology variants, and distractors. It exists to compare retrieval, query-expansion, reranking, and context-coverage changes consistently across experiments.
+`evaluation-data/rag_benchmark_v1.jsonl` is a fixed, source-grounded single-turn benchmark of 50 answerable and controlled-unanswerable questions. It includes reference answers, atomic facts, exact PDF evidence with physical page numbers, source restrictions, terminology variants, and distractors. It exists to compare retrieval, query-expansion, reranking, and context-coverage changes consistently across experiments.
 
 Run the complete automated evaluation with `python evaluate.py`, or use `python evaluate.py --limit 1` for a small execution check. The evaluator imports the same `RAGPipeline` used by `main.py`. Evidence text precision and recall compare only the final reranked chunks supplied to the answering LLM against the annotated passages using normalized PDF word positions. They do not measure semantic correctness and can miss valid alternative evidence.
 
@@ -48,4 +51,4 @@ This repository evaluates retrieval and reranking rather than final-answer quali
 
 - Figures, table structure, page layout, and scanned text are not parsed.
 - `rank_bm25` scores every chunk rather than using a scalable inverted index.
-- No serving API or conversational memory yet.
+- Conversation sessions are not persisted, and there is no conversational benchmark or serving API yet.

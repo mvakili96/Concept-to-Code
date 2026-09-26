@@ -1,4 +1,4 @@
-# The question asked to the RAG pipeline.
+# The question used only when conversation mode is disabled.
 query: "What is Hough transform in the context of computer vision?"
 
 documents:
@@ -10,8 +10,38 @@ indexing:
 
 ablation:
   use_dense_retrieval: true
-  use_bm25_retrieval: false
+  use_bm25_retrieval: true
   use_query_expansion: true
+
+conversation:
+  enabled: true
+  max_history_turns: 4  # One turn contains one user message and one assistant answer.
+  rewrite_max_new_tokens: 120
+  exit_commands: ["exit", "quit"]
+  rewrite_prompt: |
+    Determine whether the new user message depends on the conversation history.
+    Rewrite it as a complete standalone retrieval query when necessary.
+
+    Return ONLY valid JSON with this exact structure:
+    {{
+      "is_follow_up": true,
+      "standalone_query": "a complete question that can be understood without the history"
+    }}
+
+    Rules:
+      - Do not answer the question.
+      - Use the history only to resolve references or omitted context.
+      - Do not add facts that are absent from the user's messages or the assistant's prior answers.
+      - If the message is independent, set is_follow_up to false and preserve its meaning.
+
+    CONVERSATION HISTORY:
+    {conversation_history}
+
+    ACTIVE SOURCE RESTRICTION:
+    {active_sources}
+
+    NEW USER MESSAGE:
+    {query}
 
 chunking:
   chunk_size: 900
