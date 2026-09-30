@@ -1,4 +1,4 @@
-# RAG Benchmark Source-Audit Review — v1.1.0
+# RAG Benchmark Source-Audit Review — v1.2.0
 
 > All included examples passed a Codex source audit and are eligible for evaluation. This is automated source verification, not human approval or a guarantee of correctness.
 
@@ -1220,7 +1220,7 @@ Re-read against the original PDF; source, one-based physical page, exact quote, 
 
 ## ragbench-v1-025
 
-**Question:** In the reference entry for Add Two Numbers, how are the integers represented, what form must the result take, and what typical complexity is targeted?
+**Question:** In the Add Two Numbers entry, how are digits ordered in each input list, what form must the sum take, and which extra-digit and leading-zero conditions are stated?
 
 **Category / difficulty:** `source_specific_lookup` / `easy`
 
@@ -1228,55 +1228,48 @@ Re-read against the original PDF; source, one-based physical page, exact quote, 
 
 **Answerability / expected behavior:** `answerable` / `answer_using_only_allowed_sources`
 
-**Reference answer:** The two non-negative integers are encoded as reverse-order linked lists, and the sum is returned in the same representation. The typical target is O(m+n) time and O(1) auxiliary space.
+**Reference answer:** Each nonempty input list stores one decimal digit per node, with the least significant digit first. The sum must be returned as a linked list in the same digit order, including any additional digit needed by the sum. Inputs have no leading zero except when the represented number is zero.
 
 **Required facts:**
 
-- `ragbench-v1-025-f1`: The inputs are non-negative integers encoded in reverse-order linked lists, and the output uses the same representation. (evidence: ragbench-v1-025-e1)
-- `ragbench-v1-025-f2`: The typical target is O(m+n) time and O(1) auxiliary space. (evidence: ragbench-v1-025-e1)
+- `ragbench-v1-025-f1`: Each node stores one decimal digit, and the first node contains the number’s least significant digit. (evidence: ragbench-v1-025-e1)
+- `ragbench-v1-025-f2`: The sum is returned as a linked list in the same digit order, including any additional digit needed by the sum. (evidence: ragbench-v1-025-e1)
+- `ragbench-v1-025-f3`: Neither input has a leading zero unless it represents zero itself. (evidence: ragbench-v1-025-e1)
 
 **Evidence:**
 
-- `ragbench-v1-025-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 162 (printed label 162); supports ragbench-v1-025-f1, ragbench-v1-025-f2
+- `ragbench-v1-025-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 1 (printed label 1); supports ragbench-v1-025-f1, ragbench-v1-025-f2, ragbench-v1-025-f3
 
 > 2. Add Two Numbers
-> MEDIUM
-> |
-> Open on LeetCode
-> Summary:
-> Add two non-negative integers encoded in reverse-order linked lists and return the sum in the same representation.
-> Key concepts:
-> Linked list; carry handling; simulation
-> Typical target:
-> O(m+n) time, O(1) auxiliary space
+> Medium | Open on LeetCode
+> The heads l1 and l2 identify two nonempty singly linked lists. Each node holds one decimal digit,
+> and the first node contains the least significant digit of its number. Compute the sum of the two
+> represented nonnegative integers and return a linked list using the same digit order. Include any
+> additional digit needed by the sum. Neither input represents a number with a leading zero, except
+> zero itself.
 
 **Required evidence groups:**
 
 - `ragbench-v1-025-g1`: any one of [ragbench-v1-025-e1] supports ragbench-v1-025-f1.
 - `ragbench-v1-025-g2`: any one of [ragbench-v1-025-e1] supports ragbench-v1-025-f2.
+- `ragbench-v1-025-g3`: any one of [ragbench-v1-025-e1] supports ragbench-v1-025-f3.
 
 **Verified distractors:**
 
-- `ragbench-v1-025-d1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 310 (printed label 310): This is the similarly named Add Two Numbers II entry, not problem 2, and it does not state the reverse-order representation asked about.
+- `ragbench-v1-025-d1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 223 (printed label 223): This similarly named entry stores digits most significant first, whereas problem 2 asks about least-significant-digit-first inputs.
 
 > 445. Add Two Numbers II
-> MEDIUM
-> |
-> Open on LeetCode
-> Summary:
-> Solve the algorithmic task described by 'Add Two Numbers II', with the main study focus on Linked List, Math.
-> Key concepts:
-> Linked List; Math; Stack
-> Typical target:
-> Typically O(n) time with O(1) auxiliary space unless recursion or extra indexing is used
+> Medium | Open on LeetCode
+> Two linked lists store decimal digits most significant first. Return their nonnegative sum in the
+> same format, preserving any new leading digit. Inputs have no unnecessary initial zeros.
 
-**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-08 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
+**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-30 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
 
-Re-read against the original PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
+Re-read against the replacement LeetCode PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
 
 ## ragbench-v1-026
 
-**Question:** Which technique and data structures does the reference associate with finding the longest substring that has no repeated characters?
+**Question:** For Longest Substring Without Repeating Characters, what makes a segment eligible, which character types count, and what should be returned for an empty string?
 
 **Category / difficulty:** `source_specific_lookup` / `easy`
 
@@ -1284,44 +1277,41 @@ Re-read against the original PDF; source, one-based physical page, exact quote, 
 
 **Answerability / expected behavior:** `answerable` / `answer_using_only_allowed_sources`
 
-**Reference answer:** It associates the task with a sliding window, a hash map or set, and two pointers; the target is O(n) time and O(k) space.
+**Reference answer:** The result is the greatest length of a contiguous segment in which every character occurs at most once; characters cannot be skipped. Spaces, digits, and punctuation all count, and an empty string produces zero.
 
 **Required facts:**
 
-- `ragbench-v1-026-f1`: The task uses a sliding window, hash map/set, and two pointers. (evidence: ragbench-v1-026-e1)
-- `ragbench-v1-026-f2`: The typical target is O(n) time and O(k) space. (evidence: ragbench-v1-026-e1)
+- `ragbench-v1-026-f1`: The eligible substring is contiguous, uses consecutive positions, and contains each character at most once. (evidence: ragbench-v1-026-e1)
+- `ragbench-v1-026-f2`: Spaces, digits, and punctuation count as characters. (evidence: ragbench-v1-026-e1)
+- `ragbench-v1-026-f3`: An empty input string returns zero. (evidence: ragbench-v1-026-e1)
 
 **Evidence:**
 
-- `ragbench-v1-026-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 162 (printed label 162); supports ragbench-v1-026-f1, ragbench-v1-026-f2
+- `ragbench-v1-026-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 2 (printed label 2); supports ragbench-v1-026-f1, ragbench-v1-026-f2, ragbench-v1-026-f3
 
 > 3. Longest Substring Without Repeating Characters
-> MEDIUM
-> |
-> Open on LeetCode
-> Summary:
-> Determine the maximum length of a contiguous substring containing no repeated characters.
-> Key concepts:
-> Sliding window; hash map/set; two pointers
-> Typical target:
-> O(n) time, O(k) space
+> Medium | Open on LeetCode
+> For a string s, return the greatest length of a contiguous segment in which every character occurs
+> at most once. Count all characters, including spaces, digits, and punctuation. A segment must use
+> consecutive positions from s; characters cannot be skipped. Return zero when s is empty.
 
 **Required evidence groups:**
 
 - `ragbench-v1-026-g1`: any one of [ragbench-v1-026-e1] supports ragbench-v1-026-f1.
 - `ragbench-v1-026-g2`: any one of [ragbench-v1-026-e1] supports ragbench-v1-026-f2.
+- `ragbench-v1-026-g3`: any one of [ragbench-v1-026-e1] supports ragbench-v1-026-f3.
 
 **Terminology examples:**
 
-- Longest Substring Without Repeating Characters: longest unique-character substring, non-repeating contiguous substring, sliding-window substring
+- Longest Substring Without Repeating Characters: contiguous segment, characters occur at most once, characters cannot be skipped
 
-**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-08 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
+**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-30 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
 
-Re-read against the original PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
+Re-read against the replacement LeetCode PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
 
 ## ragbench-v1-027
 
-**Question:** What runtime and space target does the reference give for computing the median of two sorted arrays?
+**Question:** For Median of Two Sorted Arrays, how is the median defined for odd and even combined counts, what empty-array case is allowed, and what running time is required?
 
 **Category / difficulty:** `numerical_factual_lookup` / `easy`
 
@@ -1329,40 +1319,39 @@ Re-read against the original PDF; source, one-based physical page, exact quote, 
 
 **Answerability / expected behavior:** `answerable` / `answer_using_only_allowed_sources`
 
-**Reference answer:** It gives O(log min(m,n)) time and O(1) space, with binary search and partitioning as the key concepts.
+**Reference answer:** For an odd combined count, the median is the middle value; for an even count, it is the arithmetic mean of the two middle values. Either array may be empty as long as their combined collection is nonempty. The required running time is O(log(m+n)).
 
 **Required facts:**
 
-- `ragbench-v1-027-f1`: The typical runtime is O(log min(m,n)) with O(1) space. (evidence: ragbench-v1-027-e1)
-- `ragbench-v1-027-f2`: The associated concepts are binary search, partitioning, and sorted arrays. (evidence: ragbench-v1-027-e1)
+- `ragbench-v1-027-f1`: An odd combined count uses the middle value, while an even count uses the arithmetic mean of the two middle values. (evidence: ragbench-v1-027-e1)
+- `ragbench-v1-027-f2`: Either input array may be empty, but their combined collection must be nonempty. (evidence: ragbench-v1-027-e1)
+- `ragbench-v1-027-f3`: The required running time is O(log(m+n)), where m and n are the array lengths. (evidence: ragbench-v1-027-e1)
 
 **Evidence:**
 
-- `ragbench-v1-027-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 163 (printed label 163); supports ragbench-v1-027-f1, ragbench-v1-027-f2
+- `ragbench-v1-027-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 2 (printed label 2); supports ragbench-v1-027-f1, ragbench-v1-027-f2, ragbench-v1-027-f3
 
 > 4. Median of Two Sorted Arrays
-> HARD
-> |
-> Open on LeetCode
-> Summary:
-> Compute the median of two sorted arrays while meeting a logarithmic-time requirement.
-> Key concepts:
-> Binary search; partitioning; sorted arrays
-> Typical target:
-> O(log min(m,n)) time, O(1) space
+> Hard | Open on LeetCode
+> Two integer arrays nums1 and nums2 are already sorted in nondecreasing order. Return the
+> median of the values from both arrays considered together. With an odd total count, the median is
+> the middle value; with an even count, it is the arithmetic mean of the two middle values. Either
+> array may be empty, but their combined collection is nonempty. Required running time: O(log(m +
+> n)), where m and n are the array lengths.
 
 **Required evidence groups:**
 
 - `ragbench-v1-027-g1`: any one of [ragbench-v1-027-e1] supports ragbench-v1-027-f1.
 - `ragbench-v1-027-g2`: any one of [ragbench-v1-027-e1] supports ragbench-v1-027-f2.
+- `ragbench-v1-027-g3`: any one of [ragbench-v1-027-e1] supports ragbench-v1-027-f3.
 
-**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-08 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
+**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-30 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
 
-Re-read against the original PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
+Re-read against the replacement LeetCode PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
 
 ## ragbench-v1-028
 
-**Question:** What special correctness condition accompanies reversing a signed integer, and what typical complexity does the reference target?
+**Question:** When reversing a signed integer, how are the sign and newly leading zeros handled, what happens on 32-bit overflow, and which wider storage is forbidden?
 
 **Category / difficulty:** `source_specific_lookup` / `easy`
 
@@ -1370,40 +1359,38 @@ Re-read against the original PDF; source, one-based physical page, exact quote, 
 
 **Answerability / expected behavior:** `answerable` / `answer_using_only_allowed_sources`
 
-**Reference answer:** The reversed decimal digits must remain safe under signed 32-bit overflow handling. The typical target is O(log |x|) time and O(1) space.
+**Reference answer:** The decimal digits are reversed while the sign is retained, and zeros that would become leading digits are omitted. If the reversed value is outside the signed 32-bit range, the result is zero. The computation may not store values in a signed or unsigned 64-bit integer type.
 
 **Required facts:**
 
-- `ragbench-v1-028-f1`: Reversing the digits must safely handle signed 32-bit overflow. (evidence: ragbench-v1-028-e1)
-- `ragbench-v1-028-f2`: The typical target is O(log |x|) time and O(1) space. (evidence: ragbench-v1-028-e1)
+- `ragbench-v1-028-f1`: The digits are reversed while retaining the sign, and zeros that become leading digits are omitted. (evidence: ragbench-v1-028-e1)
+- `ragbench-v1-028-f2`: A reversed value outside the signed 32-bit range returns zero. (evidence: ragbench-v1-028-e1)
+- `ragbench-v1-028-f3`: The computation cannot store values in a signed or unsigned 64-bit integer type. (evidence: ragbench-v1-028-e1)
 
 **Evidence:**
 
-- `ragbench-v1-028-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 164 (printed label 164); supports ragbench-v1-028-f1, ragbench-v1-028-f2
+- `ragbench-v1-028-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 4 (printed label 4); supports ragbench-v1-028-f1, ragbench-v1-028-f2, ragbench-v1-028-f3
 
 > 7. Reverse Integer
-> MEDIUM
-> |
-> Open on LeetCode
-> Summary:
-> Reverse the decimal digits of a signed 32-bit integer while safely handling overflow.
-> Key concepts:
-> Math; digit extraction; overflow checks
-> Typical target:
-> O(log |x|) time, O(1) space
+> Medium | Open on LeetCode
+> For a signed 32-bit integer x, reverse the order of its decimal digits while retaining its sign. Zeros
+> that become leading digits are omitted from the numeric result. Return zero if the reversed value
+> is outside the signed 32-bit range. The computation must work without storing values in a signed
+> or unsigned 64-bit integer type.
 
 **Required evidence groups:**
 
 - `ragbench-v1-028-g1`: any one of [ragbench-v1-028-e1] supports ragbench-v1-028-f1.
 - `ragbench-v1-028-g2`: any one of [ragbench-v1-028-e1] supports ragbench-v1-028-f2.
+- `ragbench-v1-028-g3`: any one of [ragbench-v1-028-e1] supports ragbench-v1-028-f3.
 
-**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-08 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
+**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-30 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
 
-Re-read against the original PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
+Re-read against the replacement LeetCode PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
 
 ## ragbench-v1-029
 
-**Question:** For Regular Expression Matching, does the reference ask for a partial or full-string match, which pattern operators are named, and what typical bound is listed?
+**Question:** For Regular Expression Matching, is the match partial or complete, and what exact behavior does the reference assign to the period and asterisk operators?
 
 **Category / difficulty:** `multi_fact_lookup` / `medium`
 
@@ -1411,28 +1398,24 @@ Re-read against the original PDF; source, one-based physical page, exact quote, 
 
 **Answerability / expected behavior:** `answerable` / `answer_using_only_allowed_sources`
 
-**Reference answer:** It asks whether the entire string matches a pattern with dot and star semantics. The typical target is O(mn) time and O(mn) space, usually using dynamic programming or recursion/memoization.
+**Reference answer:** The pattern must match all of the text, leaving no unmatched prefix or suffix. A period matches one arbitrary character. An asterisk modifies the immediately preceding letter or period and allows zero or more occurrences of that element; it is not an independent wildcard.
 
 **Required facts:**
 
-- `ragbench-v1-029-f1`: The task is full-string matching, not partial matching. (evidence: ragbench-v1-029-e1)
-- `ragbench-v1-029-f2`: The pattern supports dot and star semantics. (evidence: ragbench-v1-029-e1)
-- `ragbench-v1-029-f3`: The typical target is O(mn) time and O(mn) space. (evidence: ragbench-v1-029-e1)
+- `ragbench-v1-029-f1`: The pattern must match all of the text, with no unmatched prefix or suffix. (evidence: ragbench-v1-029-e1)
+- `ragbench-v1-029-f2`: A period matches one arbitrary character. (evidence: ragbench-v1-029-e1)
+- `ragbench-v1-029-f3`: An asterisk modifies the immediately preceding letter or period, permits zero or more occurrences, and is not an independent wildcard. (evidence: ragbench-v1-029-e1)
 
 **Evidence:**
 
-- `ragbench-v1-029-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 165 (printed label 165); supports ragbench-v1-029-f1, ragbench-v1-029-f2, ragbench-v1-029-f3
+- `ragbench-v1-029-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 5 (printed label 5); supports ragbench-v1-029-f1, ragbench-v1-029-f2, ragbench-v1-029-f3
 
 > 10. Regular Expression Matching
-> HARD
-> |
-> Open on LeetCode
-> Summary:
-> Check whether an entire string matches a pattern supporting dot and star semantics.
-> Key concepts:
-> Dynamic programming; recursion/memoization; pattern matching
-> Typical target:
-> O(mn) time, O(mn) space typical
+> Hard | Open on LeetCode
+> Given text s and pattern p, return whether p matches all of s. Lowercase letters in p match
+> themselves; a period matches one arbitrary character. An asterisk modifies the immediately
+> preceding letter or period and permits zero or more occurrences of that element. It does not act as
+> an independent wildcard. No unmatched prefix or suffix may remain in s.
 
 **Required evidence groups:**
 
@@ -1440,13 +1423,13 @@ Re-read against the original PDF; source, one-based physical page, exact quote, 
 - `ragbench-v1-029-g2`: any one of [ragbench-v1-029-e1] supports ragbench-v1-029-f2.
 - `ragbench-v1-029-g3`: any one of [ragbench-v1-029-e1] supports ragbench-v1-029-f3.
 
-**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-08 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
+**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-30 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
 
-Re-read against the original PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
+Re-read against the replacement LeetCode PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
 
 ## ragbench-v1-030
 
-**Question:** What output uniqueness requirement and typical time target are stated for 4Sum?
+**Question:** For 4Sum, what makes a returned combination valid and distinct, how are equal values handled, and are values or indices returned?
 
 **Category / difficulty:** `source_specific_lookup` / `easy`
 
@@ -1454,40 +1437,39 @@ Re-read against the original PDF; source, one-based physical page, exact quote, 
 
 **Answerability / expected behavior:** `answerable` / `answer_using_only_allowed_sources`
 
-**Reference answer:** The result must contain all unique quadruples whose values equal the requested target. The listed typical runtime is O(n^3).
+**Reference answer:** Each result is a distinct four-value combination summing to the target and must use four different input positions. Equal values are allowed when they come from separate positions. The output contains values rather than indices and removes duplicates caused only by ordering or choices among equal-valued positions.
 
 **Required facts:**
 
-- `ragbench-v1-030-f1`: 4Sum returns unique value quadruples that sum to the target. (evidence: ragbench-v1-030-e1)
-- `ragbench-v1-030-f2`: The typical target is O(n^3) time. (evidence: ragbench-v1-030-e1)
+- `ragbench-v1-030-f1`: Every returned distinct four-value combination sums to the target. (evidence: ragbench-v1-030-e1)
+- `ragbench-v1-030-f2`: Four different input positions are required, while equal values are allowed when supplied at separate positions. (evidence: ragbench-v1-030-e1)
+- `ragbench-v1-030-f3`: The result returns values rather than indices and removes duplicates differing only by order or equal-valued position choices. (evidence: ragbench-v1-030-e1)
 
 **Evidence:**
 
-- `ragbench-v1-030-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 167 (printed label 167); supports ragbench-v1-030-f1, ragbench-v1-030-f2
+- `ragbench-v1-030-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 9 (printed label 9); supports ragbench-v1-030-f1, ragbench-v1-030-f2, ragbench-v1-030-f3
 
 > 18. 4Sum
-> MEDIUM
-> |
-> Open on LeetCode
-> Summary:
-> Return all unique quadruples whose values sum to the requested target.
-> Key concepts:
-> Sorting; two pointers; k-sum; pruning
-> Typical target:
-> O(n^3) time typical
+> Medium | Open on LeetCode
+> Given integer array nums and integer target, return every distinct four-value combination that
+> sums to target. Four different input positions must be used; equal values are allowed if supplied at
+> separate positions. Return quadruplets of values rather than indices, and remove duplicates that
+> differ only in ordering or equal-valued position choices. Result ordering is unrestricted. If no
+> quadruplet qualifies, return an empty collection.
 
 **Required evidence groups:**
 
 - `ragbench-v1-030-g1`: any one of [ragbench-v1-030-e1] supports ragbench-v1-030-f1.
 - `ragbench-v1-030-g2`: any one of [ragbench-v1-030-e1] supports ragbench-v1-030-f2.
+- `ragbench-v1-030-g3`: any one of [ragbench-v1-030-e1] supports ragbench-v1-030-f3.
 
-**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-08 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
+**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-30 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
 
-Re-read against the original PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
+Re-read against the replacement LeetCode PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
 
 ## ragbench-v1-031
 
-**Question:** What pointer strategy and resource target are listed for removing the nth node counted from the end of a singly linked list?
+**Question:** For Remove Nth Node From End of List, how is n counted, what must be preserved and returned, and what happens when the original head or only node is removed?
 
 **Category / difficulty:** `source_specific_lookup` / `easy`
 
@@ -1495,36 +1477,34 @@ Re-read against the original PDF; source, one-based physical page, exact quote, 
 
 **Answerability / expected behavior:** `answerable` / `answer_using_only_allowed_sources`
 
-**Reference answer:** The entry lists fast/slow pointers with a dummy node, targeting O(n) time and O(1) space.
+**Reference answer:** The tail is position one and n is counted backward from it. The remaining nodes keep their order and the resulting head is returned. Removing the original head can change the returned head, while removing the only node produces an empty list.
 
 **Required facts:**
 
-- `ragbench-v1-031-f1`: The listed technique uses fast/slow pointers and a dummy node. (evidence: ragbench-v1-031-e1)
-- `ragbench-v1-031-f2`: The typical target is O(n) time and O(1) space. (evidence: ragbench-v1-031-e1)
+- `ragbench-v1-031-f1`: The node is counted backward from the tail, where the tail is position one. (evidence: ragbench-v1-031-e1)
+- `ragbench-v1-031-f2`: The order of the other nodes is preserved and the resulting head is returned. (evidence: ragbench-v1-031-e1)
+- `ragbench-v1-031-f3`: Removing the original head may change the returned head, and removing the only node produces an empty list. (evidence: ragbench-v1-031-e1)
 
 **Evidence:**
 
-- `ragbench-v1-031-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 168 (printed label 168); supports ragbench-v1-031-f1, ragbench-v1-031-f2
+- `ragbench-v1-031-e1` — `LeetCode_4000_Problem_Reference.pdf`, PDF page 10 (printed label 10); supports ragbench-v1-031-f1, ragbench-v1-031-f2, ragbench-v1-031-f3
 
 > 19. Remove Nth Node From End of List
-> MEDIUM
-> |
-> Open on LeetCode
-> Summary:
-> Delete the node located n positions from the end of a singly linked list.
-> Key concepts:
-> Linked list; fast/slow pointers; dummy node
-> Typical target:
-> O(n) time, O(1) space
+> Medium | Open on LeetCode
+> Given a singly linked list head and positive integer n, remove the node that is n-th when counting
+> backward from the tail, where the tail is position one. Preserve the order of the other nodes and
+> return the resulting head. Removing the original head may change the returned head; removing
+> the only node produces an empty list.
 
 **Required evidence groups:**
 
 - `ragbench-v1-031-g1`: any one of [ragbench-v1-031-e1] supports ragbench-v1-031-f1.
 - `ragbench-v1-031-g2`: any one of [ragbench-v1-031-e1] supports ragbench-v1-031-f2.
+- `ragbench-v1-031-g3`: any one of [ragbench-v1-031-e1] supports ragbench-v1-031-f3.
 
-**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-08 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
+**Source audit:** `reviewed_and_verified` via `codex_source_audit` on 2026-09-30 using OpenAI Codex (GPT-5); evaluation eligibility = `eligible`; human approved = `false`.
 
-Re-read against the original PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
+Re-read against the replacement LeetCode PDF; source, one-based physical page, exact quote, semantic support, fact links, evidence groups, source restrictions, and terminology were verified.
 
 ## ragbench-v1-032
 

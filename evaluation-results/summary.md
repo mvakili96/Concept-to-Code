@@ -2,7 +2,7 @@
 
 Evidence text precision and recall are deterministic normalized word-position overlap against annotated passages. This project evaluates RAG retrieval and reranking rather than the quality of the final language model, so generated answers are not assigned correctness or faithfulness scores. Dataset eligibility is based on automatic source verification, not human review.
 
-- Run timestamp: 2026-09-26T23:58:27.040992+00:00
+- Run timestamp: 2026-09-30T23:17:37.519294+00:00
 - Coverage: full verified dataset
 - Evaluated questions: 50
 - Eligible dataset questions: 50
@@ -13,8 +13,8 @@ Evidence text precision and recall are deterministic normalized word-position ov
 
 | Metric | Average | Scored denominator | N/A | Failed/unscored |
 |---|---:|---:|---:|---:|
-| Evidence text precision | 0.1823 | 47 | 3 | 0 |
-| Evidence text recall | 0.7435 | 47 | 3 | 0 |
+| Evidence text precision | 0.1847 | 47 | 3 | 0 |
+| Evidence text recall | 0.7445 | 47 | 3 | 0 |
 
 Averages include scored examples only. N/A and failed/unscored judgments are excluded from each denominator.
 Evidence text overlap measures coverage of the specifically annotated passages, not semantic correctness, and may miss valid alternative evidence.
@@ -27,7 +27,7 @@ Evidence text overlap measures coverage of the specifically annotated passages, 
 - BM25 retrieval enabled: `True`
 - Query expansion enabled: `True`
 - Chunk size/overlap: 900 / 200 characters
-- Dense FAISS index: `hnsw`
+- Dense FAISS index: `flat`
 - Dense top-k / BM25 top-k: 10 / 10
 - Final reranked top-k: 4
 - Embedding model: `sentence-transformers/all-MiniLM-L6-v2`
@@ -43,21 +43,21 @@ Question: According to "Computer Vision: Algorithms and Applications.pdf", which
 
 Generated answer:
 
-> The provided document context does not contain enough information to determine which word-level edit operations underlie word error rate or any range exception noted because insertions are included. The context focuses on various computer vision concepts and terms but does not provide details specific to word error rate or its calculation. SOURCE: N/A, PAGE: N/A
-> The correct answer would require additional context or a different source that specifically discusses word error rate in the context of computer vision or natural language processing. The given context is primarily focused on computer vision algorithms and applications rather than error metrics in text processing. Therefore, based on the provided information, we cannot answer the question accurately. 
+> The provided document context does not contain enough information to determine which word-level edit operations underlie word error rate or any range exception noted due to insertions being included. The context discusses false positive rate, true positive rate, ROC curves, and document scanning but does not provide details on word error rate or its underlying edit operations. SOURCE: Computer Vision: Algorithms and Applications.pdf, PAGE: 470
 >
-> If you have a specific section or page that discusses word error rate, please provide that information so I can give a more precise answer. SOURCE: N/A, PAGE: N/A
-> The provided context does not contain the necessary information to answer the question. SOURCE: N/A, PAGE: N/A
-> The provided document context does not contain enough information. SOURCE: N/A, PAGE: N/A
-> The provided document context does not contain the required information. SOURCE: N/A, PAGE: N/A
-> The provided document context does not contain the relevant details. SOURCE: N/A, PAGE: N/A
-> The provided document context does not include the specific information requested. SOURCE: N/A, PAGE: N/A
-> The provided document context does not contain the necessary details to answer the question. SOURCE: N/A, PAGE: N/A
-> The provided document context does not contain the required information to answer the question. SOURCE: N/A, PAGE: N/A
-> The provided document context does not contain the specific information needed. SOURCE: N/A, PAGE: N/A
-> The provided document context does not contain the relevant details to answer the question. SOURCE: N/A, PAGE: N/A
-> The provided document context does not contain the necessary information to address the query. SOURCE: N/A, PAGE: N/A
-> The provided document
+> The relevant content from PAGE 470 is about ROC curves and their related rates, not word error rate or its underlying edit operations. Therefore, no answer can be given based on the provided context. SOURCE: Computer Vision: Algorithms and Applications.pdf, PAGE: 164
+>
+> The relevant content from PAGE 164 is about binary image morphology and processing, which is unrelated to word error rate. Thus, the context still does not provide the required information. SOURCE: Computer Vision: Algorithms and Applications.pdf, PAGE: 1206
+>
+> PAGE 1206 lists various applications of computer vision but does not mention word error rate or its underlying edit operations. Therefore, the context does not contain the necessary information. 
+>
+> In conclusion, the provided document context does not contain enough information to answer the question regarding word-level edit operations underlying word error rate and any range exception noted because insertions are included. SOURCE: Computer Vision: Algorithms and Applications.pdf, PAGE: 606
+>
+> PAGE 606 discusses motion estimation techniques like Horn and Schunck's method but does not address word error rate or its underlying edit operations. Hence, the context lacks the required information. 
+>
+> Therefore, the provided document context does not contain enough information to answer the question. SOURCE: Computer Vision: Algorithms and Applications.pdf, PAGE: 470
+>
+> The context from PAGE 470 focuses on ROC curves and their related rates, which do not pertain to word error rate or its underlying edit operations. Thus, the context does not provide the necessary information
 
 ### `ragbench-v1-049`
 

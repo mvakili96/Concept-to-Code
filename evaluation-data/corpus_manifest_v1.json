@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
   "benchmark_name": "rag-learning-source-grounded-benchmark",
-  "benchmark_version": "1.1.0",
+  "benchmark_version": "1.2.0",
   "dataset_schema_version": "1.1.0",
-  "last_source_audit_on": "2026-09-08",
+  "last_source_audit_on": "2026-09-30",
   "source_audit_method": "codex_source_audit",
   "source_audit_model": "OpenAI Codex (GPT-5)",
   "created_on": "2026-09-08",
@@ -52,12 +52,12 @@
     {
       "source": "LeetCode_4000_Problem_Reference.pdf",
       "relative_path": "documents/LeetCode_4000_Problem_Reference.pdf",
-      "sha256": "f6f6fd93289a1d76d98a216ed7b6c8b13698e7a297013a4d668511600d55c79e",
-      "size_bytes": 3416999,
-      "pdf_pages": 1495,
+      "sha256": "76c3d016959864965612cca10512f133bcbed2b4fac8acd6a8891467d7e4d5de",
+      "size_bytes": 5235811,
+      "pdf_pages": 2002,
       "page_numbering": "one_based_physical_pdf_page",
       "printed_page_offset_for_benchmark_evidence": 0,
-      "pdf_metadata_title": "LeetCode 4000 Problem Reference"
+      "pdf_metadata_title": null
     },
     {
       "source": "Probabilistic Machine Learning.pdf",
@@ -83,6 +83,7 @@
   "notes": [
     "Hashes pin this benchmark to the exact local PDF bytes inspected.",
     "Some PDFs emit pypdf extraction warnings; benchmark evidence was selected only from clean prose passages and verified as exact extracted-page substrings.",
-    "All 50 included records passed the v1.1 Codex source audit and are evaluation-eligible; this is not human approval or a correctness guarantee."
+    "The replacement LeetCode reference was pinned and its seven affected records were corrected and reverified in benchmark v1.2.0.",
+    "All 50 included records are evaluation-eligible; this is not human approval or a correctness guarantee."
   ]
 }

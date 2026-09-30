@@ -1,5 +1,13 @@
 # Benchmark Changelog
 
+## 1.2.0 — 2026-09-30
+
+- Replaced the pinned LeetCode reference metadata with the new 2,002-page file and updated its SHA-256 and byte size.
+- Preserved all stable question IDs while correcting and reverifying `ragbench-v1-025` through `ragbench-v1-031` against the replacement source.
+- Removed unsupported questions and facts about algorithm labels and typical complexity targets that no longer appear in the source. Replaced them with source-supported representation rules, operator semantics, constraints, edge cases, and output requirements.
+- Updated the seven evidence passages, physical PDF pages, fact mappings, evidence groups, terminology examples, and the Add Two Numbers distractor.
+- Verified every revised quote as an exact substring of the cited page's `pypdf` extraction. Quarantined 0 records.
+
 ## 1.1.0 — 2026-09-08
 
 - Re-read all 50 examples against the original PDFs and verified source filenames, one-based physical pages, exact extracted quotes, semantic support, fact mappings, evidence groups, source restrictions, answerability, and terminology annotations.

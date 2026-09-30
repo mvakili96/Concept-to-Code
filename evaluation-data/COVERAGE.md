@@ -5,7 +5,8 @@ All 50 stable-ID examples form one fixed, evaluation-eligible benchmark. There a
 ## Audit result
 
 - Reviewed and verified: 50
-- Corrected and reverified: 19
+- Corrected and reverified for the replacement LeetCode source in v1.2: 7
+- Previously corrected and reverified in v1.1: 19
 - Quarantined: 0
 - Answerable: 47
 - Controlled unanswerable within allowed sources: 3
@@ -32,4 +33,5 @@ Coverage includes direct and paraphrased lookup, exact source routing, acronyms 
 - Printed labels are advisory; the authoritative citation is the one-based physical PDF page.
 - Controlled unanswerability passed complete allowed-source extracted-text audits, but absence of every conceivable paraphrase cannot be guaranteed; those records retain `uncertainty: true`.
 - Some supplied material is itself a draft or study reference. The benchmark measures faithfulness to this fixed corpus, not external factual correctness.
+- The LeetCode reference contains problem specifications and constraints but omits examples, hints, and solutions; its benchmark questions are limited to facts stated in those specifications.
 - Repeated use of one fixed benchmark can cause benchmark-specific tuning, so reported comparisons must not claim held-out generalization.

@@ -35,13 +35,13 @@ With `conversation.enabled`, every turn—including the first—is entered inter
 - *Computer Vision: Algorithms and Applications* — computer vision methods and applications.
 - *Designing Data-Intensive Applications* — scalable and distributed data systems.
 - *Grokking the System Design Interview* — practical system-design case studies.
-- *LeetCode 4000 Problem Reference* — coding problems, algorithms, and data structures.
+- *LeetCode 4000 Problem Reference* — 4,000 coding-problem specifications and constraints.
 - *Probabilistic Machine Learning* — advanced probabilistic modeling and inference.
 - *Speech and Language Processing* — NLP, speech, and language models.
 
 ## Evaluation Dataset
 
-`evaluation-data/rag_benchmark_v1.jsonl` is a fixed, source-grounded single-turn benchmark of 50 answerable and controlled-unanswerable questions. It includes reference answers, atomic facts, exact PDF evidence with physical page numbers, source restrictions, terminology variants, and distractors. It exists to compare retrieval, query-expansion, reranking, and context-coverage changes consistently across experiments.
+`evaluation-data/rag_benchmark_v1.jsonl` is a fixed, source-grounded single-turn benchmark of 50 answerable and controlled-unanswerable questions. It includes reference answers, atomic facts, exact PDF evidence with physical page numbers, source restrictions, terminology variants, and distractors. Benchmark v1.2 pins the expanded LeetCode reference and re-audits its seven examples. The dataset exists to compare retrieval, query-expansion, reranking, and context-coverage changes consistently across experiments.
 
 Run the complete automated evaluation with `python evaluate.py`, or use `python evaluate.py --limit 1` for a small execution check. The evaluator imports the same `RAGPipeline` used by `main.py`. Evidence text precision and recall compare only the final reranked chunks supplied to the answering LLM against the annotated passages using normalized PDF word positions. They do not measure semantic correctness and can miss valid alternative evidence.
 

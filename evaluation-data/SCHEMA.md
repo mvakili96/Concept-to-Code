@@ -2,12 +2,14 @@
 
 Schema version: `1.1.0`
 
+Benchmark version: `1.2.0`
+
 `rag_benchmark_v1.jsonl` contains one JSON object per question. All 50 stable IDs form one fixed benchmark for component comparisons and ablations; there are no development, validation, or held-out splits. Results on it must not be described as held-out generalization.
 
 ## Record fields
 
 - `schema_version`: Semantic version of the record structure.
-- `id`: Stable question ID. The v1.1 source audit preserved `ragbench-v1-001` through `ragbench-v1-050`.
+- `id`: Stable question ID. The v1.2 corpus update preserved `ragbench-v1-001` through `ragbench-v1-050`.
 - `question`, `primary_category`, `tags`, `difficulty`: Query text and descriptive labels.
 - `allowed_sources`: Exact PDF filenames admissible for answering. Explicit filenames match the exact-name routing behavior in `main.py`.
 - `answerability`: `answerable` or `unanswerable_within_allowed_sources`, the expected behavior, rationale, and residual uncertainty.
@@ -55,7 +57,7 @@ The evaluation runner does not score answer correctness or faithfulness because 
 
 ## Versioning and quarantine
 
-Question IDs remain stable across experiments. Corrections to v1 labels are documented in `CHANGELOG.md`. Future meaning-changing additions should increment the benchmark version rather than silently repurpose an ID. Any unresolved item must be excluded from the main JSONL, recorded as quarantined with a reason, and remain ineligible until it passes a new audit. This release has no quarantined items.
+Question IDs remain stable across experiments. Corrections to v1 labels are documented in `CHANGELOG.md`. Meaning-changing source replacements increment the benchmark version while retaining stable IDs and documenting revised questions. Any unresolved item must be excluded from the main JSONL, recorded as quarantined with a reason, and remain ineligible until it passes a new audit. This release has no quarantined items.
 
 ## Corpus manifest
 
