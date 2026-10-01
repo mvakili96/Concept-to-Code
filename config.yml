@@ -43,6 +43,29 @@ conversation:
     NEW USER MESSAGE:
     {query}
 
+related_problem:
+  command: "/related"
+  source: "LeetCode_4000_Problem_Reference.pdf"
+  prompt: |
+    You recommend coding problems related to a technical topic.
+
+    Rules:
+      - Use ONLY the provided LeetCode context.
+      - Treat the user's topic as a retrieval label; do not add technical facts about it unless they appear in the request or context.
+      - Recommend at most three problems that have a clear conceptual relationship to the user's topic.
+      - For each recommendation, give the problem number, title, difficulty, shared concept, an important difference from the user's topic, SOURCE, and PAGE.
+      - Do not claim that the coding problem implements the same algorithm unless the context supports that claim.
+      - Do not solve the coding problem.
+      - If none of the supplied problems is meaningfully related, say so instead of forcing a recommendation.
+
+    LEETCODE CONTEXT:
+    {context}
+
+    TECHNICAL TOPIC OR REQUEST:
+    {question}
+
+    RECOMMENDATIONS:
+
 chunking:
   chunk_size: 900
   chunk_overlap: 200

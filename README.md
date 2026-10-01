@@ -14,6 +14,7 @@ A compact, local pipeline for progressively exploring production RAG concepts ov
 | **Reranking** | MiniLM cross-encoder |
 | **Generation** | `Qwen2.5-7B-Instruct` with source and page citations |
 | **Conversation** | Qwen follow-up rewriting, in-memory history, and active-source state |
+| **Related-problem baseline** | Explicit LeetCode-only retrieval through `/related` |
 | **Persistence** | Reusable corpus, BM25, IndexFlat, and HNSW artifacts |
 | **Ablations** | Independent dense retrieval, BM25, and query-expansion toggles |
 | **Evaluation** | 50-question source-grounded benchmark with deterministic evidence-overlap metrics |
@@ -29,6 +30,8 @@ Use indexing mode `build` once to parse and chunk the complete corpus, build BM2
 `use_dense_retrieval`, `use_bm25_retrieval`, and `use_query_expansion` support retrieval ablations without rebuilding. At least one retriever must remain enabled, and query expansion runs only when BM25 is enabled.
 
 With `conversation.enabled`, every turn—including the first—is entered interactively in the terminal; the configured query is used only in single-turn mode. Later turns are rewritten into standalone retrieval queries using recent user and assistant messages. An explicitly named source is inherited only for a follow-up and cleared for a new topic. History resolves references but is not treated as document evidence; session state lasts only for the current process.
+
+Use `/related <technical topic or request>` in conversation mode to run the separate related-problem baseline. It searches only the existing LeetCode chunks with the same query expansion, dense/BM25 retrieval, merging, and reranking pipeline, then recommends up to three grounded candidates. This baseline intentionally performs direct retrieval without transferable-pattern extraction and does not yet use or update conversation memory.
 
 ## Retrieval Sources
 
@@ -52,3 +55,4 @@ This repository evaluates retrieval and reranking rather than final-answer quali
 - Figures, table structure, page layout, and scanned text are not parsed.
 - `rank_bm25` scores every chunk rather than using a scalable inverted index.
 - Conversation sessions are not persisted, and there is no conversational benchmark or serving API yet.
+- Related-problem retrieval currently searches the original request directly; technical-pattern extraction and recommendation-specific evaluation are not implemented yet.

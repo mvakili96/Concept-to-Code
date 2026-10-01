@@ -700,7 +700,7 @@ class RAGPipeline:
             unknown_sources = set(source_override) - set(self.available_sources)
             if unknown_sources:
                 raise ValueError(
-                    "Unknown conversational source restriction: "
+                    "Unknown source restriction: "
                     + ", ".join(sorted(unknown_sources))
                 )
             return source_override
@@ -919,8 +919,10 @@ class RAGPipeline:
     #########################################################################################################################################
     # 9- Construct the actual RAG prompt
     #########################################################################################################################################
-    def build_prompt(self, context, query):
-        rag_prompt = PromptTemplate.from_template(self.config["rag"]["prompt"])
+    def build_prompt(self, context, query, prompt_template=None):
+        rag_prompt = PromptTemplate.from_template(
+            prompt_template or self.config["rag"]["prompt"]
+        )
 
         formatted_prompt = rag_prompt.format(
             context=context,
@@ -936,7 +938,7 @@ class RAGPipeline:
     def generate_answer(self, formatted_prompt):
         return self.llm.invoke(formatted_prompt)
 
-    def run(self, query, source_override=None):
+    def run(self, query, source_override=None, prompt_template=None):
         query_expansion = {
             "key_terms": [],
             "acronyms": [],
@@ -956,7 +958,7 @@ class RAGPipeline:
             retrieval["candidate_docs"]
         )
         context, final_chunks = self.build_context(reranked_docs)
-        formatted_prompt = self.build_prompt(context, query)
+        formatted_prompt = self.build_prompt(context, query, prompt_template)
         response = self.generate_answer(formatted_prompt)
 
         return {
@@ -969,6 +971,28 @@ class RAGPipeline:
             "final_chunks": final_chunks,
             "generated_answer": response,
         }
+
+    #########################################################################################################################################
+    # Related-problem baseline: search the existing LeetCode chunks directly
+    #########################################################################################################################################
+    def run_related_problem(self, query):
+        leetcode_source = self.config["related_problem"]["source"]
+
+        # This first baseline deliberately reuses the normal dense + BM25 +
+        # reranking path. Pattern extraction will be added as a later step so
+        # its effect can be compared against direct retrieval.
+        result = self.run(
+            query,
+            source_override=[leetcode_source],
+            prompt_template=self.config["related_problem"]["prompt"],
+        )
+        result.update(
+            {
+                "workflow": "related_problem",
+                "source_restriction_origin": "related_problem_workflow",
+            }
+        )
+        return result
 
     def run_turn(self, query, session):
         rewrite = self.rewrite_conversational_query(query, session)
@@ -1028,6 +1052,7 @@ def main():
 
     if config["conversation"]["enabled"]:
         session = ConversationSession()
+        related_command = config["related_problem"]["command"].strip()
         exit_commands = {
             command.lower()
             for command in config["conversation"]["exit_commands"]
@@ -1044,6 +1069,21 @@ def main():
             if current_query.lower() in exit_commands:
                 break
             if not current_query:
+                continue
+
+            if current_query.casefold() == related_command.casefold():
+                print(f"Provide a topic after {related_command}.")
+                continue
+
+            related_prefix = related_command.casefold() + " "
+            if current_query.casefold().startswith(related_prefix):
+                related_query = current_query[len(related_command):].strip()
+                result = pipeline.run_related_problem(related_query)
+                print(
+                    "Related-problem workflow; searching only:",
+                    ", ".join(result["selected_sources"]),
+                )
+                print("\nAssistant:", result["generated_answer"])
                 continue
 
             result = pipeline.run_turn(current_query, session)
