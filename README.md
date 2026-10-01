@@ -16,6 +16,7 @@ The core RAG pipeline and retrieval benchmark already support grounded answers t
 | Conversational follow-ups and source memory | Implemented |
 | Persistent hybrid retrieval and retrieval ablations | Implemented |
 | Source-grounded retrieval benchmark | Implemented: 50 source-audited questions |
+| Automated software tests | Planned: add unit, integration, and end-to-end tests for the pipeline and terminal workflows |
 | Multi-turn conversation benchmark | Planned: create test conversations with follow-up questions and source changes |
 | Multi-turn conversation evaluation | Planned: run the conversational pipeline on the new benchmark and report the results |
 | `/related` direct LeetCode search | Built on the feature branch. Not yet on `master` |
