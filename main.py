@@ -4,6 +4,7 @@
 import json
 import pickle
 import re
+import unicodedata
 from pathlib import Path
 
 import faiss
@@ -1013,9 +1014,7 @@ class RAGPipeline:
     #########################################################################################################################################
     # Related-problem workflow: retrieve technical evidence and LeetCode candidates independently
     #########################################################################################################################################
-    def extract_transferable_patterns(
-        self, query, technical_context, technical_chunks, corrective_note=None
-    ):
+    def extract_transferable_patterns(self, query, technical_context, technical_chunks):
         settings = self.config["related_problem"]["pattern_extraction"]
         fallback = {
             "topic": query,
@@ -1024,89 +1023,137 @@ class RAGPipeline:
             "leetcode_search_query": query,
             "status": "fallback",
             "verification_notes": "No technical evidence was retrieved.",
+            "rejected_items": [],
         }
         if not technical_chunks:
             return fallback
 
-        prompt = settings["prompt"].format(
+        base_prompt = settings["prompt"].format(
             question=query,
             technical_context=technical_context,
             max_source_terms=settings["max_source_terms"],
             max_patterns=settings["max_patterns"],
             max_query_length=settings["max_query_length"],
+            min_quote_words=settings["min_quote_words"],
+            max_quote_words=settings["max_quote_words"],
         )
-        if corrective_note:
-            prompt += (
-                "\nCORRECTION: The previous response failed verification: "
-                + corrective_note
-                + " Return fewer patterns if necessary. Copy only short terms and "
-                "quotes actually present above. Translate the mechanism into a "
-                "concrete coding task for the search query. Return complete JSON."
-            )
-        # Qwen-Instruct expects chat formatting for reliable instruction following.
-        prompt = self.llm.pipeline.tokenizer.apply_chat_template(
-            [{"role": "user", "content": prompt}],
-            tokenize=False,
-            add_generation_prompt=True,
-        )
-        response = self.llm.invoke(
-            prompt,
-            pipeline_kwargs={"max_new_tokens": settings["max_new_tokens"]},
-        )
-
         # Read the first JSON object, as in query expansion. A quote match checks
         # provenance, not whether the model's proposed conceptual link is correct.
-        normalize = lambda text: " ".join(text.split())
+        def normalize(text):
+            text = unicodedata.normalize("NFKC", text)
+            text = re.sub(r"(?<=\w)[-\u00ad\u2010]\s*\n\s*(?=\w)", "", text)
+            return " ".join(text.split())
+
         evidence_texts = [normalize(chunk["text"]) for chunk in technical_chunks]
-        try:
-            json_start = response.find("{")
-            if json_start == -1:
-                raise ValueError("No JSON object was returned.")
-            patterns, _ = json.JSONDecoder().raw_decode(response[json_start:])
-            if not isinstance(patterns, dict):
-                raise ValueError("The extraction must be a JSON object.")
-            for field in ("topic", "leetcode_search_query"):
-                if not isinstance(patterns.get(field), str) or not patterns[field].strip():
-                    raise ValueError("Missing topic or search query; evidence may be insufficient.")
-            if len(patterns["leetcode_search_query"].strip()) > settings["max_query_length"]:
-                raise ValueError("The search query exceeds the configured limit.")
-            terms = patterns.get("source_terms")
-            if not isinstance(terms, list) or not 1 <= len(terms) <= settings["max_source_terms"]:
-                raise ValueError("Invalid source terms.")
-            if any(
-                not isinstance(term, str) or not term.strip()
-                or not any(normalize(term) in text for text in evidence_texts)
-                for term in terms
-            ):
-                raise ValueError("A source term does not occur in the technical evidence.")
-            inferred_patterns = patterns.get("transferable_patterns")
-            if not isinstance(inferred_patterns, list) or not 1 <= len(inferred_patterns) <= settings["max_patterns"]:
-                raise ValueError("No usable patterns were returned, or too many patterns.")
-            for pattern in inferred_patterns:
-                if not isinstance(pattern, dict) or any(
-                    not isinstance(pattern.get(field), str) or not pattern[field].strip()
-                    for field in ("pattern", "reason", "supporting_quote")
-                ):
-                    raise ValueError("A pattern is missing its description, reason, or quote.")
-                quote = normalize(pattern["supporting_quote"])
-                if not any(quote in text for text in evidence_texts):
-                    raise ValueError("A supporting quote does not occur in a technical chunk.")
-        except (json.JSONDecodeError, ValueError) as error:
-            # One corrective retry helps Qwen repair formatting or copying errors.
-            if corrective_note is None:
-                return self.extract_transferable_patterns(
-                    query, technical_context, technical_chunks, str(error)
-                )
-            fallback["verification_notes"] = str(error)
+        terms, inferred_patterns, rejected_items = [], [], []
+        feedback = ""
+        # One corrective retry helps Qwen repair formatting or copying errors.
+        for attempt in range(2):
+            # Qwen-Instruct expects chat formatting for reliable instruction following.
+            prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                [{"role": "user", "content": base_prompt + feedback}],
+                tokenize=False,
+                add_generation_prompt=True,
+            )
+            response = self.llm.invoke(
+                prompt,
+                pipeline_kwargs={"max_new_tokens": settings["max_new_tokens"]},
+            )
+            errors = []
+            try:
+                json_start = response.find("{")
+                if json_start == -1:
+                    raise ValueError("No JSON object was returned.")
+                patterns, _ = json.JSONDecoder().raw_decode(response[json_start:])
+                if not isinstance(patterns, dict):
+                    raise ValueError("The extraction must be a JSON object.")
+                if patterns.get("evidence_sufficient") is False:
+                    fallback["verification_notes"] = "Qwen reported insufficient evidence for the requested topic."
+                    fallback["rejected_items"] = rejected_items
+                    return fallback
+                if patterns.get("evidence_sufficient") is not True:
+                    raise ValueError("Missing boolean evidence_sufficient; assess relevance to the REQUEST first.")
+                proposed_terms = patterns.get("source_terms")
+                if not isinstance(proposed_terms, list):
+                    errors.append("source_terms must be a list.")
+                    proposed_terms = []
+                for term in proposed_terms:
+                    if not isinstance(term, str) or not term.strip() or not any(
+                        normalize(term) in text for text in evidence_texts
+                    ):
+                        errors.append(f"Rejected source term {term!r}: not a literal term in the evidence; copy its exact wording or omit it.")
+                    elif term.strip() not in terms and len(terms) < settings["max_source_terms"]:
+                        terms.append(term.strip())
+                proposed_patterns = patterns.get("transferable_patterns")
+                if not isinstance(proposed_patterns, list):
+                    errors.append("transferable_patterns must be a list.")
+                    proposed_patterns = []
+                for pattern in proposed_patterns:
+                    fields = ("pattern", "reason", "topic_connection", "supporting_quote", "coding_task")
+                    if not isinstance(pattern, dict) or any(
+                        not isinstance(pattern.get(field), str) or not pattern[field].strip()
+                        for field in fields
+                    ):
+                        errors.append(f"Rejected pattern {pattern!r}: each pattern needs nonempty {fields}.")
+                        continue
+                    quote = normalize(pattern["supporting_quote"])
+                    if not any(quote in text for text in evidence_texts):
+                        # Offer only literal, already-matching fragments, never a fuzzy match.
+                        # Qwen must still decide whether a fragment supports this pattern.
+                        words, examples = quote.split(), []
+                        for size in range(min(len(words), settings["max_quote_words"]), settings["min_quote_words"] - 1, -1):
+                            for start in range(len(words) - size + 1):
+                                excerpt = " ".join(words[start:start + size])
+                                if excerpt not in examples and any(excerpt in text for text in evidence_texts):
+                                    examples.append(excerpt)
+                                    if len(examples) == 2:
+                                        break
+                            if examples:
+                                break
+                        errors.append(f"Rejected quote {pattern['supporting_quote']!r} for pattern {pattern['pattern']!r}: not consecutive evidence text. Literal excerpt options (use only if relevant): {examples!r}.")
+                        continue
+                    if len(pattern["coding_task"].strip()) > settings["max_query_length"]:
+                        errors.append(f"Rejected coding_task {pattern['coding_task']!r}: exceeds {settings['max_query_length']} characters.")
+                        continue
+                    accepted = {field: pattern[field].strip() for field in fields}
+                    if accepted not in inferred_patterns and len(inferred_patterns) < settings["max_patterns"]:
+                        inferred_patterns.append(accepted)
+                if not inferred_patterns:
+                    errors.append("No accepted patterns yet. Repair the rejected items; report evidence_sufficient=false ONLY if the evidence itself is insufficient or unrelated.")
+            except (json.JSONDecodeError, ValueError) as error:
+                errors.append(str(error))
+            rejected_items.extend({"attempt": attempt + 1, "error": error} for error in errors)
+            if not errors:
+                break
+            feedback = (
+                "\nCORRECTION: Fix ONLY these rejected items, or omit them:\n"
+                + json.dumps(errors, ensure_ascii=False)
+                + "\nPreviously accepted patterns will be retained; do not repeat them:\n"
+                + json.dumps(inferred_patterns, ensure_ascii=False)
+                + "\nQuote-formatting errors do not imply insufficient evidence. Return complete JSON. Do not invent a relationship to the request."
+            )
+
+        if not inferred_patterns:
+            fallback["verification_notes"] = "No usable patterns remained after verification and one retry."
+            fallback["rejected_items"] = rejected_items
             return fallback
 
+        # Never reuse a model-wide query that might depend on rejected patterns.
+        # Assemble complete coding tasks only from individually accepted patterns.
+        tasks = []
+        for pattern in inferred_patterns:
+            task = pattern["coding_task"]
+            if task not in tasks and len("; ".join(tasks + [task])) <= settings["max_query_length"]:
+                tasks.append(task)
+
         return {
-            "topic": patterns["topic"].strip(),
+            "topic": query,
             "source_terms": terms,
             "transferable_patterns": inferred_patterns,
-            "leetcode_search_query": patterns["leetcode_search_query"].strip(),
+            "leetcode_search_query": "; ".join(tasks),
             "status": "extracted",
-            "verification_notes": "Source terms and quotes matched retrieved text; patterns remain model inferences.",
+            "verification_notes": "Accepted source terms and quotes matched normalized text; topic connections remain model inferences, not verified relevance judgments.",
+            "rejected_items": rejected_items,
         }
 
     def run_related_problem(self, query):
