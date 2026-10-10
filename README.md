@@ -14,7 +14,7 @@ A compact, local pipeline for progressively exploring production RAG concepts ov
 | **Reranking** | MiniLM cross-encoder |
 | **Generation** | `Qwen2.5-7B-Instruct` with source and page citations |
 | **Conversation** | Qwen follow-up rewriting, in-memory history, and active-source state |
-| **Related-problem workflow** | Independent technical-evidence and LeetCode retrieval through `/related` |
+| **Related-problem workflow** | Technical evidence → Qwen pattern extraction → LeetCode retrieval through `/related` |
 | **Persistence** | Reusable corpus, BM25, IndexFlat, and HNSW artifacts |
 | **Ablations** | Independent dense retrieval, BM25, and query-expansion toggles |
 | **Evaluation** | 50-question source-grounded benchmark with deterministic evidence-overlap metrics |
@@ -31,7 +31,7 @@ Use indexing mode `build` once to parse and chunk the complete corpus, build BM2
 
 With `conversation.enabled`, every turn—including the first—is entered interactively in the terminal; the configured query is used only in single-turn mode. Later turns are rewritten into standalone retrieval queries using recent user and assistant messages. An explicitly named source is inherited only for a follow-up and cleared for a new topic. History resolves references but is not treated as document evidence; session state lasts only for the current process.
 
-Use `/related <technical topic or request>` in conversation mode to run the separate related-problem workflow. It first retrieves and reranks technical evidence from an exactly named technical PDF, or from every non-LeetCode source when none is named. It then independently searches the existing LeetCode chunks with the same expanded query and gives both contexts to Qwen. The LeetCode search still uses the original request rather than extracted transferable patterns, and the workflow does not yet use or update conversation memory.
+Use `/related <technical topic or request>` in conversation mode to run the separate related-problem workflow. It first retrieves and reranks technical evidence from an exactly named technical PDF, or from every non-LeetCode source when none is named. Qwen extracts literal source terms, inferred coding patterns with supporting quotes, and a bridge query for LeetCode retrieval and reranking. Python verifies source terms and quotes against the retrieved text; invalid extraction gets one corrective retry before falling back to the original request. The terminal shows the patterns and search query, and Qwen receives both contexts for recommendations. The workflow does not yet use or update conversation memory.
 
 ## Retrieval Sources
 
@@ -55,4 +55,4 @@ This repository evaluates retrieval and reranking rather than final-answer quali
 - Figures, table structure, page layout, and scanned text are not parsed.
 - `rank_bm25` scores every chunk rather than using a scalable inverted index.
 - Conversation sessions are not persisted, and there is no conversational benchmark or serving API yet.
-- Related-problem candidate retrieval still searches the original request directly; technical-pattern extraction and recommendation-specific evaluation are not implemented yet.
+- Pattern quotes are checked for text occurrence, but conceptual relationships and recommendations still need a dedicated relevance benchmark.

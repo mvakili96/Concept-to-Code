@@ -1013,6 +1013,102 @@ class RAGPipeline:
     #########################################################################################################################################
     # Related-problem workflow: retrieve technical evidence and LeetCode candidates independently
     #########################################################################################################################################
+    def extract_transferable_patterns(
+        self, query, technical_context, technical_chunks, corrective_note=None
+    ):
+        settings = self.config["related_problem"]["pattern_extraction"]
+        fallback = {
+            "topic": query,
+            "source_terms": [],
+            "transferable_patterns": [],
+            "leetcode_search_query": query,
+            "status": "fallback",
+            "verification_notes": "No technical evidence was retrieved.",
+        }
+        if not technical_chunks:
+            return fallback
+
+        prompt = settings["prompt"].format(
+            question=query,
+            technical_context=technical_context,
+            max_source_terms=settings["max_source_terms"],
+            max_patterns=settings["max_patterns"],
+            max_query_length=settings["max_query_length"],
+        )
+        if corrective_note:
+            prompt += (
+                "\nCORRECTION: The previous response failed verification: "
+                + corrective_note
+                + " Return fewer patterns if necessary. Copy only short terms and "
+                "quotes actually present above. Translate the mechanism into a "
+                "concrete coding task for the search query. Return complete JSON."
+            )
+        # Qwen-Instruct expects chat formatting for reliable instruction following.
+        prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+            [{"role": "user", "content": prompt}],
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+        response = self.llm.invoke(
+            prompt,
+            pipeline_kwargs={"max_new_tokens": settings["max_new_tokens"]},
+        )
+
+        # Read the first JSON object, as in query expansion. A quote match checks
+        # provenance, not whether the model's proposed conceptual link is correct.
+        normalize = lambda text: " ".join(text.split())
+        evidence_texts = [normalize(chunk["text"]) for chunk in technical_chunks]
+        try:
+            json_start = response.find("{")
+            if json_start == -1:
+                raise ValueError("No JSON object was returned.")
+            patterns, _ = json.JSONDecoder().raw_decode(response[json_start:])
+            if not isinstance(patterns, dict):
+                raise ValueError("The extraction must be a JSON object.")
+            for field in ("topic", "leetcode_search_query"):
+                if not isinstance(patterns.get(field), str) or not patterns[field].strip():
+                    raise ValueError("Missing topic or search query; evidence may be insufficient.")
+            if len(patterns["leetcode_search_query"].strip()) > settings["max_query_length"]:
+                raise ValueError("The search query exceeds the configured limit.")
+            terms = patterns.get("source_terms")
+            if not isinstance(terms, list) or not 1 <= len(terms) <= settings["max_source_terms"]:
+                raise ValueError("Invalid source terms.")
+            if any(
+                not isinstance(term, str) or not term.strip()
+                or not any(normalize(term) in text for text in evidence_texts)
+                for term in terms
+            ):
+                raise ValueError("A source term does not occur in the technical evidence.")
+            inferred_patterns = patterns.get("transferable_patterns")
+            if not isinstance(inferred_patterns, list) or not 1 <= len(inferred_patterns) <= settings["max_patterns"]:
+                raise ValueError("No usable patterns were returned, or too many patterns.")
+            for pattern in inferred_patterns:
+                if not isinstance(pattern, dict) or any(
+                    not isinstance(pattern.get(field), str) or not pattern[field].strip()
+                    for field in ("pattern", "reason", "supporting_quote")
+                ):
+                    raise ValueError("A pattern is missing its description, reason, or quote.")
+                quote = normalize(pattern["supporting_quote"])
+                if not any(quote in text for text in evidence_texts):
+                    raise ValueError("A supporting quote does not occur in a technical chunk.")
+        except (json.JSONDecodeError, ValueError) as error:
+            # One corrective retry helps Qwen repair formatting or copying errors.
+            if corrective_note is None:
+                return self.extract_transferable_patterns(
+                    query, technical_context, technical_chunks, str(error)
+                )
+            fallback["verification_notes"] = str(error)
+            return fallback
+
+        return {
+            "topic": patterns["topic"].strip(),
+            "source_terms": terms,
+            "transferable_patterns": inferred_patterns,
+            "leetcode_search_query": patterns["leetcode_search_query"].strip(),
+            "status": "extracted",
+            "verification_notes": "Source terms and quotes matched retrieved text; patterns remain model inferences.",
+        }
+
     def run_related_problem(self, query):
         leetcode_source = self.config["related_problem"]["source"]
         explicit_sources = find_explicit_sources(
@@ -1052,9 +1148,25 @@ class RAGPipeline:
             expanded_query,
             source_override=technical_sources,
         )
-        leetcode_retrieval = self.retrieve_and_rerank_context(
+        pattern_extraction = self.extract_transferable_patterns(
             query,
-            expanded_query,
+            technical_retrieval["context"],
+            technical_retrieval["final_chunks"],
+        )
+        leetcode_query = pattern_extraction["leetcode_search_query"]
+        leetcode_query_expansion = query_expansion
+        expanded_leetcode_query = expanded_query
+        if pattern_extraction["status"] == "extracted":
+            leetcode_query_expansion = {"key_terms": [], "acronyms": [], "variations": []}
+            expanded_leetcode_query = leetcode_query
+            if self.use_bm25_retrieval and self.use_query_expansion:
+                leetcode_query_expansion, expanded_leetcode_query = self.expand_query(leetcode_query)
+
+        # Dense retrieval and reranking use the bridge query; BM25 also receives
+        # its optional conservative expansion. A failed extraction keeps the baseline.
+        leetcode_retrieval = self.retrieve_and_rerank_context(
+            leetcode_query,
+            expanded_leetcode_query,
             source_override=[leetcode_source],
         )
 
@@ -1108,6 +1220,9 @@ class RAGPipeline:
             "query_expansion": query_expansion,
             "technical_context": technical_retrieval["context"],
             "technical_chunks": technical_chunks,
+            "pattern_extraction": pattern_extraction,
+            "leetcode_search_query": leetcode_query,
+            "leetcode_query_expansion": leetcode_query_expansion,
             "leetcode_context": leetcode_retrieval["context"],
             "leetcode_chunks": leetcode_chunks,
             "final_context": final_context,
@@ -1210,6 +1325,9 @@ def main():
                         f"  {chunk['rank']}. {chunk['source']}, "
                         f"PAGE: {chunk['page']}"
                     )
+                print("Extracted source terms and inferred coding patterns:")
+                print(json.dumps(result["pattern_extraction"], indent=2, ensure_ascii=False))
+                print("LeetCode search query:", result["leetcode_search_query"])
                 print(
                     "LeetCode candidate source:",
                     ", ".join(result["leetcode_selected_sources"]),
