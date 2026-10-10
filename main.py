@@ -916,6 +916,29 @@ class RAGPipeline:
         # print(context)
         return context, final_chunks
 
+    def retrieve_and_rerank_context(
+        self,
+        query,
+        expanded_query,
+        source_override=None,
+    ):
+        retrieval = self.retrieve_candidates(
+            query,
+            expanded_query,
+            source_override,
+        )
+        reranked_docs = self.rerank_candidates(
+            query,
+            retrieval["candidate_docs"]
+        )
+        context, final_chunks = self.build_context(reranked_docs)
+
+        return {
+            "selected_sources": retrieval["selected_sources"],
+            "context": context,
+            "final_chunks": final_chunks,
+        }
+
     #########################################################################################################################################
     # 9- Construct the actual RAG prompt
     #########################################################################################################################################
@@ -931,6 +954,22 @@ class RAGPipeline:
 
         # print(formatted_prompt)
         return formatted_prompt
+
+    def build_related_problem_prompt(
+        self,
+        technical_context,
+        leetcode_context,
+        query,
+    ):
+        related_problem_prompt = PromptTemplate.from_template(
+            self.config["related_problem"]["prompt"]
+        )
+
+        return related_problem_prompt.format(
+            technical_context=technical_context,
+            leetcode_context=leetcode_context,
+            question=query,
+        )
 
     #########################################################################################################################################
     # 10- Generate the grounded response with the already-loaded LLM
@@ -948,17 +987,16 @@ class RAGPipeline:
         if self.use_bm25_retrieval and self.use_query_expansion:
             query_expansion, expanded_query = self.expand_query(query)
 
-        retrieval = self.retrieve_candidates(
+        retrieval = self.retrieve_and_rerank_context(
             query,
             expanded_query,
             source_override,
         )
-        reranked_docs = self.rerank_candidates(
+        formatted_prompt = self.build_prompt(
+            retrieval["context"],
             query,
-            retrieval["candidate_docs"]
+            prompt_template,
         )
-        context, final_chunks = self.build_context(reranked_docs)
-        formatted_prompt = self.build_prompt(context, query, prompt_template)
         response = self.generate_answer(formatted_prompt)
 
         return {
@@ -967,32 +1005,115 @@ class RAGPipeline:
                 find_explicit_sources(query, self.available_sources)
             ),
             "query_expansion": query_expansion,
-            "final_context": context,
-            "final_chunks": final_chunks,
+            "final_context": retrieval["context"],
+            "final_chunks": retrieval["final_chunks"],
             "generated_answer": response,
         }
 
     #########################################################################################################################################
-    # Related-problem baseline: search the existing LeetCode chunks directly
+    # Related-problem workflow: retrieve technical evidence and LeetCode candidates independently
     #########################################################################################################################################
     def run_related_problem(self, query):
         leetcode_source = self.config["related_problem"]["source"]
-
-        # This first baseline deliberately reuses the normal dense + BM25 +
-        # reranking path. Pattern extraction will be added as a later step so
-        # its effect can be compared against direct retrieval.
-        result = self.run(
+        explicit_sources = find_explicit_sources(
             query,
+            self.available_sources,
+        )
+        explicitly_selected_technical_sources = [
+            source
+            for source in explicit_sources
+            if source != leetcode_source
+        ]
+        technical_sources = explicitly_selected_technical_sources or [
+            source
+            for source in self.available_sources
+            if source != leetcode_source
+        ]
+
+        if not technical_sources:
+            raise ValueError(
+                "The related-problem workflow requires at least one "
+                "non-LeetCode source for technical evidence."
+            )
+
+        query_expansion = {
+            "key_terms": [],
+            "acronyms": [],
+            "variations": [],
+        }
+        expanded_query = query
+        if self.use_bm25_retrieval and self.use_query_expansion:
+            query_expansion, expanded_query = self.expand_query(query)
+
+        # Technical evidence is retrieved independently from the LeetCode
+        # candidates so that each stage remains visible and testable.
+        technical_retrieval = self.retrieve_and_rerank_context(
+            query,
+            expanded_query,
+            source_override=technical_sources,
+        )
+        leetcode_retrieval = self.retrieve_and_rerank_context(
+            query,
+            expanded_query,
             source_override=[leetcode_source],
-            prompt_template=self.config["related_problem"]["prompt"],
         )
-        result.update(
+
+        formatted_prompt = self.build_related_problem_prompt(
+            technical_retrieval["context"],
+            leetcode_retrieval["context"],
+            query,
+        )
+        response = self.generate_answer(formatted_prompt)
+
+        technical_chunks = [
             {
-                "workflow": "related_problem",
-                "source_restriction_origin": "related_problem_workflow",
+                **chunk,
+                "context_role": "technical_evidence",
             }
+            for chunk in technical_retrieval["final_chunks"]
+        ]
+        leetcode_chunks = [
+            {
+                **chunk,
+                "context_role": "leetcode_candidate",
+            }
+            for chunk in leetcode_retrieval["final_chunks"]
+        ]
+        final_context = (
+            "TECHNICAL EVIDENCE:\n"
+            + technical_retrieval["context"]
+            + "\n\n=== LEETCODE CANDIDATES ===\n\n"
+            + leetcode_retrieval["context"]
         )
-        return result
+
+        return {
+            "workflow": "related_problem",
+            "source_restriction_origin": "related_problem_workflow",
+            "selected_sources": list(
+                dict.fromkeys(
+                    technical_retrieval["selected_sources"]
+                    + leetcode_retrieval["selected_sources"]
+                )
+            ),
+            "technical_selected_sources": technical_retrieval[
+                "selected_sources"
+            ],
+            "leetcode_selected_sources": leetcode_retrieval[
+                "selected_sources"
+            ],
+            "explicit_source_restriction_detected": bool(explicit_sources),
+            "technical_source_restriction_detected": bool(
+                explicitly_selected_technical_sources
+            ),
+            "query_expansion": query_expansion,
+            "technical_context": technical_retrieval["context"],
+            "technical_chunks": technical_chunks,
+            "leetcode_context": leetcode_retrieval["context"],
+            "leetcode_chunks": leetcode_chunks,
+            "final_context": final_context,
+            "final_chunks": technical_chunks + leetcode_chunks,
+            "generated_answer": response,
+        }
 
     def run_turn(self, query, session):
         rewrite = self.rewrite_conversational_query(query, session)
@@ -1080,9 +1201,25 @@ def main():
                 related_query = current_query[len(related_command):].strip()
                 result = pipeline.run_related_problem(related_query)
                 print(
-                    "Related-problem workflow; searching only:",
-                    ", ".join(result["selected_sources"]),
+                    "Technical evidence search sources:",
+                    ", ".join(result["technical_selected_sources"]),
                 )
+                print("Reranked technical evidence:")
+                for chunk in result["technical_chunks"]:
+                    print(
+                        f"  {chunk['rank']}. {chunk['source']}, "
+                        f"PAGE: {chunk['page']}"
+                    )
+                print(
+                    "LeetCode candidate source:",
+                    ", ".join(result["leetcode_selected_sources"]),
+                )
+                print("Reranked LeetCode candidates:")
+                for chunk in result["leetcode_chunks"]:
+                    print(
+                        f"  {chunk['rank']}. {chunk['source']}, "
+                        f"PAGE: {chunk['page']}"
+                    )
                 print("\nAssistant:", result["generated_answer"])
                 continue
 
