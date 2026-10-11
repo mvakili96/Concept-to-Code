@@ -1028,6 +1028,12 @@ class RAGPipeline:
         if not technical_chunks:
             return fallback
 
+        # Passage IDs are local to this extraction; Python owns their source/page mapping.
+        passages = {f"P{index}": chunk for index, chunk in enumerate(technical_chunks, start=1)}
+        technical_context = "\n\n".join(
+            f"PASSAGE_ID: {passage_id}\nSOURCE: {chunk['source']}\nPAGE: {chunk['page']}\n{chunk['text']}"
+            for passage_id, chunk in passages.items()
+        )
         base_prompt = settings["prompt"].format(
             question=query,
             technical_context=technical_context,
@@ -1046,6 +1052,7 @@ class RAGPipeline:
 
         evidence_texts = [normalize(chunk["text"]) for chunk in technical_chunks]
         terms, inferred_patterns, rejected_items = [], [], []
+        quote_repairs = {}
         feedback = ""
         # One corrective retry helps Qwen repair formatting or copying errors.
         for attempt in range(2):
@@ -1060,6 +1067,7 @@ class RAGPipeline:
                 pipeline_kwargs={"max_new_tokens": settings["max_new_tokens"]},
             )
             errors = []
+            quote_failures = []
             try:
                 json_start = response.find("{")
                 if json_start == -1:
@@ -1088,37 +1096,101 @@ class RAGPipeline:
                 if not isinstance(proposed_patterns, list):
                     errors.append("transferable_patterns must be a list.")
                     proposed_patterns = []
-                for pattern in proposed_patterns:
-                    fields = ("pattern", "reason", "topic_connection", "supporting_quote", "coding_task")
+                for pattern in proposed_patterns[:settings["max_patterns"]]:
+                    fields = ("pattern", "reason", "topic_connection", "passage_id", "supporting_quote", "coding_task")
                     if not isinstance(pattern, dict) or any(
                         not isinstance(pattern.get(field), str) or not pattern[field].strip()
                         for field in fields
                     ):
                         errors.append(f"Rejected pattern {pattern!r}: each pattern needs nonempty {fields}.")
                         continue
+                    passage_id = pattern["passage_id"].strip()
+                    if passage_id not in passages:
+                        errors.append(f"Rejected passage_id {passage_id!r}: select one of {list(passages)}; do not invent an ID.")
+                        continue
+                    passage = passages[passage_id]
+                    passage_text = normalize(passage["text"])
                     quote = normalize(pattern["supporting_quote"])
-                    if not any(quote in text for text in evidence_texts):
+                    if quote not in passage_text:
                         # Offer only literal, already-matching fragments, never a fuzzy match.
                         # Qwen must still decide whether a fragment supports this pattern.
-                        words, examples = quote.split(), []
-                        for size in range(min(len(words), settings["max_quote_words"]), settings["min_quote_words"] - 1, -1):
+                        words = quote.split()
+                        # Prefer complete short clauses over arbitrary, cut-off windows.
+                        examples = sorted({
+                            excerpt for excerpt in re.split(r"(?<=[,;.!?])\s+", quote)
+                            if settings["min_quote_words"] <= len(excerpt.split()) <= settings["max_quote_words"]
+                            and excerpt in passage_text
+                        }, key=lambda excerpt: (-len(excerpt.split()), excerpt))[:2]
+                        for size in ([] if examples else range(min(len(words), settings["max_quote_words"]), settings["min_quote_words"] - 1, -1)):
                             for start in range(len(words) - size + 1):
                                 excerpt = " ".join(words[start:start + size])
-                                if excerpt not in examples and any(excerpt in text for text in evidence_texts):
+                                if excerpt not in examples and excerpt in passage_text:
                                     examples.append(excerpt)
                                     if len(examples) == 2:
                                         break
                             if examples:
                                 break
-                        errors.append(f"Rejected quote {pattern['supporting_quote']!r} for pattern {pattern['pattern']!r}: not consecutive evidence text. Literal excerpt options (use only if relevant): {examples!r}.")
-                        continue
+                        error = f"Rejected quote {pattern['supporting_quote']!r} for pattern {pattern['pattern']!r}: not consecutive text in {passage_id}. Literal excerpt options (use only if relevant): {examples!r}."
+                        repair_key = (passage_id, quote)
+                        if repair_key not in quote_repairs:
+                            # A quote gets one focused retry with ONLY its selected passage.
+                            quote_options = {f"Q{index}": excerpt for index, excerpt in enumerate(examples, start=1)}
+                            retry_prompt = settings["quote_retry_prompt"].format(
+                                question=query,
+                                pattern=json.dumps(pattern, ensure_ascii=False),
+                                error=error,
+                                passage_id=passage_id,
+                                passage_text=passage["text"],
+                                quote_options=json.dumps(quote_options, ensure_ascii=False),
+                                min_quote_words=settings["min_quote_words"],
+                                max_quote_words=settings["max_quote_words"],
+                            )
+                            retry_prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                                [{"role": "user", "content": retry_prompt}],
+                                tokenize=False,
+                                add_generation_prompt=True,
+                            )
+                            retry_response = self.llm.invoke(
+                                retry_prompt,
+                                pipeline_kwargs={"max_new_tokens": settings["quote_retry_max_new_tokens"]},
+                            )
+                            try:
+                                json_start = retry_response.find("{")
+                                if json_start == -1:
+                                    raise ValueError("Quote retry returned no JSON object.")
+                                repaired, _ = json.JSONDecoder().raw_decode(retry_response[json_start:])
+                                repaired_quote = repaired.get("supporting_quote") if isinstance(repaired, dict) else None
+                                if isinstance(repaired, dict) and "quote_option" in repaired:
+                                    option = repaired["quote_option"]
+                                    if not isinstance(option, str) or option not in quote_options:
+                                        raise ValueError("Quote retry selected no valid literal excerpt option.")
+                                    # Python copies the literal excerpt, so Qwen need not retype it.
+                                    repaired_quote = quote_options[option]
+                                if not isinstance(repaired_quote, str) or not repaired_quote.strip() or normalize(repaired_quote) not in passage_text:
+                                    raise ValueError("Retried quote is empty or does not occur in the selected passage.")
+                                quote_repairs[repair_key] = (repaired_quote.strip(), None)
+                            except (json.JSONDecodeError, ValueError) as retry_error:
+                                quote_repairs[repair_key] = (None, str(retry_error))
+                        repaired_quote, retry_error = quote_repairs[repair_key]
+                        rejected_items.append({
+                            "attempt": attempt + 1,
+                            "error": error,
+                            "passage_id": passage_id,
+                            "quote_retry_status": "failed" if retry_error else "repaired",
+                            "quote_retry_error": retry_error,
+                        })
+                        if retry_error:
+                            quote_failures.append(error)
+                            continue
+                        pattern = {**pattern, "supporting_quote": repaired_quote}
                     if len(pattern["coding_task"].strip()) > settings["max_query_length"]:
                         errors.append(f"Rejected coding_task {pattern['coding_task']!r}: exceeds {settings['max_query_length']} characters.")
                         continue
                     accepted = {field: pattern[field].strip() for field in fields}
+                    accepted.update(source=passage["source"], page=passage["page"], chunk_id=passage["chunk_id"])
                     if accepted not in inferred_patterns and len(inferred_patterns) < settings["max_patterns"]:
                         inferred_patterns.append(accepted)
-                if not inferred_patterns:
+                if not inferred_patterns and not quote_failures:
                     errors.append("No accepted patterns yet. Repair the rejected items; report evidence_sufficient=false ONLY if the evidence itself is insufficient or unrelated.")
             except (json.JSONDecodeError, ValueError) as error:
                 errors.append(str(error))
@@ -1134,7 +1206,7 @@ class RAGPipeline:
             )
 
         if not inferred_patterns:
-            fallback["verification_notes"] = "No usable patterns remained after verification and one retry."
+            fallback["verification_notes"] = "No usable patterns remained after verification and bounded retries."
             fallback["rejected_items"] = rejected_items
             return fallback
 
