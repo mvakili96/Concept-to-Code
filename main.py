@@ -1228,6 +1228,72 @@ class RAGPipeline:
             "rejected_items": rejected_items,
         }
 
+    def build_leetcode_search_queries(self, pattern_extraction):
+        settings = self.config["related_problem"]["candidate_retrieval"]
+        baseline = {
+            "queries": [{"pattern_index": None, "query": pattern_extraction["leetcode_search_query"]}],
+            "status": "baseline",
+            "notes": [],
+        }
+        if pattern_extraction["status"] != "extracted":
+            return baseline
+
+        # Only accepted patterns reach this pass; rejected items and raw history do not.
+        patterns = pattern_extraction["transferable_patterns"]
+        prompt = settings["prompt"].format(
+            patterns=json.dumps([
+                {"pattern_index": index, **{field: pattern[field] for field in (
+                    "pattern", "reason", "topic_connection", "supporting_quote"
+                )}}
+                for index, pattern in enumerate(patterns, start=1)
+            ], ensure_ascii=False),
+            max_queries=settings["max_queries"],
+            max_query_length=settings["max_query_length"],
+        )
+        prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+            [{"role": "user", "content": prompt}], tokenize=False, add_generation_prompt=True,
+        )
+        response = self.llm.invoke(
+            prompt, pipeline_kwargs={"max_new_tokens": settings["max_new_tokens"]},
+        )
+        queries, notes, seen = [], [], set()
+        try:
+            json_start = response.find("{")
+            if json_start == -1:
+                raise ValueError("No query-plan JSON object was returned.")
+            plan, _ = json.JSONDecoder().raw_decode(response[json_start:])
+            if not isinstance(plan, dict) or not isinstance(plan.get("queries"), list):
+                raise ValueError("The query plan needs a queries list.")
+            for entry in plan["queries"]:
+                if not isinstance(entry, dict):
+                    notes.append(f"Rejected query entry: {entry!r}.")
+                    continue
+                index, search_query = entry.get("pattern_index"), entry.get("query")
+                if type(index) is not int or not 1 <= index <= len(patterns):
+                    notes.append(f"Rejected pattern_index {index!r}: no such accepted pattern.")
+                    continue
+                if not isinstance(search_query, str) or not search_query.strip() or len(search_query.strip()) > settings["max_query_length"]:
+                    notes.append(f"Rejected empty, non-text, or overlong query: {search_query!r}.")
+                    continue
+                search_query = " ".join(search_query.split())
+                # Synthetic example numbers can pull retrieval toward unrelated tasks.
+                pattern_text = " ".join(patterns[index - 1][field] for field in (
+                    "pattern", "reason", "topic_connection", "supporting_quote"
+                ))
+                query_numbers = set(re.findall(r"\b\d+(?:\.\d+)?\b", search_query))
+                supported_numbers = set(re.findall(r"\b\d+(?:\.\d+)?\b", pattern_text))
+                if query_numbers - supported_numbers:
+                    notes.append(f"Rejected query with invented numerical inputs: {search_query!r}.")
+                    continue
+                if search_query.casefold() not in seen and len(queries) < settings["max_queries"]:
+                    queries.append({"pattern_index": index, "query": search_query})
+                    seen.add(search_query.casefold())
+        except (json.JSONDecodeError, ValueError) as error:
+            notes.append(str(error))
+        if not queries:
+            return {**baseline, "status": "fallback", "notes": notes + ["Using the existing coding-task bridge query."]}
+        return {"queries": queries, "status": "generated", "notes": notes}
+
     def run_related_problem(self, query):
         leetcode_source = self.config["related_problem"]["source"]
         explicit_sources = find_explicit_sources(
@@ -1272,22 +1338,42 @@ class RAGPipeline:
             technical_retrieval["context"],
             technical_retrieval["final_chunks"],
         )
-        leetcode_query = pattern_extraction["leetcode_search_query"]
-        leetcode_query_expansion = query_expansion
-        expanded_leetcode_query = expanded_query
-        if pattern_extraction["status"] == "extracted":
-            leetcode_query_expansion = {"key_terms": [], "acronyms": [], "variations": []}
-            expanded_leetcode_query = leetcode_query
-            if self.use_bm25_retrieval and self.use_query_expansion:
-                leetcode_query_expansion, expanded_leetcode_query = self.expand_query(leetcode_query)
-
+        leetcode_query_plan = self.build_leetcode_search_queries(pattern_extraction)
+        candidate_docs, candidate_queries, retrieval_runs = {}, {}, []
         # Dense retrieval and reranking use the bridge query; BM25 also receives
         # its optional conservative expansion. A failed extraction keeps the baseline.
-        leetcode_retrieval = self.retrieve_and_rerank_context(
-            leetcode_query,
-            expanded_leetcode_query,
-            source_override=[leetcode_source],
+        # Multiple task queries broaden the pool BEFORE the existing reranker.
+        for query_index, search in enumerate(leetcode_query_plan["queries"], start=1):
+            search_query = search["query"]
+            expansion = {"key_terms": [], "acronyms": [], "variations": []}
+            expanded_search = search_query
+            if leetcode_query_plan["status"] == "baseline":
+                expansion, expanded_search = query_expansion, expanded_query
+            elif self.use_bm25_retrieval and self.use_query_expansion:
+                expansion, expanded_search = self.expand_query(search_query)
+            retrieved = self.retrieve_candidates(
+                search_query, expanded_search, source_override=[leetcode_source],
+            )
+            retrieval_runs.append({
+                **search,
+                "query_expansion": expansion,
+                "dense_chunk_ids": [doc.metadata["chunk_id"] for doc, _ in retrieved["dense_results_with_scores"]],
+                "bm25_chunk_ids": [doc.metadata["chunk_id"] for doc, _ in retrieved["bm25_results_with_scores"]],
+            })
+            for doc in retrieved["candidate_docs"]:
+                chunk_id = doc.metadata["chunk_id"]
+                candidate_docs[chunk_id] = doc
+                candidate_queries.setdefault(chunk_id, []).append({
+                    "query_index": query_index,
+                    "methods": retrieved["candidate_methods"][chunk_id],
+                })
+        leetcode_query = "; ".join(search["query"] for search in leetcode_query_plan["queries"])
+        context, final_chunks = self.build_context(
+            self.rerank_candidates(leetcode_query, list(candidate_docs.values()))
         )
+        leetcode_retrieval = {
+            "selected_sources": [leetcode_source], "context": context, "final_chunks": final_chunks,
+        }
 
         formatted_prompt = self.build_related_problem_prompt(
             technical_retrieval["context"],
@@ -1341,7 +1427,15 @@ class RAGPipeline:
             "technical_chunks": technical_chunks,
             "pattern_extraction": pattern_extraction,
             "leetcode_search_query": leetcode_query,
-            "leetcode_query_expansion": leetcode_query_expansion,
+            "leetcode_query_plan": leetcode_query_plan,
+            # Retain the first query's expansion; all expansions are in retrieval_runs.
+            "leetcode_query_expansion": retrieval_runs[0]["query_expansion"],
+            "leetcode_retrieval_runs": retrieval_runs,
+            "leetcode_candidates": [
+                {"chunk_id": chunk_id, "source": doc.metadata["source"],
+                 "page": doc.metadata["page"], "retrieved_by": candidate_queries[chunk_id]}
+                for chunk_id, doc in candidate_docs.items()
+            ],
             "leetcode_context": leetcode_retrieval["context"],
             "leetcode_chunks": leetcode_chunks,
             "final_context": final_context,
@@ -1447,6 +1541,14 @@ def main():
                 print("Extracted source terms and inferred coding patterns:")
                 print(json.dumps(result["pattern_extraction"], indent=2, ensure_ascii=False))
                 print("LeetCode search query:", result["leetcode_search_query"])
+                print("LeetCode task-query plan:")
+                print(json.dumps(result["leetcode_query_plan"], indent=2, ensure_ascii=False))
+                for index, retrieval in enumerate(result["leetcode_retrieval_runs"], start=1):
+                    print(
+                        f"  Query {index}: dense={len(retrieval['dense_chunk_ids'])}, "
+                        f"BM25={len(retrieval['bm25_chunk_ids'])} candidates"
+                    )
+                print("Unique LeetCode candidates before reranking:", len(result["leetcode_candidates"]))
                 print(
                     "LeetCode candidate source:",
                     ", ".join(result["leetcode_selected_sources"]),
