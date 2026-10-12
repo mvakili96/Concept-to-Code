@@ -825,7 +825,7 @@ class RAGPipeline:
     #########################################################################################################################################
     # 7- Rerank the n candidates
     #########################################################################################################################################
-    def rerank_candidates(self, query, candidate_docs):
+    def rerank_candidates(self, query, candidate_docs, top_k=None):
         """
         the previous retrieval step is optimized for speed, not perfect relevance. FAISS quickly finds chunks whose embeddings are close to the query, but embedding similarity can still return chunks that are only loosely related.
 
@@ -856,7 +856,7 @@ class RAGPipeline:
             reverse=True
         )
 
-        reranked_docs = scored_docs[:self.config["reranking"]["final_top_k"]]
+        reranked_docs = scored_docs[:self.config["reranking"]["final_top_k"] if top_k is None else top_k]
 
         """
         print("\nRERANKED RESULTS")
@@ -961,6 +961,7 @@ class RAGPipeline:
         technical_context,
         leetcode_context,
         query,
+        conceptual_assessments=None,
     ):
         related_problem_prompt = PromptTemplate.from_template(
             self.config["related_problem"]["prompt"]
@@ -970,6 +971,7 @@ class RAGPipeline:
             technical_context=technical_context,
             leetcode_context=leetcode_context,
             question=query,
+            conceptual_assessments=json.dumps(conceptual_assessments or [], ensure_ascii=False),
         )
 
     #########################################################################################################################################
@@ -1294,7 +1296,203 @@ class RAGPipeline:
             return {**baseline, "status": "fallback", "notes": notes + ["Using the existing coding-task bridge query."]}
         return {"queries": queries, "status": "generated", "notes": notes}
 
+    def extract_related_relationship(self, pattern_extraction, technical_chunks):
+        settings = self.config["related_problem"]["conceptual_reranking"]
+        patterns = pattern_extraction["transferable_patterns"]
+        passages = {chunk["chunk_id"]: chunk for chunk in technical_chunks}
+
+        def normalize(text):
+            text = unicodedata.normalize("NFKC", text)
+            text = re.sub(r"(?<=\w)[-\u00ad\u2010]\s*\n\s*(?=\w)", "", text)
+            return " ".join(text.split())
+
+        # Keep the actual technical passage beside each pattern, not just its short quote.
+        # Quote occurrence verifies provenance; conceptual relevance is still Qwen's judgment.
+        # Read the original prose, not generated coding tasks or inferred mechanisms.
+        # These passages already came from topic retrieval; the procedural question is not re-fed here.
+        selected_passages = list({pattern["chunk_id"]: passages[pattern["chunk_id"]] for pattern in patterns}.values())
+        outcome = {"status": "skipped_no_patterns", "attempts": []}
+        if not selected_passages:
+            return outcome
+        base_prompt = settings["relationship_prompt"].format(
+            passages="\n\n".join(passage["text"] for passage in selected_passages),
+        )
+        feedback = ""
+        for attempt in range(2):
+            prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                [{"role": "user", "content": base_prompt + feedback}],
+                tokenize=False, add_generation_prompt=True,
+            )
+            response = self.llm.invoke(
+                prompt, pipeline_kwargs={"max_new_tokens": settings["relationship_max_new_tokens"]},
+            )
+            try:
+                start = response.find("{")
+                if start == -1:
+                    raise ValueError("No relationship JSON object was returned.")
+                result, _ = json.JSONDecoder().raw_decode(response[start:])
+                if not isinstance(result, dict) or "relationship" not in result:
+                    raise ValueError("Return a relationship string, or null if the prose is insufficient.")
+                if not isinstance(result.get("explanation"), str) or not result["explanation"].strip():
+                    raise ValueError("Provide a nonempty explanation.")
+                if result["relationship"] is not None:
+                    for field in ("relationship", "technical_quote"):
+                        if not isinstance(result.get(field), str) or not result[field].strip():
+                            raise ValueError(f"Provide a nonempty {field}.")
+                    quote = normalize(result["technical_quote"])
+                    matches = [passage for passage in selected_passages if quote in normalize(passage["text"])]
+                    if len(quote.split()) < 3 or len(matches) != 1:
+                        raise ValueError(f"technical_quote {result['technical_quote']!r} must match at least three consecutive words in exactly one supplied passage (found {len(matches)} matches). Copy a longer literal quote if ambiguous.")
+                    passage = matches[0]
+                    outcome.update(
+                        status="extracted", relationship=result["relationship"].strip(),
+                        technical_quote=result["technical_quote"].strip(),
+                        technical_evidence={key: passage[key] for key in ("chunk_id", "source", "page")},
+                    )
+                else:
+                    outcome["status"] = "insufficient_evidence"
+                outcome["explanation"] = result["explanation"].strip()
+                outcome["attempts"].append({"attempt": attempt + 1, "response": response, "error": None})
+                break
+            except (json.JSONDecodeError, ValueError) as error:
+                outcome["status"] = "unscored"
+                outcome["attempts"].append({"attempt": attempt + 1, "response": response, "error": str(error)})
+                feedback = "\nCORRECTION: " + str(error) + " Return complete JSON; copy a short literal quote or report insufficient evidence."
+        return outcome
+
+    def rerank_related_candidates(self, query, pattern_extraction, technical_chunks, shortlisted_docs):
+        settings = self.config["related_problem"]["conceptual_reranking"]
+        relationship = self.extract_related_relationship(pattern_extraction, technical_chunks) if shortlisted_docs else {
+            "status": "skipped_no_candidates", "attempts": [],
+        }
+        passages = {chunk["chunk_id"]: chunk for chunk in technical_chunks}
+        judgments, accepted = [], []
+
+        def normalize(text):
+            text = unicodedata.normalize("NFKC", text)
+            text = re.sub(r"(?<=\w)[-\u00ad\u2010]\s*\n\s*(?=\w)", "", text)
+            return " ".join(text.split())
+
+        # No numeric rating: a chunk either supports this specific relationship or does not.
+        labels = ("supported_match", "weak_match", "unrelated")
+        for rank, (doc, cross_encoder_score) in enumerate(shortlisted_docs, start=1):
+            judgment = {
+                "chunk_id": doc.metadata["chunk_id"], "source": doc.metadata["source"],
+                "page": doc.metadata["page"], "shortlist_rank": rank,
+                "cross_encoder_score": float(cross_encoder_score), "attempts": [],
+            }
+            if relationship["status"] != "extracted":
+                judgments.append({**judgment, "status": "skipped_no_relationship",
+                                  "note": "No usable technical relationship; no conceptual recommendation is supported."})
+                continue
+            base_prompt = settings["prompt"].format(
+                relationship=relationship["relationship"], candidate_text=doc.page_content,
+            )
+            feedback = ""
+            # One call per candidate, with one bounded corrective retry if invalid.
+            for attempt in range(2):
+                prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                    [{"role": "user", "content": base_prompt + feedback}],
+                    tokenize=False, add_generation_prompt=True,
+                )
+                response = self.llm.invoke(
+                    prompt, pipeline_kwargs={"max_new_tokens": settings["max_new_tokens"]},
+                )
+                try:
+                    json_start = response.find("{")
+                    if json_start == -1:
+                        raise ValueError("No JSON object was returned.")
+                    result, _ = json.JSONDecoder().raw_decode(response[json_start:])
+                    if not isinstance(result, dict) or result.get("match_label") not in labels:
+                        raise ValueError("match_label must be supported_match, weak_match, or unrelated.")
+                    assessment = {"match_label": result["match_label"]}
+                    for field in ("candidate_relationship", "explanation"):
+                        if not isinstance(result.get(field), str) or not result[field].strip():
+                            raise ValueError(f"Provide a nonempty {field}.")
+                        assessment[field] = result[field].strip()
+                    if result["match_label"] == "supported_match":
+                        for field in ("leetcode_quote",):
+                            if not isinstance(result.get(field), str) or not result[field].strip():
+                                raise ValueError(f"Missing nonempty {field} for a supported match.")
+                            assessment[field] = result[field].strip()
+                        quote = normalize(assessment["leetcode_quote"])
+                        if len(quote.split()) < 3 or quote not in normalize(doc.page_content):
+                            raise ValueError(f"leetcode_quote {assessment['leetcode_quote']!r} must match at least three consecutive words in the supplied chunk body.")
+                        # Python owns the chunk IDs and citations, never generated IDs/pages.
+                        assessment.update(
+                            shared_mechanism=relationship["relationship"],
+                            technical_relationship=relationship["relationship"],
+                            technical_quote=relationship["technical_quote"],
+                            technical_evidence=relationship["technical_evidence"],
+                        )
+                    judgment["attempts"].append({"attempt": attempt + 1, "response": response, "error": None})
+                    judgment.update(assessment, status="rejected")
+                    break
+                except (json.JSONDecodeError, ValueError) as error:
+                    judgment["attempts"].append({"attempt": attempt + 1, "response": response, "error": str(error)})
+                    judgment["status"] = "unscored"
+                    feedback = "\nCORRECTION: " + str(error) + " Return complete JSON. Copy a short literal quote; do not invent support."
+
+            if judgment.get("match_label") == "supported_match":
+                # A separate call checks the claim against BOTH original passages.
+                # It does not see the candidate judge's label, explanation, or numeric score.
+                technical_passage = passages[relationship["technical_evidence"]["chunk_id"]]
+                base_prompt = settings["verification_prompt"].format(
+                    relationship=relationship["relationship"], technical_text=technical_passage["text"],
+                    candidate_text=doc.page_content, technical_quote=relationship["technical_quote"],
+                    leetcode_quote=judgment["leetcode_quote"],
+                )
+                verification = {"status": "unscored", "attempts": []}
+                feedback = ""
+                for attempt in range(2):
+                    prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                        [{"role": "user", "content": base_prompt + feedback}],
+                        tokenize=False, add_generation_prompt=True,
+                    )
+                    response = self.llm.invoke(
+                        prompt, pipeline_kwargs={"max_new_tokens": settings["verification_max_new_tokens"]},
+                    )
+                    try:
+                        start = response.find("{")
+                        if start == -1:
+                            raise ValueError("No verification JSON object was returned.")
+                        result, _ = json.JSONDecoder().raw_decode(response[start:])
+                        if not isinstance(result, dict) or type(result.get("supported")) is not bool:
+                            raise ValueError("supported must be a boolean.")
+                        if not isinstance(result.get("explanation"), str) or not result["explanation"].strip():
+                            raise ValueError("Provide a nonempty verification explanation.")
+                        if result["supported"]:
+                            difference = result.get("important_difference")
+                            if not isinstance(difference, str) or not difference.strip():
+                                raise ValueError("For supported=true, explain an important_difference between the technical passage and the ONE selected coding problem.")
+                            judgment["important_difference"] = difference.strip()
+                        verification.update(status="valid", supported=result["supported"], explanation=result["explanation"].strip())
+                        verification["attempts"].append({"attempt": attempt + 1, "response": response, "error": None})
+                        judgment["status"] = "accepted" if result["supported"] else "rejected"
+                        if result["supported"]:
+                            accepted.append((doc, cross_encoder_score))
+                        break
+                    except (json.JSONDecodeError, ValueError) as error:
+                        verification["attempts"].append({"attempt": attempt + 1, "response": response, "error": str(error)})
+                        judgment["status"] = "unscored"
+                        feedback = "\nCORRECTION: " + str(error) + " Return ONLY complete JSON with supported and explanation."
+                judgment["verification"] = verification
+            judgments.append(judgment)
+
+        # Previously, ordinal ratings ranked links:
+        # Stronger conceptual links first; the cross-encoder breaks ties.
+        # Now every retained link passed both checks; keep cross-encoder order within that set.
+        accepted.sort(key=lambda item: float(item[1]), reverse=True)
+        selected = accepted[:self.config["reranking"]["final_top_k"]]
+        selected_ids = {doc.metadata["chunk_id"] for doc, _ in selected}
+        for judgment in judgments:
+            judgment["selected_for_context"] = judgment["chunk_id"] in selected_ids
+        return selected, judgments, relationship
+
     def run_related_problem(self, query):
+        shortlist_top_k = self.config["related_problem"]["conceptual_reranking"]["shortlist_top_k"]
+        if type(shortlist_top_k) is not int or shortlist_top_k < 1:
+            raise ValueError("related_problem.conceptual_reranking.shortlist_top_k must be a positive integer.")
         leetcode_source = self.config["related_problem"]["source"]
         explicit_sources = find_explicit_sources(
             query,
@@ -1368,9 +1566,15 @@ class RAGPipeline:
                     "methods": retrieved["candidate_methods"][chunk_id],
                 })
         leetcode_query = "; ".join(search["query"] for search in leetcode_query_plan["queries"])
-        context, final_chunks = self.build_context(
-            self.rerank_candidates(leetcode_query, list(candidate_docs.values()))
+        shortlisted_docs = self.rerank_candidates(
+            leetcode_query, list(candidate_docs.values()),
+            top_k=shortlist_top_k,
         )
+        _, shortlisted_chunks = self.build_context(shortlisted_docs)
+        conceptually_ranked_docs, conceptual_judgments, relationship_extraction = self.rerank_related_candidates(
+            query, pattern_extraction, technical_retrieval["final_chunks"], shortlisted_docs,
+        )
+        context, final_chunks = self.build_context(conceptually_ranked_docs)
         leetcode_retrieval = {
             "selected_sources": [leetcode_source], "context": context, "final_chunks": final_chunks,
         }
@@ -1379,8 +1583,14 @@ class RAGPipeline:
             technical_retrieval["context"],
             leetcode_retrieval["context"],
             query,
+            [{key: value for key, value in judgment.items() if key not in ("attempts", "verification")}
+             for judgment in conceptual_judgments if judgment["selected_for_context"]],
         )
-        response = self.generate_answer(formatted_prompt)
+        # Do not ask the answer model to fill in a recommendation after the gate rejects everything.
+        response = self.generate_answer(formatted_prompt) if final_chunks else (
+            "No related LeetCode recommendation is supported by the current retrieved evidence: "
+            "no candidate passed conceptual reranking. See the extraction and judgment diagnostics."
+        )
 
         technical_chunks = [
             {
@@ -1436,6 +1646,9 @@ class RAGPipeline:
                  "page": doc.metadata["page"], "retrieved_by": candidate_queries[chunk_id]}
                 for chunk_id, doc in candidate_docs.items()
             ],
+            "leetcode_shortlist": shortlisted_chunks,
+            "conceptual_judgments": conceptual_judgments,
+            "relationship_extraction": relationship_extraction,
             "leetcode_context": leetcode_retrieval["context"],
             "leetcode_chunks": leetcode_chunks,
             "final_context": final_context,
@@ -1549,6 +1762,10 @@ def main():
                         f"BM25={len(retrieval['bm25_chunk_ids'])} candidates"
                     )
                 print("Unique LeetCode candidates before reranking:", len(result["leetcode_candidates"]))
+                print("Source-grounded relationship for matching:")
+                print(json.dumps(result["relationship_extraction"], indent=2, ensure_ascii=False))
+                print("Conceptual reranking judgments:")
+                print(json.dumps(result["conceptual_judgments"], indent=2, ensure_ascii=False))
                 print(
                     "LeetCode candidate source:",
                     ", ".join(result["leetcode_selected_sources"]),

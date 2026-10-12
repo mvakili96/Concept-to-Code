@@ -14,7 +14,7 @@ A compact, local pipeline for progressively exploring production RAG concepts ov
 | **Reranking** | MiniLM cross-encoder |
 | **Generation** | `Qwen2.5-7B-Instruct` with source and page citations |
 | **Conversation** | Qwen follow-up rewriting, in-memory history, and active-source state |
-| **Related-problem workflow** | Technical evidence → accepted coding patterns → multi-query LeetCode retrieval through `/related` |
+| **Related-problem workflow** | Technical evidence → coding patterns → multi-query LeetCode retrieval → conceptual reranking through `/related` |
 | **Persistence** | Reusable corpus, BM25, IndexFlat, and HNSW artifacts |
 | **Ablations** | Independent dense retrieval, BM25, and query-expansion toggles |
 | **Evaluation** | 50-question source-grounded benchmark with deterministic evidence-overlap metrics |
@@ -32,6 +32,8 @@ Use indexing mode `build` once to parse and chunk the complete corpus, build BM2
 With `conversation.enabled`, every turn—including the first—is entered interactively in the terminal; the configured query is used only in single-turn mode. Later turns are rewritten into standalone retrieval queries using recent user and assistant messages. An explicitly named source is inherited only for a follow-up and cleared for a new topic. History resolves references but is not treated as document evidence; session state lasts only for the current process.
 
 Use `/related <technical topic or request>` in conversation mode to run the separate related-problem workflow. It first retrieves and reranks technical evidence from an exactly named technical PDF, or from every non-LeetCode source when none is named. Qwen assesses evidence sufficiency and extracts literal source terms, inferred coding patterns, topic connections, quotes, and coding tasks. Each pattern selects a Python-assigned passage ID; quotes must match that passage after Unicode, whitespace, and line-break-hyphen normalization. Invalid quotes get one focused retry using only the selected passage, selecting literal excerpt IDs when available so Python copies the quote; other extraction errors retain one targeted retry. A separate Qwen pass translates accepted patterns into concise coding-problem queries. Each query independently searches the LeetCode PDF using enabled dense/BM25 components; candidates are deduplicated by chunk ID before the existing reranker scores them against the combined task queries. Per-query retrieval limits remain in `retrieval`; query-construction settings are in `related_problem.candidate_retrieval`. Invalid query plans reuse the previous coding-task bridge; insufficient technical evidence falls back to the original request. The terminal shows the query plan, per-query candidate counts, and unique merged count; returned results also retain chunk IDs and retrieval provenance. Qwen receives both contexts for recommendations. Topic connections are model inferences, not guaranteed relevance checks. The workflow does not yet use or update conversation memory.
+
+For `/related` only, `related_problem.conceptual_reranking` configures a cross-encoder shortlist. Qwen extracts one precise, quoted relationship from the technical prose, then labels each chunk `supported_match`, `weak_match`, or `unrelated`. Proposed matches undergo a separate check against both passages and their literal quotes; only passing chunks reach recommendations, in cross-encoder order and capped by `reranking.final_top_k`. Invalid outputs get one corrective retry, then exclusion; no accepted chunks produces a fixed abstention. Relationships, decisions, checks, quotes, provenance, and errors remain visible. This adds latency and is model-based assessment, not guaranteed semantic validation. Problem number/title verification remains future work; ordinary QA and benchmark evaluation are unchanged.
 
 ## Retrieval Sources
 
@@ -55,4 +57,4 @@ This repository evaluates retrieval and reranking rather than final-answer quali
 - Figures, table structure, page layout, and scanned text are not parsed.
 - `rank_bm25` scores every chunk rather than using a scalable inverted index.
 - Conversation sessions are not persisted, and there is no conversational benchmark or serving API yet.
-- Pattern quotes are checked for text occurrence, but conceptual relationships and recommendations still need a dedicated relevance benchmark.
+- Valid quotes do not guarantee good related-problem judgments: Qwen can accept weak analogies, reject useful ones, or invent recommendation details. A dedicated relevance benchmark and problem-identity validation are still missing.
