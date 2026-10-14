@@ -1360,13 +1360,88 @@ class RAGPipeline:
                 feedback = "\nCORRECTION: " + str(error) + " Return complete JSON; copy a short literal quote or report insufficient evidence."
         return outcome
 
+    def isolate_related_problems(self, shortlisted_docs):
+        settings = self.config["related_problem"]["problem_isolation"]
+        groups, notes = {}, []
+        # Only query-time processing: indexes, retrieval, and original chunk IDs stay unchanged.
+        # Saved page text recovers a heading even when the retrieved chunk begins mid-problem.
+        for doc, score in shortlisted_docs:
+            source, page = doc.metadata["source"], doc.metadata["page"]
+            text = self.page_texts.get((source, page))
+            start = doc.metadata.get("start_index")
+            error = None
+            if text is None:
+                error = "Saved source page text is unavailable."
+            elif type(start) is not int or start < 0 or text[start:start + len(doc.page_content)] != doc.page_content:
+                error = "The chunk does not match its recorded character span in the saved source page."
+            headers = list(re.finditer(settings["header_pattern"], text)) if error is None else []
+            ranges = list(re.finditer(settings["page_range_pattern"], text)) if error is None else []
+            numbers = [int(match["number"]) for match in headers]
+            first, last = (int(ranges[0]["first"]), int(ranges[0]["last"] or ranges[0]["first"])) if len(ranges) == 1 else (None, None)
+            if error is None and (not headers or len(ranges) != 1 or len(set(numbers)) != len(numbers)
+                                  or len(headers) != last - first + 1
+                                  or min(numbers) != first or max(numbers) != last):
+                error = "Problem headings are missing or ambiguous on this page."
+            if error:
+                notes.append({"chunk_id": doc.metadata["chunk_id"], "source": source, "page": page,
+                              "status": "unscored_problem_isolation", "note": error, "attempts": []})
+                continue
+            footer = re.search(settings["footer_pattern"], text)
+            found_body = False
+            for index, header in enumerate(headers):
+                end = headers[index + 1].start() if index + 1 < len(headers) else (footer.start() if footer else len(text))
+                left, right = max(start, header.end()), min(start + len(doc.page_content), end)
+                body = text[left:right] if left < right else ""
+                if not body.strip():
+                    continue
+                left += len(body) - len(body.lstrip())
+                right = left + len(body.strip())
+                found_body = True
+                problem_id = f"{source}::page={page}::problem={header['number']}"
+                if problem_id not in groups:
+                    groups[problem_id] = {
+                        "metadata": {**doc.metadata, "problem_id": problem_id,
+                                     "problem_identity": {"number": int(header["number"]), "title": " ".join(header["title"].split()),
+                                                          "difficulty": header["difficulty"], "heading_quote": header.group().strip()},
+                                     "parent_chunk_ids": []},
+                        "score": float(score), "spans": [],
+                    }
+                group = groups[problem_id]
+                group["spans"].append((left, right))
+                if doc.metadata["chunk_id"] not in group["metadata"]["parent_chunk_ids"]:
+                    group["metadata"]["parent_chunk_ids"].append(doc.metadata["chunk_id"])
+                if float(score) > group["score"]:
+                    group["score"] = float(score)
+                    group["metadata"]["chunk_id"] = doc.metadata["chunk_id"]
+            if not found_body:
+                notes.append({"chunk_id": doc.metadata["chunk_id"], "source": source, "page": page,
+                              "status": "unscored_problem_isolation", "note": "No identified problem prose overlaps this chunk.", "attempts": []})
+
+        problem_docs = []
+        for group in groups.values():
+            metadata = group["metadata"]
+            spans = []
+            for left, right in sorted(group["spans"]):
+                if spans and left <= spans[-1][1]:
+                    spans[-1] = (spans[-1][0], max(spans[-1][1], right))
+                else:
+                    spans.append((left, right))
+            # Merge overlapping retrieved coverage, but never silently fill an unretrieved gap.
+            page_text = self.page_texts[(metadata["source"], metadata["page"])]
+            excerpts = [page_text[left:right] for left, right in spans]
+            metadata.update(start_index=spans[0][0], problem_excerpts=excerpts,
+                            problem_spans=[{"start": left, "end": right} for left, right in spans])
+            problem_docs.append((Document(page_content="\n\n[Unretrieved gap]\n\n".join(excerpts), metadata=metadata), group["score"]))
+        return problem_docs, notes
+
     def rerank_related_candidates(self, query, pattern_extraction, technical_chunks, shortlisted_docs):
         settings = self.config["related_problem"]["conceptual_reranking"]
-        relationship = self.extract_related_relationship(pattern_extraction, technical_chunks) if shortlisted_docs else {
+        problem_docs, isolation_notes = self.isolate_related_problems(shortlisted_docs)
+        relationship = self.extract_related_relationship(pattern_extraction, technical_chunks) if problem_docs else {
             "status": "skipped_no_candidates", "attempts": [],
         }
         passages = {chunk["chunk_id"]: chunk for chunk in technical_chunks}
-        judgments, accepted = [], []
+        judgments, accepted = isolation_notes, []
 
         def normalize(text):
             text = unicodedata.normalize("NFKC", text)
@@ -1374,12 +1449,15 @@ class RAGPipeline:
             return " ".join(text.split())
 
         # No numeric rating: a chunk either supports this specific relationship or does not.
+        # Each candidate is now ONE problem's retrieved prose, not an entire mixed-problem chunk.
         labels = ("supported_match", "weak_match", "unrelated")
-        for rank, (doc, cross_encoder_score) in enumerate(shortlisted_docs, start=1):
+        for rank, (doc, cross_encoder_score) in enumerate(problem_docs, start=1):
             judgment = {
                 "chunk_id": doc.metadata["chunk_id"], "source": doc.metadata["source"],
                 "page": doc.metadata["page"], "shortlist_rank": rank,
                 "cross_encoder_score": float(cross_encoder_score), "attempts": [],
+                "problem_id": doc.metadata["problem_id"], "problem_identity": doc.metadata["problem_identity"],
+                "parent_chunk_ids": doc.metadata["parent_chunk_ids"], "problem_text": doc.page_content,
             }
             if relationship["status"] != "extracted":
                 judgments.append({**judgment, "status": "skipped_no_relationship",
@@ -1416,7 +1494,7 @@ class RAGPipeline:
                                 raise ValueError(f"Missing nonempty {field} for a supported match.")
                             assessment[field] = result[field].strip()
                         quote = normalize(assessment["leetcode_quote"])
-                        if len(quote.split()) < 3 or quote not in normalize(doc.page_content):
+                        if len(quote.split()) < 3 or not any(quote in normalize(excerpt) for excerpt in doc.metadata["problem_excerpts"]):
                             raise ValueError(f"leetcode_quote {assessment['leetcode_quote']!r} must match at least three consecutive words in the supplied chunk body.")
                         # Python owns the chunk IDs and citations, never generated IDs/pages.
                         assessment.update(
@@ -1484,10 +1562,75 @@ class RAGPipeline:
         # Now every retained link passed both checks; keep cross-encoder order within that set.
         accepted.sort(key=lambda item: float(item[1]), reverse=True)
         selected = accepted[:self.config["reranking"]["final_top_k"]]
-        selected_ids = {doc.metadata["chunk_id"] for doc, _ in selected}
+        selected_ids = {doc.metadata["problem_id"] for doc, _ in selected}
         for judgment in judgments:
-            judgment["selected_for_context"] = judgment["chunk_id"] in selected_ids
+            judgment["selected_for_context"] = judgment.get("problem_id") in selected_ids
         return selected, judgments, relationship
+
+    def generate_related_recommendations(self, formatted_prompt, selected_judgments):
+        settings = self.config["related_problem"]["recommendation_validation"]
+        if type(settings["max_recommendations"]) is not int or settings["max_recommendations"] < 1:
+            raise ValueError("related_problem.recommendation_validation.max_recommendations must be a positive integer.")
+        accepted, attempts, rejected = {}, [], []
+        feedback = ""
+
+        def normalize(text):
+            return " ".join(unicodedata.normalize("NFKC", text).split())
+
+        # The LLM may propose identities; only exact source-verified identities can be displayed.
+        # Python renders titles, difficulty, and citations from the selected source records.
+        for attempt in range(2):
+            prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                [{"role": "user", "content": formatted_prompt + feedback}], tokenize=False, add_generation_prompt=True,
+            )
+            response = self.llm.invoke(prompt, pipeline_kwargs={"max_new_tokens": settings["max_new_tokens"]})
+            errors = []
+            try:
+                start = min((position for position in (response.find("{"), response.find("[")) if position != -1), default=-1)
+                if start == -1:
+                    raise ValueError("No recommendation JSON was returned.")
+                result, _ = json.JSONDecoder().raw_decode(response[start:])
+                # A bare JSON array is harmless; every proposed identity still gets the same strict checks.
+                recommendations = result if isinstance(result, list) else result.get("recommendations") if isinstance(result, dict) else None
+                if not isinstance(recommendations, list):
+                    raise ValueError("Return a recommendations list.")
+                for item in recommendations:
+                    index = item.get("candidate_index") if isinstance(item, dict) else None
+                    if type(index) is not int or not 1 <= index <= len(selected_judgments):
+                        errors.append(f"Unknown candidate_index: {index!r}.")
+                        rejected.append({"attempt": attempt + 1, "item": item, "error": errors[-1]})
+                        continue
+                    judgment = selected_judgments[index - 1]
+                    identity = judgment["problem_identity"]
+                    if (type(item.get("number")) is not int or item["number"] != identity["number"]
+                            or any(not isinstance(item.get(field), str) or normalize(item[field]) != normalize(identity[field])
+                                   for field in ("title", "difficulty"))):
+                        errors.append(f"candidate_index {index}: copy exactly number={identity['number']}, title={identity['title']!r}, difficulty={identity['difficulty']!r}.")
+                        rejected.append({"attempt": attempt + 1, "item": item, "error": errors[-1]})
+                        continue
+                    if index not in accepted and len(accepted) < settings["max_recommendations"]:
+                        accepted[index] = judgment
+            except (json.JSONDecodeError, ValueError) as error:
+                errors.append(str(error))
+            attempts.append({"attempt": attempt + 1, "response": response, "errors": errors})
+            if not errors:
+                break
+            feedback = "\nCORRECTION: " + " ".join(errors) + " Return complete recommendations JSON using only the supplied verified identities. Do not invent missing details."
+
+        blocks = []
+        for judgment in accepted.values():
+            identity, technical = judgment["problem_identity"], judgment["technical_evidence"]
+            blocks.append(
+                f"{identity['number']}. {identity['title']} ({identity['difficulty']})\n"
+                f"Shared condition: {judgment['shared_mechanism']}\n"
+                f"Important difference: {judgment['important_difference']}\n"
+                f"Technical quote: {judgment['technical_quote']}\n"
+                f"Problem quote: {judgment['leetcode_quote']}\n"
+                f"SOURCES: {technical['source']}, PAGE: {technical['page']}; {judgment['source']}, PAGE: {judgment['page']}"
+            )
+        response = "\n\n".join(blocks) if blocks else "No source-verified recommendation was selected; no problem details have been guessed."
+        return response, {"status": "validated" if blocks else "no_valid_recommendations", "attempts": attempts,
+                          "rejected_items": rejected, "accepted_problem_ids": [judgment["problem_id"] for judgment in accepted.values()]}
 
     def run_related_problem(self, query):
         shortlist_top_k = self.config["related_problem"]["conceptual_reranking"]["shortlist_top_k"]
@@ -1575,22 +1718,36 @@ class RAGPipeline:
             query, pattern_extraction, technical_retrieval["final_chunks"], shortlisted_docs,
         )
         context, final_chunks = self.build_context(conceptually_ranked_docs)
+        for chunk, (doc, _) in zip(final_chunks, conceptually_ranked_docs):
+            chunk.update({key: doc.metadata[key] for key in (
+                "problem_id", "problem_identity", "parent_chunk_ids", "problem_spans", "problem_excerpts"
+            )})
         leetcode_retrieval = {
             "selected_sources": [leetcode_source], "context": context, "final_chunks": final_chunks,
         }
 
+        selected_judgments = [
+            {"candidate_index": index, **{key: value for key, value in judgment.items()
+                                          if key not in ("attempts", "verification")}}
+            for index, judgment in enumerate(
+                [judgment for judgment in conceptual_judgments if judgment["selected_for_context"]], start=1,
+            )
+        ]
         formatted_prompt = self.build_related_problem_prompt(
             technical_retrieval["context"],
             leetcode_retrieval["context"],
             query,
-            [{key: value for key, value in judgment.items() if key not in ("attempts", "verification")}
-             for judgment in conceptual_judgments if judgment["selected_for_context"]],
+            selected_judgments,
         )
         # Do not ask the answer model to fill in a recommendation after the gate rejects everything.
-        response = self.generate_answer(formatted_prompt) if final_chunks else (
-            "No related LeetCode recommendation is supported by the current retrieved evidence: "
-            "no candidate passed conceptual reranking. See the extraction and judgment diagnostics."
-        )
+        if final_chunks:
+            response, recommendation_validation = self.generate_related_recommendations(formatted_prompt, selected_judgments)
+        else:
+            response = (
+                "No related LeetCode recommendation is supported by the current retrieved evidence: "
+                "no candidate passed conceptual reranking. See the extraction and judgment diagnostics."
+            )
+            recommendation_validation = {"status": "skipped_no_candidates", "attempts": [], "rejected_items": [], "accepted_problem_ids": []}
 
         technical_chunks = [
             {
@@ -1649,6 +1806,7 @@ class RAGPipeline:
             "leetcode_shortlist": shortlisted_chunks,
             "conceptual_judgments": conceptual_judgments,
             "relationship_extraction": relationship_extraction,
+            "recommendation_validation": recommendation_validation,
             "leetcode_context": leetcode_retrieval["context"],
             "leetcode_chunks": leetcode_chunks,
             "final_context": final_context,
@@ -1766,14 +1924,18 @@ def main():
                 print(json.dumps(result["relationship_extraction"], indent=2, ensure_ascii=False))
                 print("Conceptual reranking judgments:")
                 print(json.dumps(result["conceptual_judgments"], indent=2, ensure_ascii=False))
+                print("Recommendation identity validation:")
+                print(json.dumps(result["recommendation_validation"], indent=2, ensure_ascii=False))
                 print(
                     "LeetCode candidate source:",
                     ", ".join(result["leetcode_selected_sources"]),
                 )
-                print("Reranked LeetCode candidates:")
+                print("Reranked LeetCode problems:")
                 for chunk in result["leetcode_chunks"]:
+                    identity = chunk["problem_identity"]
                     print(
-                        f"  {chunk['rank']}. {chunk['source']}, "
+                        f"  {chunk['rank']}. {identity['number']}. {identity['title']} ({identity['difficulty']}), "
+                        f"{chunk['source']}, "
                         f"PAGE: {chunk['page']}"
                     )
                 print("\nAssistant:", result["generated_answer"])
