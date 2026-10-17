@@ -50,6 +50,7 @@ class ConversationSession:
 
 class RAGPipeline:
     PERSISTENCE_FORMAT_VERSION = 1
+    MODEL_TEXT_NORMALIZATION_VERSION = 1
 
     def __init__(self, config, pdf_paths):
         self.config = config
@@ -119,6 +120,10 @@ class RAGPipeline:
         return {
             "chunking": self.config["chunking"],
             "embedding": self.config["embedding"],
+            "text_normalization": {
+                "enabled": self.config["text_normalization"]["enabled"],
+                "version": self.MODEL_TEXT_NORMALIZATION_VERSION,
+            },
             "bm25": {
                 key: self.config["retrieval"][key]
                 for key in (
@@ -189,7 +194,7 @@ class RAGPipeline:
 
         if manifest.get("index_settings") != self.persisted_index_settings():
             raise ValueError(
-                "Chunking, embedding, BM25, or HNSW construction settings changed "
+                "Chunking, text normalization, embedding, BM25, or HNSW construction settings changed "
                 "after the indexes were built. Set indexing.mode to \"build\" to rebuild them."
             )
 
@@ -288,6 +293,15 @@ class RAGPipeline:
     #########################################################################################################################################
     # 3- Turn chunks into embeddings
     #########################################################################################################################################
+    def normalize_model_text(self, text):
+        # Keep Documents and page_texts raw: normalization must not move citation
+        # offsets, change chunk IDs, or break evaluation's original-PDF mappings.
+        if not self.config["text_normalization"]["enabled"]:
+            return text
+        text = unicodedata.normalize("NFKC", text)
+        text = re.sub(r"(?<=\w)[-\u00ad\u2010\u2011][\t ]*\r?\n[\t ]*(?=\w)", "", text)
+        return " ".join(text.split())
+
     def create_embedding_model(self):
         embedding_model = HuggingFaceEmbeddings(
             model_name=self.config["embedding"]["model_name"],
@@ -314,7 +328,7 @@ class RAGPipeline:
     def tokenize_for_bm25(self, text):
         return re.findall(
             self.config["retrieval"]["bm25_token_pattern"],
-            text.lower()
+            self.normalize_model_text(text).lower()
         )
 
     def build_faiss_vector_store(self, chunks, embeddings, dense_index_type):
@@ -376,7 +390,7 @@ class RAGPipeline:
                 raise ValueError(f"No extractable text chunks were found for {source}.")
 
             embeddings = self.embedding_model.embed_documents(
-                [chunk.page_content for chunk in chunks]
+                [self.normalize_model_text(chunk.page_content) for chunk in chunks]
             )
 
             for index_type in ("flat", "hnsw"):
@@ -569,7 +583,7 @@ class RAGPipeline:
                 continue
 
             term = value.strip()
-            normalized_term = term.lower()
+            normalized_term = self.normalize_model_text(term).casefold()
 
             if (
                 term
@@ -583,11 +597,18 @@ class RAGPipeline:
 
     def expand_query(self, query):
         expansion_prompt = self.config["query_expansion"]["prompt"].format(
-            query=query,
+            query=self.normalize_model_text(query),
             max_key_terms=self.config["query_expansion"]["max_key_terms"],
             max_acronyms=self.config["query_expansion"]["max_acronyms"],
             min_variations=self.config["query_expansion"]["min_variations"],
             max_variations=self.config["query_expansion"]["max_variations"]
+        )
+
+        # Use Qwen's instruction/chat format, as in related-pattern extraction.
+        expansion_prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+            [{"role": "user", "content": expansion_prompt}],
+            tokenize=False,
+            add_generation_prompt=True,
         )
 
         expansion_response = self.llm.invoke(
@@ -624,6 +645,42 @@ class RAGPipeline:
                 self.config["query_expansion"]["max_variations"]
             )
         }
+
+        # Main terms must come from the question, not be invented adjacent topics.
+        normalized_query = self.normalize_model_text(query).casefold()
+        query_expansion["key_terms"] = [
+            term for term in query_expansion["key_terms"]
+            if re.search(
+                r"(?<!\w)" + re.escape(self.normalize_model_text(term).casefold()) + r"(?!\w)",
+                normalized_query,
+            )
+        ]
+        retrieval_query = parsed_expansion.get("retrieval_query")
+        primary_term = next(iter(query_expansion["key_terms"]), None)
+        # Dropping a numerical condition changes the question. Filename numbers
+        # are excluded because source filtering already uses the original query.
+        query_without_sources = normalized_query
+        for source in find_explicit_sources(query, getattr(self, "available_sources", [])):
+            query_without_sources = query_without_sources.replace(
+                self.normalize_model_text(source).casefold(), ""
+            )
+        number_pattern = r"[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?"
+        query_numbers = set(re.findall(number_pattern, query_without_sources))
+        if (
+            self.config["query_expansion"]["use_focused_query"]
+            and isinstance(retrieval_query, str)
+            and 0 < len(retrieval_query.strip()) <= self.config["query_expansion"]["focused_query_max_length"]
+            and retrieval_query.strip().endswith("?")
+            and primary_term
+            and set(re.findall(number_pattern, self.normalize_model_text(retrieval_query).casefold())) == query_numbers
+            and re.search(
+                r"(?<!\w)" + re.escape(self.normalize_model_text(primary_term).casefold()) + r"(?!\w)",
+                self.normalize_model_text(retrieval_query).casefold(),
+            )
+        ):
+            query_expansion["retrieval_query"] = retrieval_query.strip()
+        else:
+            query_expansion["retrieval_query"] = query
 
         expanded_terms = (
             query_expansion["key_terms"]
@@ -709,14 +766,18 @@ class RAGPipeline:
         explicit_sources = find_explicit_sources(query, self.available_sources)
         return explicit_sources or self.available_sources
 
-    def retrieve_candidates(self, query, expanded_query, source_override=None):
+    def retrieve_candidates(self, query, expanded_query, source_override=None, retrieval_query=None):
+        # Resolve source restrictions from the original question, never a rewrite
+        # that may intentionally omit the filename.
         sources = self.selected_sources(query, source_override)
 
         # If a source was explicitly named, this searches only its chunks. Otherwise,
         # this searches all chunks from all sources.
         dense_results_with_scores = []
         if self.use_dense_retrieval:
-            query_vector = self.embedding_model.embed_query(query)
+            query_vector = self.embedding_model.embed_query(
+                self.normalize_model_text(retrieval_query or query)
+            )
             for source in sources:
                 dense_results_with_scores.extend(
                     self.source_vector_stores[source].similarity_search_with_score_by_vector(
@@ -840,8 +901,14 @@ class RAGPipeline:
                 model_name=self.config["reranking"]["model_name"]
             )
 
+        # A body chunk may omit its book title/heading. The existing source label
+        # keeps domain context for ranking; it is not additional PDF evidence.
         pairs = [
-            (query, doc.page_content)
+            (
+                self.normalize_model_text(query),
+                (f"SOURCE: {doc.metadata['source']}\n" if self.config["reranking"]["include_source_name"] else "")
+                + self.normalize_model_text(doc.page_content),
+            )
             for doc in candidate_docs
         ]
 
@@ -857,7 +924,25 @@ class RAGPipeline:
         )
 
         reranked_docs = scored_docs[:self.config["reranking"]["final_top_k"] if top_k is None else top_k]
+        
+        print("\nRERANKED RESULTS")
+        for rank, (doc, score) in enumerate(reranked_docs, start=1):
+            print(
+                f"{rank}. score={score:.4f} | {doc.metadata['chunk_id']} | "
+                f"{doc.page_content[:500].replace(chr(10), ' ')}"
+            )
+        """
 
+        """
+        for rank, (doc, score) in enumerate(reranked_docs, start=1):
+
+            print("=" * 80)
+
+            print("Reranked position:", rank)
+            print("Reranker score:", score)
+            print("Page:", doc.metadata["page"])
+
+            print(doc.page_content[:500])
         """
         print("\nRERANKED RESULTS")
         for rank, (doc, score) in enumerate(reranked_docs, start=1):
@@ -897,7 +982,7 @@ class RAGPipeline:
                 self.config["rag"]["context_entry_template"].format(
                     source=source,
                     page=page,
-                    page_content=doc.page_content
+                    page_content=self.normalize_model_text(doc.page_content)
                 )
             )
             final_chunks.append(
@@ -922,14 +1007,16 @@ class RAGPipeline:
         query,
         expanded_query,
         source_override=None,
+        retrieval_query=None,
     ):
         retrieval = self.retrieve_candidates(
             query,
             expanded_query,
             source_override,
+            retrieval_query=retrieval_query,
         )
         reranked_docs = self.rerank_candidates(
-            query,
+            retrieval_query or query,
             retrieval["candidate_docs"]
         )
         context, final_chunks = self.build_context(reranked_docs)
@@ -950,7 +1037,7 @@ class RAGPipeline:
 
         formatted_prompt = rag_prompt.format(
             context=context,
-            question=query
+            question=self.normalize_model_text(query)
         )
 
         # print(formatted_prompt)
@@ -970,7 +1057,7 @@ class RAGPipeline:
         return related_problem_prompt.format(
             technical_context=technical_context,
             leetcode_context=leetcode_context,
-            question=query,
+            question=self.normalize_model_text(query),
             conceptual_assessments=json.dumps(conceptual_assessments or [], ensure_ascii=False),
         )
 
@@ -989,11 +1076,13 @@ class RAGPipeline:
         expanded_query = query
         if self.use_bm25_retrieval and self.use_query_expansion:
             query_expansion, expanded_query = self.expand_query(query)
+        retrieval_query = query_expansion.get("retrieval_query", query)
 
         retrieval = self.retrieve_and_rerank_context(
             query,
             expanded_query,
             source_override,
+            retrieval_query=retrieval_query,
         )
         formatted_prompt = self.build_prompt(
             retrieval["context"],
@@ -1008,6 +1097,8 @@ class RAGPipeline:
                 find_explicit_sources(query, self.available_sources)
             ),
             "query_expansion": query_expansion,
+            "retrieval_query": retrieval_query,
+            "bm25_query": expanded_query,
             "final_context": retrieval["context"],
             "final_chunks": retrieval["final_chunks"],
             "generated_answer": response,
@@ -1033,11 +1124,11 @@ class RAGPipeline:
         # Passage IDs are local to this extraction; Python owns their source/page mapping.
         passages = {f"P{index}": chunk for index, chunk in enumerate(technical_chunks, start=1)}
         technical_context = "\n\n".join(
-            f"PASSAGE_ID: {passage_id}\nSOURCE: {chunk['source']}\nPAGE: {chunk['page']}\n{chunk['text']}"
+            f"PASSAGE_ID: {passage_id}\nSOURCE: {chunk['source']}\nPAGE: {chunk['page']}\n{self.normalize_model_text(chunk['text'])}"
             for passage_id, chunk in passages.items()
         )
         base_prompt = settings["prompt"].format(
-            question=query,
+            question=self.normalize_model_text(query),
             technical_context=technical_context,
             max_source_terms=settings["max_source_terms"],
             max_patterns=settings["max_patterns"],
@@ -1142,7 +1233,7 @@ class RAGPipeline:
                                 pattern=json.dumps(pattern, ensure_ascii=False),
                                 error=error,
                                 passage_id=passage_id,
-                                passage_text=passage["text"],
+                                passage_text=self.normalize_model_text(passage["text"]),
                                 quote_options=json.dumps(quote_options, ensure_ascii=False),
                                 min_quote_words=settings["min_quote_words"],
                                 max_quote_words=settings["max_quote_words"],
@@ -1315,7 +1406,7 @@ class RAGPipeline:
         if not selected_passages:
             return outcome
         base_prompt = settings["relationship_prompt"].format(
-            passages="\n\n".join(passage["text"] for passage in selected_passages),
+            passages="\n\n".join(self.normalize_model_text(passage["text"]) for passage in selected_passages),
         )
         feedback = ""
         for attempt in range(2):
@@ -1464,7 +1555,7 @@ class RAGPipeline:
                                   "note": "No usable technical relationship; no conceptual recommendation is supported."})
                 continue
             base_prompt = settings["prompt"].format(
-                relationship=relationship["relationship"], candidate_text=doc.page_content,
+                relationship=relationship["relationship"], candidate_text=self.normalize_model_text(doc.page_content),
             )
             feedback = ""
             # One call per candidate, with one bounded corrective retry if invalid.
@@ -1516,8 +1607,8 @@ class RAGPipeline:
                 # It does not see the candidate judge's label, explanation, or numeric score.
                 technical_passage = passages[relationship["technical_evidence"]["chunk_id"]]
                 base_prompt = settings["verification_prompt"].format(
-                    relationship=relationship["relationship"], technical_text=technical_passage["text"],
-                    candidate_text=doc.page_content, technical_quote=relationship["technical_quote"],
+                    relationship=relationship["relationship"], technical_text=self.normalize_model_text(technical_passage["text"]),
+                    candidate_text=self.normalize_model_text(doc.page_content), technical_quote=relationship["technical_quote"],
                     leetcode_quote=judgment["leetcode_quote"],
                 )
                 verification = {"status": "unscored", "attempts": []}
@@ -1666,6 +1757,7 @@ class RAGPipeline:
         expanded_query = query
         if self.use_bm25_retrieval and self.use_query_expansion:
             query_expansion, expanded_query = self.expand_query(query)
+        retrieval_query = query_expansion.get("retrieval_query", query)
 
         # Technical evidence is retrieved independently from the LeetCode
         # candidates so that each stage remains visible and testable.
@@ -1673,6 +1765,7 @@ class RAGPipeline:
             query,
             expanded_query,
             source_override=technical_sources,
+            retrieval_query=retrieval_query,
         )
         pattern_extraction = self.extract_transferable_patterns(
             query,
@@ -1790,6 +1883,7 @@ class RAGPipeline:
                 explicitly_selected_technical_sources
             ),
             "query_expansion": query_expansion,
+            "technical_retrieval_query": retrieval_query,
             "technical_context": technical_retrieval["context"],
             "technical_chunks": technical_chunks,
             "pattern_extraction": pattern_extraction,
@@ -1904,6 +1998,7 @@ def main():
                     ", ".join(result["technical_selected_sources"]),
                 )
                 print("Reranked technical evidence:")
+                print("Focused technical retrieval query:", result["technical_retrieval_query"])
                 for chunk in result["technical_chunks"]:
                     print(
                         f"  {chunk['rank']}. {chunk['source']}, "
@@ -1952,6 +2047,8 @@ def main():
 
             if result["standalone_query"] != current_query:
                 print("Standalone retrieval query:", result["standalone_query"])
+            if result["retrieval_query"] != result["standalone_query"]:
+                print("Focused dense/reranking query:", result["retrieval_query"])
 
             print("\nAssistant:", result["generated_answer"])
     else:

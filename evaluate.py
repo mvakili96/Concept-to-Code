@@ -535,12 +535,20 @@ def build_summary(run, dataset_counts, metric_summaries, question_results):
         f"- Dense retrieval enabled: `{run['ablation']['use_dense_retrieval']}`",
         f"- BM25 retrieval enabled: `{run['ablation']['use_bm25_retrieval']}`",
         f"- Query expansion enabled: `{run['ablation']['use_query_expansion']}`",
+        f"- Model-text normalization: `{run['text_normalization']}`",
+        f"- Focused dense/reranking query: `{run['query_expansion_settings']['use_focused_query']}` "
+        "(applies only when BM25 and query expansion are enabled)",
+        f"- Query-expansion limits (key terms / acronyms / variations): "
+        f"{run['query_expansion_settings']['max_key_terms']} / "
+        f"{run['query_expansion_settings']['max_acronyms']} / "
+        f"{run['query_expansion_settings']['max_variations']}",
         f"- Chunk size/overlap: {run['chunk_size']} / {run['chunk_overlap']} characters",
         f"- Dense FAISS index: `{run['dense_index_type']}`",
         f"- Dense top-k / BM25 top-k: {run['dense_top_k']} / {run['bm25_top_k']}",
         f"- Final reranked top-k: {run['final_top_k']}",
         f"- Embedding model: `{run['embedding_model']}`",
         f"- Reranker model: `{run['reranker_model']}`",
+        f"- Source name included in reranker input: `{run['reranker_include_source_name']}`",
         "",
     ])
 
@@ -691,6 +699,9 @@ def main():
         },
         "embedding_model": config["embedding"]["model_name"],
         "reranker_model": config["reranking"]["model_name"],
+        "reranker_include_source_name": config["reranking"]["include_source_name"],
+        "text_normalization": pipeline.persisted_index_settings()["text_normalization"],
+        "query_expansion_settings": config["query_expansion"],
         "chunk_size": config["chunking"]["chunk_size"],
         "chunk_overlap": config["chunking"]["chunk_overlap"],
         "dense_index_type": config["retrieval"]["dense_index_type"],

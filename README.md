@@ -8,6 +8,7 @@ A compact, local pipeline for progressively exploring production RAG concepts ov
 |---|---|
 | **PDF ingestion** | `pypdf` |
 | **Chunking** | LangChain recursive text splitting |
+| **Text normalization** | Model-facing Unicode ligature, line-break-hyphen, and whitespace normalization; raw citation offsets preserved |
 | **Dense retrieval** | MiniLM embeddings + `FAISS` IndexFlat (exact k-NN) or HNSW (ANN) |
 | **Sparse retrieval** | `BM25` with optional Qwen-based query expansion |
 | **Candidate fusion** | Chunk-ID deduplication |
@@ -28,6 +29,10 @@ Retrieval sources belong in `documents/`, which is git-ignored. Install the depe
 Use indexing mode `build` once to parse and chunk the complete corpus, build BM25 plus both Flat and HNSW indexes, persist them under the git-ignored `index-data/`, and answer the configured query. Then switch to `load` to skip ingestion and index construction. `dense_index_type` selects the persisted Flat or HNSW index without rebuilding.
 
 `use_dense_retrieval`, `use_bm25_retrieval`, and `use_query_expansion` support retrieval ablations without rebuilding. At least one retriever must remain enabled, and query expansion runs only when BM25 is enabled.
+
+`text_normalization.enabled` normalizes embedding, BM25, reranking, and context inputs without changing stored PDF text, chunks, IDs, or citation offsets; changing it requires an index rebuild. The same query-expansion pass optionally supplies a focused dense/reranking query (`query_expansion.use_focused_query`), while BM25 uses the original question plus conservative wording variations. Source restrictions and the answering question remain based on the original query. Focused queries are available only when BM25 and query expansion are enabled; disabling the option retains the original dense/reranking query. Candidate limits default to 50 per retriever before the final four reranked chunks; expansion and top-k settings can change without rebuilding.
+
+`reranking.include_source_name` supplies the existing source label alongside each chunk's normalized body, retaining document/domain context for chunks without headings. This query-time setting does not require rebuilding indexes.
 
 With `conversation.enabled`, every turn—including the first—is entered interactively in the terminal; the configured query is used only in single-turn mode. Later turns are rewritten into standalone retrieval queries using recent user and assistant messages. An explicitly named source is inherited only for a follow-up and cleared for a new topic. History resolves references but is not treated as document evidence; session state lasts only for the current process.
 
@@ -50,11 +55,12 @@ For `/related` only, `related_problem.conceptual_reranking` configures a cross-e
 
 Run the complete automated evaluation with `python evaluate.py`, or use `python evaluate.py --limit 1` for a small execution check. The evaluator imports the same `RAGPipeline` used by `main.py`. Evidence text precision and recall compare only the final reranked chunks supplied to the answering LLM against the annotated passages using normalized PDF word positions. They do not measure semantic correctness and can miss valid alternative evidence.
 
-This repository evaluates retrieval and reranking rather than final-answer quality. Generated answers are retained, and answers to the three unanswerable questions are shown for manual inspection. Each run records the indexing and ablation configuration and replaces `summary.md`, `per_question.csv`, and `details.json` in `evaluation-results/`.
+This repository evaluates retrieval and reranking rather than final-answer quality. Generated answers are retained, and answers to the three unanswerable questions are shown for manual inspection. Each run records indexing, normalization, expansion/focused-query, candidate-limit, and ablation settings and replaces `summary.md`, `per_question.csv`, and `details.json` in `evaluation-results/`. Per-question details retain the focused retrieval query and BM25 query.
 
 ## Current limitations
 
 - Figures, table structure, page layout, and scanned text are not parsed.
 - `rank_bm25` scores every chunk rather than using a scalable inverted index.
+- Qwen query rewrites and wording variations can still lose meaning or drift; numeric/primary-term checks are safeguards, not semantic guarantees.
 - Conversation sessions are not persisted, and there is no conversational benchmark or serving API yet.
 - Related-problem judgments and explanations remain model inferences, not guaranteed semantic validation. Identity parsing depends on the PDF heading/page-range format, and a dedicated relevance benchmark is still missing.
