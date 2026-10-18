@@ -1387,8 +1387,7 @@ class RAGPipeline:
             return {**baseline, "status": "fallback", "notes": notes + ["Using the existing coding-task bridge query."]}
         return {"queries": queries, "status": "generated", "notes": notes}
 
-    def extract_related_relationship(self, pattern_extraction, technical_chunks):
-        settings = self.config["related_problem"]["conceptual_reranking"]
+    def extract_related_relationship(self, pattern_extraction, technical_chunks, pattern_indices=None):
         patterns = pattern_extraction["transferable_patterns"]
         passages = {chunk["chunk_id"]: chunk for chunk in technical_chunks}
 
@@ -1397,58 +1396,34 @@ class RAGPipeline:
             text = re.sub(r"(?<=\w)[-\u00ad\u2010]\s*\n\s*(?=\w)", "", text)
             return " ".join(text.split())
 
+        # Earlier relationship-extraction notes, retained for learning:
         # Keep the actual technical passage beside each pattern, not just its short quote.
         # Quote occurrence verifies provenance; conceptual relevance is still Qwen's judgment.
         # Read the original prose, not generated coding tasks or inferred mechanisms.
         # These passages already came from topic retrieval; the procedural question is not re-fed here.
-        selected_passages = list({pattern["chunk_id"]: passages[pattern["chunk_id"]] for pattern in patterns}.values())
-        outcome = {"status": "skipped_no_patterns", "attempts": []}
-        if not selected_passages:
-            return outcome
-        base_prompt = settings["relationship_prompt"].format(
-            passages="\n\n".join(self.normalize_model_text(passage["text"]) for passage in selected_passages),
-        )
-        feedback = ""
-        for attempt in range(2):
-            prompt = self.llm.pipeline.tokenizer.apply_chat_template(
-                [{"role": "user", "content": base_prompt + feedback}],
-                tokenize=False, add_generation_prompt=True,
-            )
-            response = self.llm.invoke(
-                prompt, pipeline_kwargs={"max_new_tokens": settings["relationship_max_new_tokens"]},
-            )
-            try:
-                start = response.find("{")
-                if start == -1:
-                    raise ValueError("No relationship JSON object was returned.")
-                result, _ = json.JSONDecoder().raw_decode(response[start:])
-                if not isinstance(result, dict) or "relationship" not in result:
-                    raise ValueError("Return a relationship string, or null if the prose is insufficient.")
-                if not isinstance(result.get("explanation"), str) or not result["explanation"].strip():
-                    raise ValueError("Provide a nonempty explanation.")
-                if result["relationship"] is not None:
-                    for field in ("relationship", "technical_quote"):
-                        if not isinstance(result.get(field), str) or not result[field].strip():
-                            raise ValueError(f"Provide a nonempty {field}.")
-                    quote = normalize(result["technical_quote"])
-                    matches = [passage for passage in selected_passages if quote in normalize(passage["text"])]
-                    if len(quote.split()) < 3 or len(matches) != 1:
-                        raise ValueError(f"technical_quote {result['technical_quote']!r} must match at least three consecutive words in exactly one supplied passage (found {len(matches)} matches). Copy a longer literal quote if ambiguous.")
-                    passage = matches[0]
-                    outcome.update(
-                        status="extracted", relationship=result["relationship"].strip(),
-                        technical_quote=result["technical_quote"].strip(),
-                        technical_evidence={key: passage[key] for key in ("chunk_id", "source", "page")},
-                    )
-                else:
-                    outcome["status"] = "insufficient_evidence"
-                outcome["explanation"] = result["explanation"].strip()
-                outcome["attempts"].append({"attempt": attempt + 1, "response": response, "error": None})
-                break
-            except (json.JSONDecodeError, ValueError) as error:
-                outcome["status"] = "unscored"
-                outcome["attempts"].append({"attempt": attempt + 1, "response": response, "error": str(error)})
-                feedback = "\nCORRECTION: " + str(error) + " Return complete JSON; copy a short literal quote or report insufficient evidence."
+        # Now Python anchors judging to the SAME accepted patterns used for search.
+        # Pattern descriptions remain inferences; their original passages/quotes
+        # remain the evidence. No new LLM-selected property can replace the target.
+        outcome = {"status": "skipped_no_patterns", "method": "accepted_pattern_anchor",
+                   "criteria": [], "rejected_patterns": [], "attempts": []}
+        for index, pattern in enumerate(patterns, start=1):
+            if pattern_indices is not None and index not in pattern_indices:
+                continue
+            passage = passages.get(pattern["chunk_id"])
+            quote = normalize(pattern["supporting_quote"])
+            if not passage or len(quote.split()) < 3 or quote not in normalize(passage["text"]):
+                outcome["rejected_patterns"].append({"pattern_index": index, "error": "Pattern quote does not match its retrieved technical passage."})
+                continue
+            outcome["criteria"].append({
+                "pattern_index": index,
+                **{field: pattern[field] for field in ("pattern", "reason", "topic_connection", "coding_task")},
+                "technical_quote": pattern["supporting_quote"],
+                "technical_evidence": {key: passage[key] for key in ("chunk_id", "source", "page")},
+            })
+        if outcome["criteria"]:
+            outcome["status"] = "extracted"
+        elif patterns:
+            outcome["status"] = "insufficient_evidence"
         return outcome
 
     def isolate_related_problems(self, shortlisted_docs):
@@ -1525,13 +1500,14 @@ class RAGPipeline:
             problem_docs.append((Document(page_content="\n\n[Unretrieved gap]\n\n".join(excerpts), metadata=metadata), group["score"]))
         return problem_docs, notes
 
-    def rerank_related_candidates(self, query, pattern_extraction, technical_chunks, shortlisted_docs):
+    def rerank_related_candidates(self, query, pattern_extraction, technical_chunks, shortlisted_docs, pattern_indices=None):
         settings = self.config["related_problem"]["conceptual_reranking"]
         problem_docs, isolation_notes = self.isolate_related_problems(shortlisted_docs)
-        relationship = self.extract_related_relationship(pattern_extraction, technical_chunks) if problem_docs else {
+        relationship = self.extract_related_relationship(pattern_extraction, technical_chunks, pattern_indices) if problem_docs else {
             "status": "skipped_no_candidates", "attempts": [],
         }
         passages = {chunk["chunk_id"]: chunk for chunk in technical_chunks}
+        criteria = {criterion["pattern_index"]: criterion for criterion in relationship.get("criteria", [])}
         judgments, accepted = isolation_notes, []
 
         def normalize(text):
@@ -1555,7 +1531,13 @@ class RAGPipeline:
                                   "note": "No usable technical relationship; no conceptual recommendation is supported."})
                 continue
             base_prompt = settings["prompt"].format(
-                relationship=relationship["relationship"], candidate_text=self.normalize_model_text(doc.page_content),
+                # The candidate judge quotes ONLY problem text. The independent
+                # verifier below receives the technical quote and original prose.
+                criteria=json.dumps([
+                    {field: criterion[field] for field in ("pattern_index", "pattern", "reason", "topic_connection")}
+                    for criterion in criteria.values()
+                ], ensure_ascii=False),
+                candidate_text=self.normalize_model_text(doc.page_content),
             )
             feedback = ""
             # One call per candidate, with one bounded corrective retry if invalid.
@@ -1580,6 +1562,10 @@ class RAGPipeline:
                             raise ValueError(f"Provide a nonempty {field}.")
                         assessment[field] = result[field].strip()
                     if result["match_label"] == "supported_match":
+                        pattern_index = result.get("pattern_index")
+                        if type(pattern_index) is not int or pattern_index not in criteria:
+                            raise ValueError(f"For supported_match, select one existing pattern_index from {list(criteria)}.")
+                        criterion = criteria[pattern_index]
                         for field in ("leetcode_quote",):
                             if not isinstance(result.get(field), str) or not result[field].strip():
                                 raise ValueError(f"Missing nonempty {field} for a supported match.")
@@ -1589,10 +1575,11 @@ class RAGPipeline:
                             raise ValueError(f"leetcode_quote {assessment['leetcode_quote']!r} must match at least three consecutive words in the supplied chunk body.")
                         # Python owns the chunk IDs and citations, never generated IDs/pages.
                         assessment.update(
-                            shared_mechanism=relationship["relationship"],
-                            technical_relationship=relationship["relationship"],
-                            technical_quote=relationship["technical_quote"],
-                            technical_evidence=relationship["technical_evidence"],
+                            pattern_index=pattern_index,
+                            shared_mechanism=criterion["pattern"],
+                            technical_relationship=criterion["pattern"],
+                            technical_quote=criterion["technical_quote"],
+                            technical_evidence=criterion["technical_evidence"],
                         )
                     judgment["attempts"].append({"attempt": attempt + 1, "response": response, "error": None})
                     judgment.update(assessment, status="rejected")
@@ -1605,10 +1592,13 @@ class RAGPipeline:
             if judgment.get("match_label") == "supported_match":
                 # A separate call checks the claim against BOTH original passages.
                 # It does not see the candidate judge's label, explanation, or numeric score.
-                technical_passage = passages[relationship["technical_evidence"]["chunk_id"]]
+                criterion = criteria[judgment["pattern_index"]]
+                technical_passage = passages[criterion["technical_evidence"]["chunk_id"]]
                 base_prompt = settings["verification_prompt"].format(
-                    relationship=relationship["relationship"], technical_text=self.normalize_model_text(technical_passage["text"]),
-                    candidate_text=self.normalize_model_text(doc.page_content), technical_quote=relationship["technical_quote"],
+                    criterion=json.dumps({field: criterion[field] for field in ("pattern_index", "pattern", "reason", "topic_connection")}, ensure_ascii=False),
+                    candidate_relationship=judgment["candidate_relationship"],
+                    technical_text=self.normalize_model_text(technical_passage["text"]),
+                    candidate_text=self.normalize_model_text(doc.page_content), technical_quote=criterion["technical_quote"],
                     leetcode_quote=judgment["leetcode_quote"],
                 )
                 verification = {"status": "unscored", "attempts": []}
@@ -1713,7 +1703,7 @@ class RAGPipeline:
             identity, technical = judgment["problem_identity"], judgment["technical_evidence"]
             blocks.append(
                 f"{identity['number']}. {identity['title']} ({identity['difficulty']})\n"
-                f"Shared condition: {judgment['shared_mechanism']}\n"
+                f"Related practice pattern: {judgment['shared_mechanism']}\n"
                 f"Important difference: {judgment['important_difference']}\n"
                 f"Technical quote: {judgment['technical_quote']}\n"
                 f"Problem quote: {judgment['leetcode_quote']}\n"
@@ -1802,6 +1792,12 @@ class RAGPipeline:
                     "methods": retrieved["candidate_methods"][chunk_id],
                 })
         leetcode_query = "; ".join(search["query"] for search in leetcode_query_plan["queries"])
+        searched_pattern_indices = [
+            index for index, pattern in enumerate(pattern_extraction["transferable_patterns"], start=1)
+            if any(search["pattern_index"] == index or (
+                search["pattern_index"] is None and pattern["coding_task"] in search["query"]
+            ) for search in leetcode_query_plan["queries"])
+        ]
         shortlisted_docs = self.rerank_candidates(
             leetcode_query, list(candidate_docs.values()),
             top_k=shortlist_top_k,
@@ -1809,6 +1805,7 @@ class RAGPipeline:
         _, shortlisted_chunks = self.build_context(shortlisted_docs)
         conceptually_ranked_docs, conceptual_judgments, relationship_extraction = self.rerank_related_candidates(
             query, pattern_extraction, technical_retrieval["final_chunks"], shortlisted_docs,
+            pattern_indices=searched_pattern_indices,
         )
         context, final_chunks = self.build_context(conceptually_ranked_docs)
         for chunk, (doc, _) in zip(final_chunks, conceptually_ranked_docs):
@@ -1889,6 +1886,7 @@ class RAGPipeline:
             "pattern_extraction": pattern_extraction,
             "leetcode_search_query": leetcode_query,
             "leetcode_query_plan": leetcode_query_plan,
+            "searched_pattern_indices": searched_pattern_indices,
             # Retain the first query's expansion; all expansions are in retrieval_runs.
             "leetcode_query_expansion": retrieval_runs[0]["query_expansion"],
             "leetcode_retrieval_runs": retrieval_runs,
@@ -2015,7 +2013,7 @@ def main():
                         f"BM25={len(retrieval['bm25_chunk_ids'])} candidates"
                     )
                 print("Unique LeetCode candidates before reranking:", len(result["leetcode_candidates"]))
-                print("Source-grounded relationship for matching:")
+                print("Accepted search patterns anchored for judging:")
                 print(json.dumps(result["relationship_extraction"], indent=2, ensure_ascii=False))
                 print("Conceptual reranking judgments:")
                 print(json.dumps(result["conceptual_judgments"], indent=2, ensure_ascii=False))
