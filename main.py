@@ -51,6 +51,8 @@ class ConversationSession:
 class RAGPipeline:
     PERSISTENCE_FORMAT_VERSION = 1
     MODEL_TEXT_NORMALIZATION_VERSION = 1
+    # Useful practice can cover only one component; closer connections rank first.
+    RELATED_PRACTICE_LEVELS = ("direct_match", "related_practice", "stretch_connection")
 
     def __init__(self, config, pdf_paths):
         self.config = config
@@ -925,24 +927,6 @@ class RAGPipeline:
 
         reranked_docs = scored_docs[:self.config["reranking"]["final_top_k"] if top_k is None else top_k]
         
-        print("\nRERANKED RESULTS")
-        for rank, (doc, score) in enumerate(reranked_docs, start=1):
-            print(
-                f"{rank}. score={score:.4f} | {doc.metadata['chunk_id']} | "
-                f"{doc.page_content[:500].replace(chr(10), ' ')}"
-            )
-        """
-
-        """
-        for rank, (doc, score) in enumerate(reranked_docs, start=1):
-
-            print("=" * 80)
-
-            print("Reranked position:", rank)
-            print("Reranker score:", score)
-            print("Page:", doc.metadata["page"])
-
-            print(doc.page_content[:500])
         """
         print("\nRERANKED RESULTS")
         for rank, (doc, score) in enumerate(reranked_docs, start=1):
@@ -1545,6 +1529,28 @@ class RAGPipeline:
             problem_docs.append((Document(page_content=body, metadata=metadata), group["score"]))
         return problem_docs, notes
 
+    def related_evidence_spans(self, text, prefix, problem=False):
+        # Select evidence by ID instead of asking Qwen to reproduce PDF spelling.
+        # Offsets and quotes refer to the ORIGINAL supplied body, not normalized text.
+        body = text
+        if problem:
+            constraints = re.search(r"(?im)^[\t ]*Constraints[.:]", body)
+            if constraints:
+                body = body[:constraints.start()]
+        spans = {}
+        for match in re.finditer(r'\S.*?(?:[.!?](?=\s+[A-Z"\u201c]|\s*$)|\Z)', body, re.DOTALL):
+            quote = match.group().rstrip()
+            if len(quote.split()) >= 3:
+                identifier = f"{prefix}{len(spans) + 1}"
+                spans[identifier] = {"id": identifier, "start": match.start(),
+                                     "end": match.start() + len(quote), "quote": quote}
+        return spans
+
+    def select_related_evidence(self, identifier, spans):
+        if not isinstance(identifier, str) or identifier not in spans:
+            raise ValueError(f"Select one existing evidence span ID from {list(spans)}, or use null with unrelated.")
+        return spans[identifier]
+
     def rerank_related_candidates(self, query, pattern_extraction, technical_chunks, shortlisted_docs, pattern_indices=None, retrieval_query=None):
         settings = self.config["related_problem"]["conceptual_reranking"]
         problem_docs, isolation_notes = self.isolate_related_problems(shortlisted_docs)
@@ -1562,14 +1568,18 @@ class RAGPipeline:
 
         # No numeric rating: a chunk either supports this specific relationship or does not.
         # Each candidate is now ONE problem's retrieved prose, not an entire mixed-problem chunk.
-        labels = ("supported_match", "weak_match", "unrelated")
+        # Keep the binary match_label for existing diagnostics, but ask Qwen for
+        # a practice level instead of requiring the whole mechanism to match.
+        levels = self.RELATED_PRACTICE_LEVELS + ("unrelated",)
         for rank, (doc, cross_encoder_score) in enumerate(problem_docs, start=1):
+            problem_spans = self.related_evidence_spans(doc.page_content, "P", problem=True)
             judgment = {
                 "chunk_id": doc.metadata["chunk_id"], "source": doc.metadata["source"],
                 "page": doc.metadata["page"], "shortlist_rank": rank,
                 "cross_encoder_score": float(cross_encoder_score), "attempts": [],
                 "problem_id": doc.metadata["problem_id"], "problem_identity": doc.metadata["problem_identity"],
                 "parent_chunk_ids": doc.metadata["parent_chunk_ids"], "problem_text": doc.page_content,
+                "problem_evidence_spans": list(problem_spans.values()),
                 "problem_expansion": {key: doc.metadata[key] for key in (
                     "problem_text_origin", "problem_expanded", "problem_spans", "retrieved_problem_spans"
                 )},
@@ -1578,14 +1588,21 @@ class RAGPipeline:
                 judgments.append({**judgment, "status": "skipped_no_relationship",
                                   "note": "No usable technical relationship; no conceptual recommendation is supported."})
                 continue
+            if not problem_spans:
+                judgments.append({**judgment, "status": "rejected",
+                                  "note": "No selectable problem prose; constraints alone do not establish an operation."})
+                continue
             base_prompt = settings["prompt"].format(
                 # The candidate judge quotes ONLY problem text. The independent
                 # verifier below receives the technical quote and original prose.
+                # Now Python copies the selected span; Qwen supplies no quote text.
                 criteria=json.dumps([
                     {field: criterion[field] for field in ("pattern_index", "pattern", "reason", "topic_connection")}
                     for criterion in criteria.values()
                 ], ensure_ascii=False),
                 candidate_text=self.normalize_model_text(doc.page_content),
+                problem_spans=json.dumps({key: normalize(span["quote"]) for key, span in problem_spans.items()}, ensure_ascii=False),
+                question=self.normalize_model_text(query),
             )
             feedback = ""
             # One call per candidate, with one bounded corrective retry if invalid.
@@ -1602,25 +1619,28 @@ class RAGPipeline:
                     if json_start == -1:
                         raise ValueError("No JSON object was returned.")
                     result, _ = json.JSONDecoder().raw_decode(response[json_start:])
-                    if not isinstance(result, dict) or result.get("match_label") not in labels:
-                        raise ValueError("match_label must be supported_match, weak_match, or unrelated.")
-                    assessment = {"match_label": result["match_label"]}
-                    for field in ("candidate_relationship", "explanation"):
+                    if not isinstance(result, dict) or result.get("connection_level") not in levels:
+                        raise ValueError(f"connection_level must be one of {levels}.")
+                    useful = result["connection_level"] in self.RELATED_PRACTICE_LEVELS
+                    assessment = {"connection_level": result["connection_level"],
+                                  "match_label": "supported_match" if useful else "unrelated"}
+                    for field in ("technical_operation", "problem_operation"):
                         if not isinstance(result.get(field), str) or not result[field].strip():
                             raise ValueError(f"Provide a nonempty {field}.")
                         assessment[field] = result[field].strip()
-                    if result["match_label"] == "supported_match":
+                    assessment["candidate_relationship"] = assessment["problem_operation"]
+                    if useful:
                         pattern_index = result.get("pattern_index")
                         if type(pattern_index) is not int or pattern_index not in criteria:
-                            raise ValueError(f"For supported_match, select one existing pattern_index from {list(criteria)}.")
+                            raise ValueError(f"For useful practice, select one existing pattern_index from {list(criteria)}.")
                         criterion = criteria[pattern_index]
-                        for field in ("leetcode_quote",):
+                        for field in ("shared_component", "important_difference"):
                             if not isinstance(result.get(field), str) or not result[field].strip():
-                                raise ValueError(f"Missing nonempty {field} for a supported match.")
+                                raise ValueError(f"Missing nonempty {field} for useful practice.")
                             assessment[field] = result[field].strip()
-                        quote = normalize(assessment["leetcode_quote"])
-                        if len(quote.split()) < 3 or not any(quote in normalize(excerpt) for excerpt in doc.metadata["problem_excerpts"]):
-                            raise ValueError(f"leetcode_quote {assessment['leetcode_quote']!r} must match at least three consecutive words in the supplied chunk body.")
+                        span = self.select_related_evidence(result.get("problem_span_id"), problem_spans)
+                        assessment.update(leetcode_quote=span["quote"], problem_evidence_span=span,
+                                          explanation=assessment["shared_component"])
                         # Python owns the chunk IDs and citations, never generated IDs/pages.
                         assessment.update(
                             pattern_index=pattern_index,
@@ -1629,25 +1649,32 @@ class RAGPipeline:
                             technical_quote=criterion["technical_quote"],
                             technical_evidence=criterion["technical_evidence"],
                         )
+                    else:
+                        assessment["explanation"] = result.get("important_difference") or "No evidenced transferable component."
                     judgment["attempts"].append({"attempt": attempt + 1, "response": response, "error": None})
                     judgment.update(assessment, status="rejected")
                     break
                 except (json.JSONDecodeError, ValueError) as error:
                     judgment["attempts"].append({"attempt": attempt + 1, "response": response, "error": str(error)})
                     judgment["status"] = "unscored"
-                    feedback = "\nCORRECTION: " + str(error) + " Return complete JSON. Copy a short literal quote; do not invent support."
+                    feedback = "\nCORRECTION: " + str(error) + " Return complete JSON. Select a supplied span ID, not quote text; use unrelated if no evidence supports a concrete connection."
 
             if judgment.get("match_label") == "supported_match":
                 # A separate call checks the claim against BOTH original passages.
                 # It does not see the candidate judge's label, explanation, or numeric score.
                 criterion = criteria[judgment["pattern_index"]]
                 technical_passage = passages[criterion["technical_evidence"]["chunk_id"]]
+                technical_spans = self.related_evidence_spans(technical_passage["text"], "T")
+                judgment["technical_evidence_spans"] = list(technical_spans.values())
                 base_prompt = settings["verification_prompt"].format(
                     criterion=json.dumps({field: criterion[field] for field in ("pattern_index", "pattern", "reason", "topic_connection")}, ensure_ascii=False),
                     candidate_relationship=judgment["candidate_relationship"],
                     technical_text=self.normalize_model_text(technical_passage["text"]),
                     candidate_text=self.normalize_model_text(doc.page_content), technical_quote=criterion["technical_quote"],
                     leetcode_quote=judgment["leetcode_quote"],
+                    technical_spans=json.dumps({key: normalize(span["quote"]) for key, span in technical_spans.items()}, ensure_ascii=False),
+                    problem_spans=json.dumps({key: normalize(span["quote"]) for key, span in problem_spans.items()}, ensure_ascii=False),
+                    question=self.normalize_model_text(query),
                 )
                 verification = {"status": "unscored", "attempts": []}
                 feedback = ""
@@ -1664,25 +1691,58 @@ class RAGPipeline:
                         if start == -1:
                             raise ValueError("No verification JSON object was returned.")
                         result, _ = json.JSONDecoder().raw_decode(response[start:])
-                        if not isinstance(result, dict) or type(result.get("supported")) is not bool:
-                            raise ValueError("supported must be a boolean.")
-                        if not isinstance(result.get("explanation"), str) or not result["explanation"].strip():
-                            raise ValueError("Provide a nonempty verification explanation.")
-                        if result["supported"]:
-                            difference = result.get("important_difference")
-                            if not isinstance(difference, str) or not difference.strip():
-                                raise ValueError("For supported=true, explain an important_difference between the technical passage and the ONE selected coding problem.")
-                            judgment["important_difference"] = difference.strip()
-                        verification.update(status="valid", supported=result["supported"], explanation=result["explanation"].strip())
+                        if not isinstance(result, dict) or result.get("connection_level") not in levels:
+                            raise ValueError(f"connection_level must be one of {levels}.")
+                        for field in ("technical_operation", "problem_operation"):
+                            if not isinstance(result.get(field), str) or not result[field].strip():
+                                raise ValueError(f"Provide a nonempty {field} based on its own passage.")
+                        for field in ("technical_operation_grounded", "problem_operation_grounded", "component_supported"):
+                            if type(result.get(field)) is not bool:
+                                raise ValueError(f"Provide a JSON boolean for {field}.")
+                        # Ground each operation in ITS OWN source, independently of similarity.
+                        # Different grounded operations can still share a useful component.
+                        operations_supported = (result["technical_operation_grounded"]
+                                                and result["problem_operation_grounded"])
+                        supported = (result["connection_level"] in self.RELATED_PRACTICE_LEVELS
+                                     and operations_supported and result["component_supported"])
+                        if supported:
+                            for field in ("shared_component", "important_difference"):
+                                if not isinstance(result.get(field), str) or not result[field].strip():
+                                    raise ValueError(f"For useful practice, provide a nonempty {field}.")
+                            technical_span = self.select_related_evidence(result.get("technical_span_id"), technical_spans)
+                            problem_span = self.select_related_evidence(result.get("problem_span_id"), problem_spans)
+                            judgment.update(proposed_leetcode_quote=judgment["leetcode_quote"],
+                                            anchored_technical_quote=criterion["technical_quote"],
+                                            technical_quote=technical_span["quote"], leetcode_quote=problem_span["quote"],
+                                            technical_evidence_span=technical_span, problem_evidence_span=problem_span,
+                                            important_difference=result["important_difference"].strip())
+                        final_level = result["connection_level"] if supported else "unrelated"
+                        explanation = (
+                            f"Technical operation: {result['technical_operation'].strip()} "
+                            f"Problem operation: {result['problem_operation'].strip()} "
+                            f"Shared component: {result.get('shared_component') or 'none supported'}."
+                        )
+                        verification.update(status="valid", supported=supported, connection_level=final_level,
+                                            reported_connection_level=result["connection_level"], explanation=explanation,
+                                            **{field: result[field] for field in ("technical_operation", "problem_operation",
+                                                                               "technical_operation_grounded", "problem_operation_grounded",
+                                                                               "component_supported")})
+                        # Derived compatibility field for the existing diagnostic readers.
+                        verification["operations_supported"] = operations_supported
+                        verification["shared_component"] = result.get("shared_component", "")
                         verification["attempts"].append({"attempt": attempt + 1, "response": response, "error": None})
-                        judgment["status"] = "accepted" if result["supported"] else "rejected"
-                        if result["supported"]:
+                        # The independent source check owns the final practice level.
+                        judgment["proposed_connection_level"] = judgment["connection_level"]
+                        judgment["connection_level"] = final_level
+                        judgment["status"] = "accepted" if supported else "rejected"
+                        if supported:
+                            doc.metadata["connection_level"] = final_level
                             accepted.append((doc, cross_encoder_score))
                         break
                     except (json.JSONDecodeError, ValueError) as error:
                         verification["attempts"].append({"attempt": attempt + 1, "response": response, "error": str(error)})
                         judgment["status"] = "unscored"
-                        feedback = "\nCORRECTION: " + str(error) + " Return ONLY complete JSON with supported and explanation."
+                        feedback = "\nCORRECTION: " + str(error) + " Return complete structured JSON. Ground each operation only in its OWN supplied span, not in the other source. Judge shared-component similarity separately. Select supplied evidence IDs, not quote text."
                 judgment["verification"] = verification
             judgments.append(judgment)
 
@@ -1702,7 +1762,9 @@ class RAGPipeline:
             for doc, score in accepted:
                 doc.metadata["problem_cross_encoder_score"] = float(score)
                 problem_scores[doc.metadata["problem_id"]] = float(score)
-        accepted.sort(key=lambda item: float(item[1]), reverse=True)
+        # Prefer direct/related practice before stretch suggestions, then use the
+        # existing cross-encoder score within each level. No retrieval changes.
+        accepted.sort(key=lambda item: (self.RELATED_PRACTICE_LEVELS.index(item[0].metadata["connection_level"]), -float(item[1])))
         selected = accepted[:self.config["reranking"]["final_top_k"]]
         selected_ids = {doc.metadata["problem_id"] for doc, _ in selected}
         for judgment in judgments:
@@ -1725,8 +1787,10 @@ class RAGPipeline:
         # Quote and source-heading validation remain in the upstream judges/isolator.
         for judgment in selected_judgments:
             if (judgment.get("status") != "accepted" or judgment.get("match_label") != "supported_match"
+                    or judgment.get("connection_level") not in self.RELATED_PRACTICE_LEVELS
                     or judgment.get("verification", {}).get("status") != "valid"
                     or judgment.get("verification", {}).get("supported") is not True
+                    or judgment["verification"].get("connection_level") != judgment["connection_level"]
                     or not judgment.get("selected_for_context")):
                 rejected.append({"problem_id": judgment.get("problem_id"), "error": "Candidate must pass both relevance checks and belong to final context."})
                 continue
@@ -1739,7 +1803,9 @@ class RAGPipeline:
             identity, technical = judgment["problem_identity"], judgment["technical_evidence"]
             blocks.append(
                 f"{identity['number']}. {identity['title']} ({identity['difficulty']})\n"
+                f"Connection: {judgment['connection_level'].replace('_', ' ').capitalize()}\n"
                 f"Related practice pattern: {judgment['shared_mechanism']}\n"
+                f"What transfers: {judgment['verification']['explanation']}\n"
                 f"Important difference: {judgment['important_difference']}\n"
                 f"Technical quote: {judgment['technical_quote']}\n"
                 f"Problem quote: {judgment['leetcode_quote']}\n"
@@ -1848,7 +1914,7 @@ class RAGPipeline:
             chunk.update({key: doc.metadata[key] for key in (
                 "problem_id", "problem_identity", "parent_chunk_ids", "problem_spans", "problem_excerpts",
                 "retrieved_problem_spans", "problem_text_origin", "problem_expanded",
-                "chunk_cross_encoder_score", "problem_cross_encoder_score"
+                "chunk_cross_encoder_score", "problem_cross_encoder_score", "connection_level"
             )})
         leetcode_retrieval = {
             "selected_sources": [leetcode_source], "context": context, "final_chunks": final_chunks,
@@ -2020,46 +2086,6 @@ def main():
             if current_query.casefold().startswith(related_prefix):
                 related_query = current_query[len(related_command):].strip()
                 result = pipeline.run_related_problem(related_query)
-                print(
-                    "Technical evidence search sources:",
-                    ", ".join(result["technical_selected_sources"]),
-                )
-                print("Reranked technical evidence:")
-                print("Focused technical retrieval query:", result["technical_retrieval_query"])
-                for chunk in result["technical_chunks"]:
-                    print(
-                        f"  {chunk['rank']}. {chunk['source']}, "
-                        f"PAGE: {chunk['page']}"
-                    )
-                print("Extracted source terms and inferred coding patterns:")
-                print(json.dumps(result["pattern_extraction"], indent=2, ensure_ascii=False))
-                print("LeetCode search query:", result["leetcode_search_query"])
-                print("LeetCode task-query plan:")
-                print(json.dumps(result["leetcode_query_plan"], indent=2, ensure_ascii=False))
-                for index, retrieval in enumerate(result["leetcode_retrieval_runs"], start=1):
-                    print(
-                        f"  Query {index}: dense={len(retrieval['dense_chunk_ids'])}, "
-                        f"BM25={len(retrieval['bm25_chunk_ids'])} candidates"
-                    )
-                print("Unique LeetCode candidates before reranking:", len(result["leetcode_candidates"]))
-                print("Accepted search patterns anchored for judging:")
-                print(json.dumps(result["relationship_extraction"], indent=2, ensure_ascii=False))
-                print("Conceptual reranking judgments:")
-                print(json.dumps(result["conceptual_judgments"], indent=2, ensure_ascii=False))
-                print("Recommendation identity validation:")
-                print(json.dumps(result["recommendation_validation"], indent=2, ensure_ascii=False))
-                print(
-                    "LeetCode candidate source:",
-                    ", ".join(result["leetcode_selected_sources"]),
-                )
-                print("Reranked LeetCode problems:")
-                for chunk in result["leetcode_chunks"]:
-                    identity = chunk["problem_identity"]
-                    print(
-                        f"  {chunk['rank']}. {identity['number']}. {identity['title']} ({identity['difficulty']}), "
-                        f"{chunk['source']}, "
-                        f"PAGE: {chunk['page']}"
-                    )
                 print("\nAssistant:", result["generated_answer"])
                 continue
 
