@@ -399,6 +399,13 @@ rag:
 
     ANSWER:
 
-evaluation:
-  dataset_path: "evaluation-data/rag_benchmark_v1.jsonl"
-  results_dir: "evaluation-results"
+document_qa_evaluation:
+  dataset_path: "evaluation-data/document-qa/rag_benchmark_v1.jsonl"
+  results_dir: "evaluation-results/document-qa"
+
+leetcode_recommendation_evaluation:
+  dataset_path: "evaluation-data/leetcode-recommendation/leetcode_benchmark_v1.jsonl"
+  references_path: "evaluation-data/leetcode-recommendation/references_v1.json"
+  manifest_path: "evaluation-data/leetcode-recommendation/corpus_manifest_v1.json"
+  results_dir: "evaluation-results/leetcode-recommendation"
+  max_workers: 2  # Independent Azure pipelines; local Qwen always uses one worker.

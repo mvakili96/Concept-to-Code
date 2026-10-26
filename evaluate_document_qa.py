@@ -489,7 +489,7 @@ def write_outputs_safely(results_dir, details, summary_text, question_results):
 
 def build_summary(run, dataset_counts, metric_summaries, question_results):
     lines = [
-        "# RAG Evaluation Summary",
+        "# Document QA Evaluation Summary",
         "",
         "Evidence text precision and recall are deterministic normalized word-position overlap "
         "against annotated passages. This project evaluates RAG retrieval and reranking rather "
@@ -602,7 +602,7 @@ def main():
     with CONFIG_PATH.open(encoding="utf-8") as file:
         config = yaml.safe_load(file)
 
-    evaluation_config = config["evaluation"]
+    evaluation_config = config["document_qa_evaluation"]
     dataset_path = Path(evaluation_config["dataset_path"])
     results_dir = Path(evaluation_config["results_dir"])
     all_records = load_dataset(dataset_path)

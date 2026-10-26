@@ -18,7 +18,7 @@ A compact pipeline for progressively exploring production RAG concepts over PDF 
 | **Related-problem workflow** | Technical evidence → coding patterns → multi-query LeetCode retrieval → conceptual reranking through `/related` |
 | **Persistence** | Reusable corpus, BM25, IndexFlat, and HNSW artifacts |
 | **Ablations** | Independent dense retrieval, BM25, and query-expansion toggles |
-| **Evaluation** | 50-question source-grounded benchmark with deterministic evidence-overlap metrics |
+| **Evaluation** | Separate 50-question RAG and 40-question LeetCode benchmarks; evidence overlap and frozen-label recommendation scoring |
 
 IndexFlat compares the query with every stored vector, while HNSW navigates a graph and trades a small chance of missing the exact nearest chunks for faster search on large indexes. Both return the requested top-k results. An exactly named PDF restricts retrieval to that source; otherwise, the entire corpus is searched.
 
@@ -57,13 +57,22 @@ Overlong `/related` coding tasks get one focused repair per source-linked patter
 - *Probabilistic Machine Learning* — advanced probabilistic modeling and inference.
 - *Speech and Language Processing* — NLP, speech, and language models.
 
-## Evaluation Dataset
+## Evaluation
 
-`evaluation-data/rag_benchmark_v1.jsonl` is a fixed, source-grounded single-turn benchmark of 50 answerable and controlled-unanswerable questions. It includes reference answers, atomic facts, exact PDF evidence with physical page numbers, source restrictions, terminology variants, and distractors. Benchmark v1.2 pins the expanded LeetCode reference and re-audits its seven examples. The dataset exists to compare retrieval, query-expansion, reranking, and context-coverage changes consistently across experiments.
+| Workflow | Dataset | Command | Latest results |
+|---|---|---|---|
+| Document QA | [50 questions](evaluation-data/document-qa/) | `python evaluate_document_qa.py` | [Document QA report](evaluation-results/document-qa/summary.md) |
+| LeetCode recommendation | [40 questions](evaluation-data/leetcode-recommendation/) | `python evaluate_leetcode_recommendation.py` | [LeetCode recommendation report](evaluation-results/leetcode-recommendation/summary.md) |
 
-Run the complete automated evaluation with `python evaluate.py`, or use `python evaluate.py --limit 1` for a small execution check. The evaluator imports the same `RAGPipeline` used by `main.py`. Evidence text precision and recall compare only the final reranked chunks supplied to the answering LLM against the annotated passages using normalized PDF word positions. They do not measure semantic correctness and can miss valid alternative evidence.
+Both workflows use RAG and import the production `RAGPipeline`; `--limit 1` selects one question. Dataset and result paths are configured separately under `document_qa_evaluation` and `leetcode_recommendation_evaluation`. These fixed benchmarks support component comparisons and ablations, not held-out generalization.
 
-This repository evaluates retrieval and reranking rather than final-answer quality. Generated answers are retained, and answers to the three unanswerable questions are shown for manual inspection. Each run records indexing, normalization, expansion/focused-query, candidate-limit, and ablation settings and replaces `summary.md`, `per_question.csv`, and `details.json` in `evaluation-results/`. Per-question details retain the focused retrieval query and BM25 query.
+The document-QA benchmark includes reference answers, atomic facts, exact physical-page evidence, source restrictions, variants, and distractors. Evidence text precision/recall measure annotated passage overlap in the final context, not semantic correctness. Final answers are retained without correctness/faithfulness scoring, including the three unanswerable examples. Existing QA records and scores are unchanged; historical run metadata retains its original paths.
+
+The LeetCode benchmark covers 20 topics with short/descriptive wordings and four explicit-naming controls. Its 180 reviewed topic/problem pairs distinguish direct, related, stretch, unrelated, and uncertain connections. The evaluator reports assessed precision, hit rate, annotated-target recall and label coverage for final recommendations against these frozen labels; unseen pairs stay unassessed and are exported for later review. Recall covers only the incomplete annotated targets. Abstentions, controls, failures, stage overlap, latency, LLM calls and available token usage remain supporting diagnostics. It does not add a judging LLM.
+
+LeetCode runs checkpoint each finished question: use `--resume` after interruption or `--restart` to explicitly abandon an unfinished run. Resume requires compatible code, data, configuration and indexes and never rebuilds them. Azure uses up to two isolated workers; local Qwen uses one. Build mode builds the corpus once before additional workers load it. A full run can make thousands of paid API calls; progress includes active IDs and call counts. Saved failed questions remain failed on resume.
+
+Each completed run replaces its workflow's `summary.md`, `per_question.csv` and `details.json`; LeetCode also writes `pending_review.jsonl`. Previous reports remain in place until replacements are ready. The included LeetCode results are the completed GPT-5.1 baseline imported without new inference, not a new run or a model-only comparison. Runtime checkpoints and bulky historical diagnostics stay local and git-ignored.
 
 ## Current limitations
 
@@ -71,4 +80,4 @@ This repository evaluates retrieval and reranking rather than final-answer quali
 - `rank_bm25` scores every chunk rather than using a scalable inverted index.
 - Qwen query rewrites and wording variations can still lose meaning or drift; numeric/primary-term checks are safeguards, not semantic guarantees.
 - Conversation sessions are not persisted, and there is no conversational benchmark or serving API yet.
-- Related-problem judgments and explanations remain model inferences, not guaranteed semantic validation. Identity parsing depends on the PDF heading/page-range format, and a dedicated relevance benchmark is still missing.
+- Related-problem judgments and explanations remain model inferences, not guaranteed semantic validation. Identity parsing depends on the PDF heading/page-range format; recommendation labels are incomplete and weak practice connections are not full algorithm implementations.
