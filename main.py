@@ -1571,6 +1571,21 @@ class RAGPipeline:
         # Keep the binary match_label for existing diagnostics, but ask Qwen for
         # a practice level instead of requiring the whole mechanism to match.
         levels = self.RELATED_PRACTICE_LEVELS + ("unrelated",)
+        max_operations = settings["max_problem_operations"]
+        if type(max_operations) is not int or max_operations < 1:
+            raise ValueError("related_problem.conceptual_reranking.max_problem_operations must be a positive integer.")
+        technical_spans_by_pattern = {
+            index: self.related_evidence_spans(passages[criterion["technical_evidence"]["chunk_id"]]["text"], f"T{index}.")
+            for index, criterion in criteria.items()
+        }
+        technical_patterns = [
+            {
+                **{field: criterion[field] for field in ("pattern_index", "pattern", "reason", "topic_connection")},
+                "text": self.normalize_model_text(passages[criterion["technical_evidence"]["chunk_id"]]["text"]),
+                "spans": {key: normalize(span["quote"]) for key, span in technical_spans_by_pattern[index].items()},
+            }
+            for index, criterion in criteria.items()
+        ]
         for rank, (doc, cross_encoder_score) in enumerate(problem_docs, start=1):
             problem_spans = self.related_evidence_spans(doc.page_content, "P", problem=True)
             judgment = {
@@ -1596,13 +1611,10 @@ class RAGPipeline:
                 # The candidate judge quotes ONLY problem text. The independent
                 # verifier below receives the technical quote and original prose.
                 # Now Python copies the selected span; Qwen supplies no quote text.
-                criteria=json.dumps([
-                    {field: criterion[field] for field in ("pattern_index", "pattern", "reason", "topic_connection")}
-                    for criterion in criteria.values()
-                ], ensure_ascii=False),
+                # First extract operations BLIND to the question, pattern, and ranking.
                 candidate_text=self.normalize_model_text(doc.page_content),
                 problem_spans=json.dumps({key: normalize(span["quote"]) for key, span in problem_spans.items()}, ensure_ascii=False),
-                question=self.normalize_model_text(query),
+                max_operations=max_operations,
             )
             feedback = ""
             # One call per candidate, with one bounded corrective retry if invalid.
@@ -1619,61 +1631,43 @@ class RAGPipeline:
                     if json_start == -1:
                         raise ValueError("No JSON object was returned.")
                     result, _ = json.JSONDecoder().raw_decode(response[json_start:])
-                    if not isinstance(result, dict) or result.get("connection_level") not in levels:
-                        raise ValueError(f"connection_level must be one of {levels}.")
-                    useful = result["connection_level"] in self.RELATED_PRACTICE_LEVELS
-                    assessment = {"connection_level": result["connection_level"],
-                                  "match_label": "supported_match" if useful else "unrelated"}
-                    for field in ("technical_operation", "problem_operation"):
-                        if not isinstance(result.get(field), str) or not result[field].strip():
-                            raise ValueError(f"Provide a nonempty {field}.")
-                        assessment[field] = result[field].strip()
-                    assessment["candidate_relationship"] = assessment["problem_operation"]
-                    if useful:
-                        pattern_index = result.get("pattern_index")
-                        if type(pattern_index) is not int or pattern_index not in criteria:
-                            raise ValueError(f"For useful practice, select one existing pattern_index from {list(criteria)}.")
-                        criterion = criteria[pattern_index]
-                        for field in ("shared_component", "important_difference"):
-                            if not isinstance(result.get(field), str) or not result[field].strip():
-                                raise ValueError(f"Missing nonempty {field} for useful practice.")
-                            assessment[field] = result[field].strip()
-                        span = self.select_related_evidence(result.get("problem_span_id"), problem_spans)
-                        assessment.update(leetcode_quote=span["quote"], problem_evidence_span=span,
-                                          explanation=assessment["shared_component"])
+                    if not isinstance(result, dict) or not isinstance(result.get("operations"), list):
+                        raise ValueError("Return an operations list; no topic or relationship judgment belongs in this pass.")
+                    if len(result["operations"]) > max_operations:
+                        raise ValueError(f"Extract at most {max_operations} atomic operations.")
+                    operations = []
+                    for item in result["operations"]:
+                        if not isinstance(item, dict) or not isinstance(item.get("operation"), str) or not item["operation"].strip():
+                            raise ValueError("Each operation needs a nonempty description.")
+                        span = self.select_related_evidence(item.get("problem_span_id"), problem_spans)
                         # Python owns the chunk IDs and citations, never generated IDs/pages.
-                        assessment.update(
-                            pattern_index=pattern_index,
-                            shared_mechanism=criterion["pattern"],
-                            technical_relationship=criterion["pattern"],
-                            technical_quote=criterion["technical_quote"],
-                            technical_evidence=criterion["technical_evidence"],
-                        )
-                    else:
-                        assessment["explanation"] = result.get("important_difference") or "No evidenced transferable component."
+                        operations.append({"operation_id": f"O{len(operations) + 1}",
+                                           "operation": item["operation"].strip(), "problem_evidence_span": span})
                     judgment["attempts"].append({"attempt": attempt + 1, "response": response, "error": None})
-                    judgment.update(assessment, status="rejected")
+                    judgment.update(problem_operations=operations, extraction_status="valid", status="rejected")
+                    if not operations:
+                        judgment.update(match_label="unrelated", connection_level="unrelated",
+                                        note="No explicit coding operation was extracted; no connection was forced.")
                     break
                 except (json.JSONDecodeError, ValueError) as error:
                     judgment["attempts"].append({"attempt": attempt + 1, "response": response, "error": str(error)})
-                    judgment["status"] = "unscored"
-                    feedback = "\nCORRECTION: " + str(error) + " Return complete JSON. Select a supplied span ID, not quote text; use unrelated if no evidence supports a concrete connection."
+                    judgment.update(status="unscored", extraction_status="unscored")
+                    feedback = "\nCORRECTION: " + str(error) + " Return only atomic operations and their supplied P span IDs. Do not invent a task or assess relationships; return an empty operations list if none is explicit."
 
-            if judgment.get("match_label") == "supported_match":
+            if judgment.get("problem_operations"):
                 # A separate call checks the claim against BOTH original passages.
                 # It does not see the candidate judge's label, explanation, or numeric score.
-                criterion = criteria[judgment["pattern_index"]]
-                technical_passage = passages[criterion["technical_evidence"]["chunk_id"]]
-                technical_spans = self.related_evidence_spans(technical_passage["text"], "T")
-                judgment["technical_evidence_spans"] = list(technical_spans.values())
+                # Compare one FIXED technical pattern with one frozen, blind-extracted
+                # operation. This pass cannot rewrite a problem operation to fit the topic.
+                operations_by_id = {op["operation_id"]: op for op in judgment["problem_operations"]}
                 base_prompt = settings["verification_prompt"].format(
-                    criterion=json.dumps({field: criterion[field] for field in ("pattern_index", "pattern", "reason", "topic_connection")}, ensure_ascii=False),
-                    candidate_relationship=judgment["candidate_relationship"],
-                    technical_text=self.normalize_model_text(technical_passage["text"]),
-                    candidate_text=self.normalize_model_text(doc.page_content), technical_quote=criterion["technical_quote"],
-                    leetcode_quote=judgment["leetcode_quote"],
-                    technical_spans=json.dumps({key: normalize(span["quote"]) for key, span in technical_spans.items()}, ensure_ascii=False),
-                    problem_spans=json.dumps({key: normalize(span["quote"]) for key, span in problem_spans.items()}, ensure_ascii=False),
+                    technical_patterns=json.dumps(technical_patterns, ensure_ascii=False),
+                    problem_operations=json.dumps([
+                        {"operation_id": op["operation_id"], "operation": op["operation"],
+                         "problem_span_id": op["problem_evidence_span"]["id"],
+                         "evidence": normalize(op["problem_evidence_span"]["quote"])}
+                        for op in judgment["problem_operations"]
+                    ], ensure_ascii=False),
                     question=self.normalize_model_text(query),
                 )
                 verification = {"status": "unscored", "attempts": []}
@@ -1693,9 +1687,6 @@ class RAGPipeline:
                         result, _ = json.JSONDecoder().raw_decode(response[start:])
                         if not isinstance(result, dict) or result.get("connection_level") not in levels:
                             raise ValueError(f"connection_level must be one of {levels}.")
-                        for field in ("technical_operation", "problem_operation"):
-                            if not isinstance(result.get(field), str) or not result[field].strip():
-                                raise ValueError(f"Provide a nonempty {field} based on its own passage.")
                         for field in ("technical_operation_grounded", "problem_operation_grounded", "component_supported"):
                             if type(result.get(field)) is not bool:
                                 raise ValueError(f"Provide a JSON boolean for {field}.")
@@ -1706,34 +1697,59 @@ class RAGPipeline:
                         supported = (result["connection_level"] in self.RELATED_PRACTICE_LEVELS
                                      and operations_supported and result["component_supported"])
                         if supported:
-                            for field in ("shared_component", "important_difference"):
+                            index = result.get("pattern_index")
+                            if type(index) is not int or index not in criteria:
+                                raise ValueError(f"Select one existing pattern_index from {list(criteria)}.")
+                            operation_id = result.get("problem_operation_id")
+                            if not isinstance(operation_id, str) or operation_id not in operations_by_id:
+                                raise ValueError(f"Select one existing problem_operation_id from {list(operations_by_id)}; do not rewrite operations.")
+                            for field in ("technical_component", "problem_component", "shared_component", "important_difference"):
                                 if not isinstance(result.get(field), str) or not result[field].strip():
                                     raise ValueError(f"For useful practice, provide a nonempty {field}.")
+                            criterion = criteria[index]
+                            operation = operations_by_id[operation_id]
+                            technical_spans = technical_spans_by_pattern[index]
                             technical_span = self.select_related_evidence(result.get("technical_span_id"), technical_spans)
-                            problem_span = self.select_related_evidence(result.get("problem_span_id"), problem_spans)
-                            judgment.update(proposed_leetcode_quote=judgment["leetcode_quote"],
+                            problem_span = operation["problem_evidence_span"]
+                            judgment.update(pattern_index=index, problem_operation_id=operation_id,
+                                            technical_operation=criterion["pattern"], problem_operation=operation["operation"],
+                                            candidate_relationship=operation["operation"], shared_mechanism=criterion["pattern"],
+                                            technical_relationship=criterion["pattern"], technical_evidence=criterion["technical_evidence"],
+                                            technical_evidence_spans=list(technical_spans.values()),
+                                            proposed_leetcode_quote=problem_span["quote"],
                                             anchored_technical_quote=criterion["technical_quote"],
                                             technical_quote=technical_span["quote"], leetcode_quote=problem_span["quote"],
                                             technical_evidence_span=technical_span, problem_evidence_span=problem_span,
                                             important_difference=result["important_difference"].strip())
                         final_level = result["connection_level"] if supported else "unrelated"
+                        # Side descriptions also stay bound to the selected records.
+                        # A free-text bridge proposal cannot rename the coding operation.
+                        technical_component = judgment.get("technical_operation") if supported else result.get("technical_component")
+                        problem_component = judgment.get("problem_operation") if supported else result.get("problem_component")
                         explanation = (
-                            f"Technical operation: {result['technical_operation'].strip()} "
-                            f"Problem operation: {result['problem_operation'].strip()} "
+                            f"Technical component: {technical_component or 'none supported'}. "
+                            f"Problem component: {problem_component or 'none supported'}. "
                             f"Shared component: {result.get('shared_component') or 'none supported'}."
                         )
                         verification.update(status="valid", supported=supported, connection_level=final_level,
                                             reported_connection_level=result["connection_level"], explanation=explanation,
-                                            **{field: result[field] for field in ("technical_operation", "problem_operation",
-                                                                               "technical_operation_grounded", "problem_operation_grounded",
+                                            **{field: result[field] for field in ("technical_operation_grounded", "problem_operation_grounded",
                                                                                "component_supported")})
+                        verification.update(technical_operation=judgment.get("technical_operation"),
+                                            problem_operation=judgment.get("problem_operation"),
+                                            technical_component=technical_component or "",
+                                            problem_component=problem_component or "",
+                                            proposed_technical_component=result.get("technical_component", ""),
+                                            proposed_problem_component=result.get("problem_component", ""))
                         # Derived compatibility field for the existing diagnostic readers.
                         verification["operations_supported"] = operations_supported
                         verification["shared_component"] = result.get("shared_component", "")
+                        judgment.update(explanation=explanation, shared_component=result.get("shared_component", ""))
                         verification["attempts"].append({"attempt": attempt + 1, "response": response, "error": None})
                         # The independent source check owns the final practice level.
-                        judgment["proposed_connection_level"] = judgment["connection_level"]
+                        judgment["proposed_connection_level"] = result["connection_level"]
                         judgment["connection_level"] = final_level
+                        judgment["match_label"] = "supported_match" if supported else "unrelated"
                         judgment["status"] = "accepted" if supported else "rejected"
                         if supported:
                             doc.metadata["connection_level"] = final_level
@@ -1742,7 +1758,7 @@ class RAGPipeline:
                     except (json.JSONDecodeError, ValueError) as error:
                         verification["attempts"].append({"attempt": attempt + 1, "response": response, "error": str(error)})
                         judgment["status"] = "unscored"
-                        feedback = "\nCORRECTION: " + str(error) + " Return complete structured JSON. Ground each operation only in its OWN supplied span, not in the other source. Judge shared-component similarity separately. Select supplied evidence IDs, not quote text."
+                        feedback = "\nCORRECTION: " + str(error) + " Select only supplied pattern/operation/span IDs. The frozen operation and its evidence cannot change. Return unrelated if either side lacks evidence for the proposed bridge."
                 judgment["verification"] = verification
             judgments.append(judgment)
 
