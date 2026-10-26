@@ -504,6 +504,7 @@ def build_summary(run, dataset_counts, metric_summaries, question_results):
         f"- Excluded questions: {dataset_counts['excluded']} "
         f"({dataset_counts['quarantined']} quarantined, {dataset_counts['unresolved']} unresolved)",
         f"- Answer model: `{run['model_id']}`",
+        f"- LLM provider: `{run.get('llm_provider', 'local')}`",
         f"- Dataset: `{run['dataset_path']}`",
         f"- Config: `{run['config_path']}`",
         "",
@@ -530,6 +531,7 @@ def build_summary(run, dataset_counts, metric_summaries, question_results):
         "",
         "## Pipeline configuration",
         "",
+        f"- Azure settings (no API key): `{run.get('azure_settings')}`",
         f"- Indexing mode: `{run['indexing_mode']}`",
         f"- Persisted index directory: `{run['persist_directory']}`",
         f"- Dense retrieval enabled: `{run['ablation']['use_dense_retrieval']}`",
@@ -688,6 +690,13 @@ def main():
         "requested_limit": args.limit,
         "evaluated_questions": len(selected_records),
         "model_id": config["llm"]["model_id"],
+        "llm_provider": config["llm"].get("provider", "local"),
+        "azure_settings": (
+            {key: config["llm"]["azure"][key] for key in (
+                "base_url", "reasoning_effort", "timeout_seconds", "max_retries"
+            )}
+            if config["llm"].get("provider", "local") == "azure_openai" else None
+        ),
         "dataset_path": str(dataset_path),
         "config_path": str(CONFIG_PATH),
         "indexing_mode": config["indexing"]["mode"],

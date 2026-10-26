@@ -2,6 +2,7 @@
 # 1- Load the document
 #########################################################################################################################################
 import json
+import os
 import pickle
 import re
 import unicodedata
@@ -19,6 +20,52 @@ from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from rank_bm25 import BM25Okapi
 from transformers import GenerationConfig
+
+
+class AzureOpenAILLM:
+    """Keep the existing text-in/text-out calls while using Azure's v1 API."""
+
+    def __init__(self, settings):
+        from dotenv import load_dotenv
+        from openai import OpenAI
+
+        # Secrets stay in the environment or a git-ignored project .env file.
+        load_dotenv(Path(__file__).with_name(".env"))
+        azure = settings["azure"]
+        api_key = os.environ.get(azure["api_key_env"], "").strip()
+        if not api_key:
+            raise ValueError(
+                f"Set {azure['api_key_env']} in your environment or local .env file. "
+                "Do not put the API key in config.yml."
+            )
+        self.client = OpenAI(
+            base_url=azure["base_url"].rstrip("/") + "/",
+            api_key=api_key,
+            timeout=azure["timeout_seconds"],
+            max_retries=azure["max_retries"],
+        )
+        self.settings = settings
+
+    def invoke(self, prompt, pipeline_kwargs=None):
+        # Reuse each stage's output limit; do not send local Transformers options.
+        max_tokens = (pipeline_kwargs or {}).get(
+            "max_new_tokens", self.settings["generation"]["max_new_tokens"]
+        )
+        messages = [{"role": "user", "content": prompt}] if isinstance(prompt, str) else prompt
+        completion = self.client.chat.completions.create(
+            model=self.settings["model_id"],  # Azure expects the deployment name.
+            messages=messages,
+            max_completion_tokens=max_tokens,
+            reasoning_effort=self.settings["azure"]["reasoning_effort"],
+            store=False,
+        )
+        content = completion.choices[0].message.content
+        if not isinstance(content, str) or not content.strip():
+            raise RuntimeError(
+                "Azure returned no answer text "
+                f"(finish_reason={completion.choices[0].finish_reason})."
+            )
+        return content
 
 
 def find_explicit_sources(question, available_sources):
@@ -549,6 +596,12 @@ class RAGPipeline:
     # 5- Load a local LLM and expand the query for BM25
     #########################################################################################################################################
     def load_llm(self):
+        provider = self.config["llm"].get("provider", "local")
+        if provider == "azure_openai":
+            return AzureOpenAILLM(self.config["llm"])
+        if provider != "local":
+            raise ValueError('llm.provider must be either "local" or "azure_openai".')
+
         generation_config = GenerationConfig.from_pretrained(
             self.config["llm"]["model_id"]
         )
@@ -572,6 +625,12 @@ class RAGPipeline:
 
             device_map=self.config["llm"]["device_map"],
         )
+
+    def format_chat_prompt(self, messages, **kwargs):
+        # The API accepts messages directly; only local Qwen needs its tokenizer.
+        if self.config["llm"].get("provider", "local") == "azure_openai":
+            return messages
+        return self.llm.pipeline.tokenizer.apply_chat_template(messages, **kwargs)
 
     def keep_conservative_terms(self, values, maximum):
         kept_terms = []
@@ -607,7 +666,7 @@ class RAGPipeline:
         )
 
         # Use Qwen's instruction/chat format, as in related-pattern extraction.
-        expansion_prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+        expansion_prompt = self.format_chat_prompt(
             [{"role": "user", "content": expansion_prompt}],
             tokenize=False,
             add_generation_prompt=True,
@@ -1118,7 +1177,7 @@ class RAGPipeline:
         # One corrective retry helps Qwen repair formatting or copying errors.
         for attempt in range(2):
             # Qwen-Instruct expects chat formatting for reliable instruction following.
-            prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+            prompt = self.format_chat_prompt(
                 [{"role": "user", "content": base_prompt + feedback}],
                 tokenize=False,
                 add_generation_prompt=True,
@@ -1206,7 +1265,7 @@ class RAGPipeline:
                                 min_quote_words=settings["min_quote_words"],
                                 max_quote_words=settings["max_quote_words"],
                             )
-                            retry_prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                            retry_prompt = self.format_chat_prompt(
                                 [{"role": "user", "content": retry_prompt}],
                                 tokenize=False,
                                 add_generation_prompt=True,
@@ -1267,7 +1326,7 @@ class RAGPipeline:
                                 passage_text=self.normalize_model_text(passage["text"]),
                                 max_query_length=settings["max_query_length"],
                             )
-                            retry_prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                            retry_prompt = self.format_chat_prompt(
                                 [{"role": "user", "content": retry_prompt}],
                                 tokenize=False, add_generation_prompt=True,
                             )
@@ -1361,7 +1420,7 @@ class RAGPipeline:
             max_queries=settings["max_queries"],
             max_query_length=settings["max_query_length"],
         )
-        prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+        prompt = self.format_chat_prompt(
             [{"role": "user", "content": prompt}], tokenize=False, add_generation_prompt=True,
         )
         response = self.llm.invoke(
@@ -1619,7 +1678,7 @@ class RAGPipeline:
             feedback = ""
             # One call per candidate, with one bounded corrective retry if invalid.
             for attempt in range(2):
-                prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                prompt = self.format_chat_prompt(
                     [{"role": "user", "content": base_prompt + feedback}],
                     tokenize=False, add_generation_prompt=True,
                 )
@@ -1673,7 +1732,7 @@ class RAGPipeline:
                 verification = {"status": "unscored", "attempts": []}
                 feedback = ""
                 for attempt in range(2):
-                    prompt = self.llm.pipeline.tokenizer.apply_chat_template(
+                    prompt = self.format_chat_prompt(
                         [{"role": "user", "content": base_prompt + feedback}],
                         tokenize=False, add_generation_prompt=True,
                     )

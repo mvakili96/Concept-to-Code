@@ -356,12 +356,20 @@ reranking:
   final_top_k: 4
 
 llm:
-  model_id: "Qwen/Qwen2.5-7B-Instruct"
+  provider: "azure_openai"  # Use "local" with model_id: "Qwen/Qwen2.5-7B-Instruct" for Qwen.
+  model_id: "gpt-5.1"  # Azure deployment name, not a local model path.
+  azure:
+    base_url: "https://concept-to-code-resource.openai.azure.com/openai/v1/"
+    api_key_env: "AZURE_OPENAI_API_KEY"
+    reasoning_effort: "none"  # Preserve the short per-stage budgets; these include reasoning tokens.
+    timeout_seconds: 60
+    max_retries: 1  # Network/API retries; JSON validation retries remain unchanged.
+  # These Transformers settings apply only to provider: "local".
   task: "text-generation"
   device_map: "auto"
   return_full_text: false
   generation:
-    max_new_tokens: 400
+    max_new_tokens: 400  # Also used as the Azure answer max_completion_tokens.
     do_sample: false
     temperature: null
     top_p: null

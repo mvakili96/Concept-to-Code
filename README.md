@@ -1,6 +1,6 @@
 # Exploring RAG
 
-A compact, local pipeline for progressively exploring production RAG concepts over PDF documents.
+A compact pipeline for progressively exploring production RAG concepts over PDF documents, with local retrieval and Azure-hosted or local generation.
 
 ## Pipeline at a glance
 
@@ -10,11 +10,11 @@ A compact, local pipeline for progressively exploring production RAG concepts ov
 | **Chunking** | LangChain recursive text splitting |
 | **Text normalization** | Model-facing Unicode ligature, line-break-hyphen, and whitespace normalization; raw citation offsets preserved |
 | **Dense retrieval** | MiniLM embeddings + `FAISS` IndexFlat (exact k-NN) or HNSW (ANN) |
-| **Sparse retrieval** | `BM25` with optional Qwen-based query expansion |
+| **Sparse retrieval** | `BM25` with optional LLM query expansion |
 | **Candidate fusion** | Chunk-ID deduplication |
 | **Reranking** | MiniLM cross-encoder |
-| **Generation** | `Qwen2.5-7B-Instruct` with source and page citations |
-| **Conversation** | Qwen follow-up rewriting, in-memory history, and active-source state |
+| **Generation** | Azure OpenAI `gpt-5.1` or local `Qwen2.5-7B-Instruct`, with source and page citations |
+| **Conversation** | LLM follow-up rewriting, in-memory history, and active-source state |
 | **Related-problem workflow** | Technical evidence → coding patterns → multi-query LeetCode retrieval → conceptual reranking through `/related` |
 | **Persistence** | Reusable corpus, BM25, IndexFlat, and HNSW artifacts |
 | **Ablations** | Independent dense retrieval, BM25, and query-expansion toggles |
@@ -25,6 +25,10 @@ IndexFlat compares the query with every stored vector, while HNSW navigates a gr
 ## Running
 
 Retrieval sources belong in `documents/`, which is git-ignored. Install the dependencies listed in [requirements.txt](requirements.txt) with `pip install -r requirements.txt`, then configure [config.yml](config.yml) and run `python main.py`. Models, prompts, the query, chunking, indexing, retrieval, and ablation settings are defined in that configuration file.
+
+The default `llm.provider: azure_openai` uses the configured Azure v1 endpoint and deployment for every LLM pass, including expansion, rewriting, pattern extraction, judging, and answers. Copy [.env.example](.env.example) to a local `.env` file and set `AZURE_OPENAI_API_KEY`, or export that environment variable; never commit the key. `.env` is git-ignored, and existing environment values take precedence. Azure calls incur charges and send the supplied questions, history, and selected PDF passages to Azure. Embeddings, FAISS, BM25, and the cross-encoder remain local; switching LLMs does not require rebuilding indexes. For local Qwen, set `llm.provider: local` and `llm.model_id: Qwen/Qwen2.5-7B-Instruct`. Qwen-specific descriptions below apply to the same workflow under either provider.
+
+Azure preserves each stage's `max_new_tokens` setting as `max_completion_tokens`; no local tokenizer or Qwen weights are loaded for generation. Reasoning defaults to `none` to retain the small output budgets. Increasing reasoning effort requires allowing room for reasoning tokens as well as visible output. Local sampling settings are not sent to Azure. Evaluation reports record the provider and non-secret Azure settings alongside the deployment name.
 
 Use indexing mode `build` once to parse and chunk the complete corpus, build BM25 plus both Flat and HNSW indexes, persist them under the git-ignored `index-data/`, and answer the configured query. Then switch to `load` to skip ingestion and index construction. `dense_index_type` selects the persisted Flat or HNSW index without rebuilding.
 
