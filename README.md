@@ -1,8 +1,55 @@
-# Exploring RAG
+# Grounded Interview Prep RAG
 
 A compact pipeline for progressively exploring production RAG concepts over PDF documents, with local retrieval and Azure-hosted or local generation.
 
-## Pipeline at a glance
+Technical interview preparation is fragmented: trusted explanations live in textbooks, while coding practice lives in a large problem bank that is difficult to prioritize. This project is being built to close that gap. It answers questions from a curated engineering library with page-level citations and is evolving toward recommending LeetCode coding problems that exercise the same transferable algorithmic patterns.
+
+The goal is to help candidates move deliberately from concepts in computer vision, machine learning, NLP, system design, and data systems to coding exercises that reinforce the same reasoning skills.
+
+## Project status
+
+The core RAG pipeline and retrieval benchmark already support grounded answers to theoretical questions. Current development focuses on a separate workflow that connects those concepts to related LeetCode problems without changing the existing question-answering flow.
+
+| Area | Status |
+|---|---|
+| Grounded single-turn question answering | Implemented |
+| Conversational follow-ups and source memory | Implemented |
+| Persistent hybrid retrieval and retrieval ablations | Implemented |
+| Source-grounded retrieval benchmark | Implemented: 50 source-audited questions |
+| Automated software tests | Planned: add unit, integration, and end-to-end tests for the pipeline and terminal workflows |
+| Multi-turn conversation benchmark | Planned: create test conversations with follow-up questions and source changes |
+| Multi-turn conversation evaluation | Planned: run the conversational pipeline on the new benchmark and report the results |
+| `/related` direct LeetCode search | Built on the feature branch. Not yet on `master` |
+| Match textbook concepts to LeetCode problems | Being implemented: retrieve textbook evidence, identify its coding patterns, and search LeetCode with those patterns |
+| Recommendation-specific benchmark | Planned |
+
+### Direction of development for LeetCode recommendations
+
+On the `related-problem-retrieval` branch, an explicit command runs the new workflow in conversation mode:
+
+```text
+/related Hough transform in computer vision
+```
+
+The current baseline searches only the existing *LeetCode 4000 Problem Reference* chunks. It reuses query expansion, dense and BM25 retrieval, candidate deduplication, and cross-encoder reranking, then asks the language model for up to three grounded recommendations. Its prompt requires a clear relationship, citations, and an important difference from the original topic. It can return no recommendation instead of forcing a weak match.
+
+The intended concept-to-practice flow is:
+
+```text
+technical topic
+    -> retrieve grounded textbook evidence
+    -> extract source terms and transferable coding patterns
+    -> build a bridge query
+    -> search only the LeetCode collection
+    -> rerank by conceptual relationship
+    -> explain the relationship and the differences with citations
+```
+
+The next milestone is the evidence-and-pattern bridge: retrieve the technical explanation first, ask Qwen for conservative structured pattern extraction, and use those patterns for LeetCode retrieval. Later work will add relevance thresholds, a recommendation benchmark with multiple acceptable answers and no-good-match cases, ablations, and conversation integration.
+
+The first version continues to use the repository's ordinary LeetCode chunks. Problem-aware parsing will be introduced only if evaluation shows that overlapping or split chunks produce incomplete or duplicate recommendations.
+
+## How the current pipeline works
 
 | Component | Implementation |
 |---|---|
@@ -20,11 +67,16 @@ A compact pipeline for progressively exploring production RAG concepts over PDF 
 | **Ablations** | Independent dense retrieval, BM25, and query-expansion toggles |
 | **Evaluation** | Separate 50-question RAG and 40-question LeetCode benchmarks; evidence overlap and frozen-label recommendation scoring |
 
-IndexFlat compares the query with every stored vector, while HNSW navigates a graph and trades a small chance of missing the exact nearest chunks for faster search on large indexes. Both return the requested top-k results. An exactly named PDF restricts retrieval to that source; otherwise, the entire corpus is searched.
+## Curated source library
 
-## Running
+- *Computer Vision: Algorithms and Applications* — computer vision methods and applications
+- *Designing Data-Intensive Applications* — scalable and distributed data systems
+- *Grokking the System Design Interview* — practical system-design case studies
+- *LeetCode 4000 Problem Reference* — 4,000 coding-problem specifications and constraints
+- *Probabilistic Machine Learning* — probabilistic modeling and inference
+- *Speech and Language Processing* — NLP, speech, and language models
 
-Retrieval sources belong in `documents/`, which is git-ignored. Install the dependencies listed in [requirements.txt](requirements.txt) with `pip install -r requirements.txt`, then configure [config.yml](config.yml) and run `python main.py`. Models, prompts, the query, chunking, indexing, retrieval, and ablation settings are defined in that configuration file.
+## Evaluation
 
 The default `llm.provider: azure_openai` uses the configured Azure v1 endpoint and deployment for every LLM pass, including expansion, rewriting, pattern extraction, judging, and answers. Copy [.env.example](.env.example) to a local `.env` file and set `AZURE_OPENAI_API_KEY`, or export that environment variable; never commit the key. `.env` is git-ignored, and existing environment values take precedence. Azure calls incur charges and send the supplied questions, history, and selected PDF passages to Azure. Embeddings, FAISS, BM25, and the cross-encoder remain local; switching LLMs does not require rebuilding indexes. For local Qwen, set `llm.provider: local` and `llm.model_id: Qwen/Qwen2.5-7B-Instruct`. Qwen-specific descriptions below apply to the same workflow under either provider.
 
@@ -32,7 +84,7 @@ Azure preserves each stage's `max_new_tokens` setting as `max_completion_tokens`
 
 Use indexing mode `build` once to parse and chunk the complete corpus, build BM25 plus both Flat and HNSW indexes, persist them under the git-ignored `index-data/`, and answer the configured query. Then switch to `load` to skip ingestion and index construction. `dense_index_type` selects the persisted Flat or HNSW index without rebuilding.
 
-`use_dense_retrieval`, `use_bm25_retrieval`, and `use_query_expansion` support retrieval ablations without rebuilding. At least one retriever must remain enabled, and query expansion runs only when BM25 is enabled.
+Run the full benchmark or a small execution check with:
 
 `text_normalization.enabled` normalizes embedding, BM25, reranking, and context inputs without changing stored PDF text, chunks, IDs, or citation offsets; changing it requires an index rebuild. The same query-expansion pass optionally supplies a focused dense/reranking query (`query_expansion.use_focused_query`), while BM25 uses the original question plus conservative wording variations. Source restrictions and the answering question remain based on the original query. Focused queries are available only when BM25 and query expansion are enabled; disabling the option retains the original dense/reranking query. Candidate limits default to 50 per retriever before the final four reranked chunks; expansion and top-k settings can change without rebuilding.
 
@@ -58,12 +110,7 @@ Overlong `/related` coding tasks get one focused repair per source-linked patter
 
 ## Retrieval Sources
 
-- *Computer Vision: Algorithms and Applications* — computer vision methods and applications.
-- *Designing Data-Intensive Applications* — scalable and distributed data systems.
-- *Grokking the System Design Interview* — practical system-design case studies.
-- *LeetCode 4000 Problem Reference* — 4,000 coding-problem specifications and constraints.
-- *Probabilistic Machine Learning* — advanced probabilistic modeling and inference.
-- *Speech and Language Processing* — NLP, speech, and language models.
+These metrics evaluate retrieval and context coverage—not answer correctness, faithfulness, or semantic equivalence—and valid alternative evidence may not receive credit. The latest checked-in run and its exact configuration are in [`evaluation-results/summary.md`](evaluation-results/summary.md). Detailed records and per-question metrics are stored alongside it.
 
 ## Evaluation
 
