@@ -1,0 +1,5 @@
+{
+  "status": "interrupted_by_user_redirect",
+  "reason": "User requested tuning v2 instead of v1. No v1 result is published or used for tuning. In-flight Azure calls may already have incurred usage.",
+  "completed_questions": 0
+}

@@ -249,7 +249,7 @@ def compact_output(output, chunk_lookup):
         "workflow", "technical_selected_sources", "leetcode_selected_sources", "query_expansion",
         "technical_retrieval_query", "technical_chunks", "pattern_extraction", "leetcode_search_query",
         "leetcode_query_plan", "searched_pattern_indices", "leetcode_retrieval_runs", "leetcode_shortlist",
-        "recommendation_validation", "generated_answer"
+        "recommendation_validation", "generated_answer", "related_problem_method", "grounded_answer", "batched_selection", "title_selection"
     ) if key in output}
     result["leetcode_candidates"] = []
     for item in output.get("leetcode_candidates", []):
@@ -283,6 +283,29 @@ def stage_coverage(question, output, references):
     targets = [pair for pair in references["pairs"].values()
                if pair["topic_id"] == question["topic_id"] and pair["number"] in target_numbers]
     result = {}
+    if output.get("related_problem_method") in ("batched", "titles"):
+        titles = output["related_problem_method"] == "titles"
+        info = output["title_selection" if titles else "batched_selection"]
+        runs = info.get("batches", [])
+        presented = info["presented_problem_numbers"] if titles else [number for run in runs for number in run["presented_problem_numbers"]]
+        complete = (info["status"] == "completed" and len(presented) == info["total_problems"]
+                    and set(presented) == set(range(1, info["total_problems"] + 1)))
+        status = "not_applicable" if info["status"] == "skipped_no_technical_evidence" else "scored" if complete else "unscored"
+        pool = set(info["shortlisted_problem_numbers"]) if titles else set(
+            runs[-1]["presented_problem_numbers"] + runs[-1]["carried_problem_numbers"]) if runs else set()
+        stages = (("all_titles_presented", set(presented)), ("shortlisted_statements_presented", pool)) if titles else (
+            ("all_problems_presented", set(presented)), ("final_selection_pool", pool))
+        for name, numbers in stages:
+            result[name] = dict(status=status, matched_target_ids=[p["pair_id"] for p in targets
+                                if p["source"] == info["source"] and p["number"] in numbers] if complete else [],
+                                total_targets=len(targets), mapping_failures=[] if complete or status == "not_applicable"
+                                else ["Catalogue presentation could not be verified."])
+        for name in ("merged_candidates", "chunk_shortlist", "final_context"):
+            result[name] = dict(status="not_applicable", matched_target_ids=[], total_targets=len(targets), mapping_failures=[])
+        identifiers = set(output.get("recommendation_validation", {}).get("accepted_problem_ids", []))
+        result["recommendations"] = dict(status="scored", matched_target_ids=[p["pair_id"] for p in targets
+            if f"{p['source']}::page={p['page']}::problem={p['number']}" in identifiers], total_targets=len(targets), mapping_failures=[])
+        return result
     for name, chunks in (("merged_candidates", output.get("leetcode_candidates", [])),
                          ("chunk_shortlist", output.get("leetcode_shortlist", []))):
         failures = [c.get("chunk_id") for c in chunks if type(c.get("start_index")) is not int
@@ -403,6 +426,8 @@ def summarize(records):
 
 def build_summary(run, records, metrics):
     counts = metrics["label_counts"]
+    method = run["config"]["related_problem"].get("method", "retrieval")
+    batched = method in ("batched", "titles")
     def fraction(numerator, denominator):
         return f"{numerator}/{denominator}" if denominator else "N/A"
     def percentage(numerator, denominator):
@@ -448,8 +473,8 @@ def build_summary(run, records, metrics):
         f"| Unrelated / uncertain / unassessed / mapping-unscored | {' / '.join(str(counts.get(k, 0)) for k in ('unrelated', 'uncertain', 'unassessed', 'unscored'))} |",
         f"| Ordinary abstention rate | {percentage(metrics['ordinary_abstentions'], metrics['ordinary_questions'])} |",
         f"| Naming controls conforming (abstaining) | {fraction(metrics['conformant_controls'], metrics['controls'])} |",
-        f"| Invalid candidate judgments after retries | {metrics['unscored_candidate_judgments']} |",
-        f"| Pattern-extraction fallbacks | {metrics['pattern_fallbacks']} |",
+        f"| Invalid candidate judgments after retries | {metrics['unscored_candidate_judgments'] if not batched else f'N/A ({method} selection)'} |",
+        f"| Pattern-extraction fallbacks | {metrics['pattern_fallbacks'] if not batched else f'N/A ({method} selection)'} |",
         f"| LLM calls | {metrics['llm_calls']} |", ""]
     if metrics["label_coverage"] is not None:
         lines += [f"Relevance-precision lower/upper bounds over all returns: "
@@ -467,11 +492,21 @@ def build_summary(run, records, metrics):
               "Any source-body overlap counts at chunk stages; it need not contain sufficient explanatory prose.", "",
               "| Stage | Questions with a target hit / scored eligible questions | Mapping-unscored questions |",
               "|---|---:|---:|"]
-    for stage in ("merged_candidates", "chunk_shortlist", "final_context", "recommendations"):
+    stages = ("all_titles_presented", "shortlisted_statements_presented", "recommendations") if method == "titles" else (
+        "all_problems_presented", "final_selection_pool", "recommendations") if batched else (
+        "merged_candidates", "chunk_shortlist", "final_context", "recommendations")
+    for stage in stages:
         eligible = [r["assessment"]["stage_coverage"][stage] for r in records if r["status"] == "completed"
-                    and r["kind"] == "ordinary" and r["assessment"]["stage_coverage"][stage]["total_targets"]]
+                    and r["kind"] == "ordinary" and r["assessment"]["stage_coverage"][stage]["total_targets"]
+                    and r["assessment"]["stage_coverage"][stage]["status"] != "not_applicable"]
         scored = [item for item in eligible if item["status"] == "scored"]
         lines.append(f"| {stage} | {fraction(sum(bool(item['matched_target_ids']) for item in scored), len(scored))} | {len(eligible) - len(scored)} |")
+    if batched:
+        description = ("Title selection presents every number/title, then only shortlisted full statements. "
+                       if method == "titles" else "Batched selection presents every complete statement, carrying a shortlist between calls. ")
+        lines += ["", description + "These are presentation/pool diagnostics, not semantic retrieval recall; "
+                  "dense/BM25 and cross-encoder stages do not apply. "
+                  "Python checks selected identities and literal evidence spans; semantic relevance is the selection model's judgment.", ""]
     lines += ["", "## Per-question results", "", "D=direct, R=related, S=stretch, X=unrelated, ?=uncertain, U=unassessed, !=mapping-unscored.", "",
               "| Question ID | Status | Recommended problems (reference labels) | Seconds |", "|---|---|---|---:|"]
     labels = dict(direct_match="D", related_practice="R", stretch_connection="S", unrelated="X", uncertain="?", unassessed="U", unscored="!")

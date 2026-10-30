@@ -1,0 +1,123 @@
+{
+  "scope": "five_question_development_subset_not_full_benchmark",
+  "selection_rule": "First ordinary short-wording question for each distinct allowed technical PDF, in benchmark order.",
+  "selected_ids": [
+    "lcrec-v2-001-short",
+    "lcrec-v2-004-short",
+    "lcrec-v2-007-short",
+    "lcrec-v2-009-short",
+    "lcrec-v2-013-short"
+  ],
+  "selected_questions": [
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-001-short",
+      "topic_id": "lcrec-v2-001",
+      "question": "According to \"Computer Vision: Algorithms and Applications.pdf\", recommend a related LeetCode problem for Dijkstra shortest-path contour tracing.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Computer Vision: Algorithms and Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-004-short",
+      "topic_id": "lcrec-v2-004",
+      "question": "According to \"Probabilistic Machine Learning.pdf\", recommend a related LeetCode problem for frequency-sensitive lossless code assignment.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Probabilistic Machine Learning.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-007-short",
+      "topic_id": "lcrec-v2-007",
+      "question": "According to \"Grokking-the-system-design-interview-free.pdf\", recommend a related LeetCode problem for round-robin request dispatch.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Grokking-the-system-design-interview-free.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-009-short",
+      "topic_id": "lcrec-v2-009",
+      "question": "According to \"Designing Data-Intensive Applications.pdf\", recommend a related LeetCode problem for continuation-bit variable-length integer encoding.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-013-short",
+      "topic_id": "lcrec-v2-013",
+      "question": "According to \"Speech and Language Processing.pdf\", recommend a related LeetCode problem for CKY chart recognition.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    }
+  ],
+  "benchmark_version": "2.0.0",
+  "production_config_sha256": "4e47db1236daaa02cf3b1666e9e4799919dd99a941aa2f70b4c7e139ed778083",
+  "only_config_override": {
+    "results_dir": "evaluation-results/leetcode-recommendation/v2/experiments/title-selection-five"
+  }
+}

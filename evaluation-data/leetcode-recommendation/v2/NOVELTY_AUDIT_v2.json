@@ -1,0 +1,464 @@
+{
+  "schema_version": "1.0.0",
+  "scope": "Available project benchmarks, named diagnostic cases, production prompt examples and available conversation history. Not proof about unrecorded past work or model pretraining.",
+  "excluded_topics": [
+    {
+      "name": "Hough transform",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-001"
+    },
+    {
+      "name": "Linear filtering",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-002"
+    },
+    {
+      "name": "Summed-area tables",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-003"
+    },
+    {
+      "name": "Connected components",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-004"
+    },
+    {
+      "name": "Minimum edit distance",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-005"
+    },
+    {
+      "name": "Trie prefix lookup",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-006"
+    },
+    {
+      "name": "LRU eviction",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-007"
+    },
+    {
+      "name": "Topological ordering",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-008"
+    },
+    {
+      "name": "Binary search on sorted records",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-009"
+    },
+    {
+      "name": "Bloom filter membership",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-010"
+    },
+    {
+      "name": "Consistent-hash ring lookup",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-011"
+    },
+    {
+      "name": "Beam-search frontier pruning",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-diag-012"
+    },
+    {
+      "name": "Median neighborhood filtering",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-fresh-001"
+    },
+    {
+      "name": "Euclidean nearest-neighbor feature matching",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-fresh-002"
+    },
+    {
+      "name": "Uniform-disk subproblem in Box-Muller sampling",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-fresh-003"
+    },
+    {
+      "name": "Merging sorted storage segments",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-fresh-004"
+    },
+    {
+      "name": "Timestamp-based sliding-window rate limiting",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-fresh-005"
+    },
+    {
+      "name": "Run-length compression of repeated column values",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-fresh-006"
+    },
+    {
+      "name": "Explicit fundamental-matrix requirement control",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-fresh-007"
+    },
+    {
+      "name": "Explicit n-gram language-model requirement control",
+      "source": "existing_leetcode_benchmarks",
+      "id": "related-fresh-008"
+    },
+    {
+      "name": "Canny edge detection",
+      "source": "available_conversation_smoke_tests"
+    },
+    {
+      "name": "Synchronous replication",
+      "source": "available_conversation_smoke_tests"
+    },
+    {
+      "name": "Data warehousing",
+      "source": "available_conversation_smoke_tests"
+    },
+    {
+      "name": "Query expansion",
+      "source": "available_conversation_smoke_tests"
+    },
+    {
+      "name": "Dense and BM25 retrieval",
+      "source": "available_conversation_smoke_tests"
+    },
+    {
+      "name": "FAISS Flat and HNSW indexing",
+      "source": "available_conversation_smoke_tests"
+    }
+  ],
+  "prior_document_qa_questions": [
+    {
+      "id": "ragbench-v1-001",
+      "question": "According to \"Computer Vision: Algorithms and Applications.pdf\", how does the original Hough transform use edge points, and what orientation-aware alternative is suggested for non-punctate points?"
+    },
+    {
+      "id": "ragbench-v1-002",
+      "question": "How is the raw SIFT descriptor constructed, and what normalization and clipping steps make it less sensitive to photometric changes?"
+    },
+    {
+      "id": "ragbench-v1-003",
+      "question": "What does hysteresis thresholding allow a contour tracker to do when an edge temporarily becomes weak?"
+    },
+    {
+      "id": "ragbench-v1-004",
+      "question": "Why can a straight edge not fully determine patch motion in the aperture problem, and which component remains reliable?"
+    },
+    {
+      "id": "ragbench-v1-005",
+      "question": "For RANSAC-based correspondence fitting, how are hypotheses generated and scored, what inlier tolerance is described as common, and how do Preemptive RANSAC and PROSAC reduce work?"
+    },
+    {
+      "id": "ragbench-v1-006",
+      "question": "When object scale is unknown, why does the book prefer scale-stable feature extraction over matching every pyramid scale, and how does Lowe's approach locate such features?"
+    },
+    {
+      "id": "ragbench-v1-007",
+      "question": "How does MOPS reduce sensitivity to detector-position errors and affine photometric changes?"
+    },
+    {
+      "id": "ragbench-v1-008",
+      "question": "How should edge-detector scale be chosen differently for sharp-edge detection versus detecting edges at multiple resolutions?"
+    },
+    {
+      "id": "ragbench-v1-009",
+      "question": "According to \"Designing Data-Intensive Applications.pdf\", what usually limits a data-intensive application, and which standard building blocks support search and asynchronous handling?"
+    },
+    {
+      "id": "ragbench-v1-010",
+      "question": "What is the book's distinction between a fault and a failure, and why can deliberately triggering faults improve confidence in a system?"
+    },
+    {
+      "id": "ragbench-v1-011",
+      "question": "What makes a partial failure in a distributed system especially difficult to reason about?"
+    },
+    {
+      "id": "ragbench-v1-012",
+      "question": "For Dynamo-style leaderless replication, what does w + r > n mean, and how many unavailable nodes can the cited n=5, w=3, r=3 setup tolerate?"
+    },
+    {
+      "id": "ragbench-v1-013",
+      "question": "Why can a Dynamo-style system still return stale data even when w + r > n? Give the two edge cases identified in the text."
+    },
+    {
+      "id": "ragbench-v1-014",
+      "question": "How do serializability and linearizability differ, and what is the name for a database that provides both?"
+    },
+    {
+      "id": "ragbench-v1-015",
+      "question": "What concrete performance penalty is reported for MySQL distributed transactions, and which two mechanisms account for much of two-phase commit's inherent cost?"
+    },
+    {
+      "id": "ragbench-v1-016",
+      "question": "If an XA transaction coordinator crashes after participants prepare, why can the transaction block other transactions that need the same data until recovery?"
+    },
+    {
+      "id": "ragbench-v1-017",
+      "question": "Why do microbatching or checkpointing alone stop providing exactly-once effects once stream output reaches an external system?"
+    },
+    {
+      "id": "ragbench-v1-018",
+      "question": "For the URL-shortening design, how many strings does a six-character base64 key provide, and why can truncating an MD5-derived base64 string still cause trouble?"
+    },
+    {
+      "id": "ragbench-v1-019",
+      "question": "How does the proposed offline Key Generation Service prevent two application servers from receiving the same short key, and what loss is accepted if the service dies?"
+    },
+    {
+      "id": "ragbench-v1-020",
+      "question": "What storage size is estimated for all six-character base64 keys, and how does the design address KGS being a single point of failure?"
+    },
+    {
+      "id": "ragbench-v1-021",
+      "question": "How does the distributed URL frontier enforce politeness toward each web server?"
+    },
+    {
+      "id": "ragbench-v1-022",
+      "question": "According to \"Grokking-the-system-design-interview-free.pdf\", what are the main read/write tradeoffs of feed fan-out, and how does the hybrid design treat celebrity accounts?"
+    },
+    {
+      "id": "ragbench-v1-023",
+      "question": "Which client-side typeahead behaviors are recommended to avoid needless requests while a user is still typing?"
+    },
+    {
+      "id": "ragbench-v1-024",
+      "question": "Once a relational database is sharded, why are cross-shard joins and foreign-key enforcement difficult, and what workarounds are proposed?"
+    },
+    {
+      "id": "ragbench-v1-025",
+      "question": "In the Add Two Numbers entry, how are digits ordered in each input list, what form must the sum take, and which extra-digit and leading-zero conditions are stated?"
+    },
+    {
+      "id": "ragbench-v1-026",
+      "question": "For Longest Substring Without Repeating Characters, what makes a segment eligible, which character types count, and what should be returned for an empty string?"
+    },
+    {
+      "id": "ragbench-v1-027",
+      "question": "For Median of Two Sorted Arrays, how is the median defined for odd and even combined counts, what empty-array case is allowed, and what running time is required?"
+    },
+    {
+      "id": "ragbench-v1-028",
+      "question": "When reversing a signed integer, how are the sign and newly leading zeros handled, what happens on 32-bit overflow, and which wider storage is forbidden?"
+    },
+    {
+      "id": "ragbench-v1-029",
+      "question": "For Regular Expression Matching, is the match partial or complete, and what exact behavior does the reference assign to the period and asterisk operators?"
+    },
+    {
+      "id": "ragbench-v1-030",
+      "question": "For 4Sum, what makes a returned combination valid and distinct, how are equal values handled, and are values or indices returned?"
+    },
+    {
+      "id": "ragbench-v1-031",
+      "question": "For Remove Nth Node From End of List, how is n counted, what must be preserved and returned, and what happens when the original head or only node is removed?"
+    },
+    {
+      "id": "ragbench-v1-032",
+      "question": "What question does a posterior predictive check ask, and how does it use synthetic datasets and test statistics to diagnose a poor model?"
+    },
+    {
+      "id": "ragbench-v1-033",
+      "question": "Why does minimizing forward KL tend to cover modes while minimizing reverse KL tends to select modes?"
+    },
+    {
+      "id": "ragbench-v1-034",
+      "question": "In reparameterized variational inference, how is randomness separated from the variational parameters, and what does that enable?"
+    },
+    {
+      "id": "ragbench-v1-035",
+      "question": "Why must HMC resample momentum on every iteration, and what problem does NUTS solve?"
+    },
+    {
+      "id": "ragbench-v1-036",
+      "question": "What happens when HMC's step size is too large or too small, and what acceptance-rate tuning range is recommended for the stated L=1, identity-mass setup?"
+    },
+    {
+      "id": "ragbench-v1-037",
+      "question": "Which structural property lets a normalizing flow both sample and evaluate exact likelihood efficiently?"
+    },
+    {
+      "id": "ragbench-v1-038",
+      "question": "How do the tractability requirements for a normalizing flow differ between density estimation and variational inference?"
+    },
+    {
+      "id": "ragbench-v1-039",
+      "question": "For Gaussian-process time-series forecasting, how can inference cost change for suitable stationary kernels, and which kernel families permit exact versus approximate conversion?"
+    },
+    {
+      "id": "ragbench-v1-040",
+      "question": "What failure of raw likelihood is reported for unsupervised out-of-distribution detection, what replacement is proposed, and what invariance advantage does it have?"
+    },
+    {
+      "id": "ragbench-v1-041",
+      "question": "How does BPE training grow its vocabulary, and what is the stopping parameter described in the text?"
+    },
+    {
+      "id": "ragbench-v1-042",
+      "question": "How should language-model perplexity be interpreted, and why is it unsafe to compare perplexities from models with very different tokenizers?"
+    },
+    {
+      "id": "ragbench-v1-043",
+      "question": "What role does self-attention play in building a token's contextual representation?"
+    },
+    {
+      "id": "ragbench-v1-044",
+      "question": "In a transformer attention head, what are the query, key, and value roles, and why is the query-key dot product scaled?"
+    },
+    {
+      "id": "ragbench-v1-045",
+      "question": "How do sparse and dense retrieval represent queries and documents, and why do modern dense systems use approximate nearest-neighbor search such as Faiss?"
+    },
+    {
+      "id": "ragbench-v1-046",
+      "question": "What are the two major stages of basic RAG, and which three knowledge problems does the text say retrieval can help address?"
+    },
+    {
+      "id": "ragbench-v1-047",
+      "question": "Which word-level edit operations underlie word error rate, and what range exception is noted because insertions are included?"
+    },
+    {
+      "id": "ragbench-v1-048",
+      "question": "According to \"Computer Vision: Algorithms and Applications.pdf\", which word-level edit operations underlie word error rate, and what range exception is noted because insertions are included?"
+    },
+    {
+      "id": "ragbench-v1-049",
+      "question": "According to \"Designing Data-Intensive Applications.pdf\", how does byte-pair encoding training grow its token vocabulary?"
+    },
+    {
+      "id": "ragbench-v1-050",
+      "question": "According to \"Grokking-the-system-design-interview-free.pdf\", how do forward and reverse KL differ in mode-covering versus mode-seeking behavior?"
+    }
+  ],
+  "inventory_hashes": {
+    "evaluation-data/leetcode-recommendation/references_v1_1.json": "a48ed89df97a5086ff6442746b4f6c893912e01020892ef12625c15cb900a7d0",
+    "evaluation-data/document-qa/rag_benchmark_v1.jsonl": "4412e3c6d5eeec46e2eed266c52758dba37926f8f5d2f260e8c596a756f35a76",
+    "main.py": "aeaa73072371229c2cf3ed985af52191af034f6367244c0779965fd5866707fe",
+    "config.yml": "823a123c0f612a618c441f54ebce621a3aba139462f5194a399dfd5b04199113"
+  },
+  "topic_reviews": [
+    {
+      "topic_id": "lcrec-v2-001",
+      "name": "Intelligent-scissors minimum-cost paths",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Minimum-cost route optimization is distinct from hysteresis threshold contour following; common contour imagery is not treated as a new name for Canny."
+    },
+    {
+      "topic_id": "lcrec-v2-002",
+      "name": "Graph-cut energy minimization",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Global graph cut/flow optimization is distinct from labeling already connected equal-valued regions."
+    },
+    {
+      "topic_id": "lcrec-v2-003",
+      "name": "Histogram equalization",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Global histogram-to-rank mapping is distinct from local linear or median filtering."
+    },
+    {
+      "topic_id": "lcrec-v2-004",
+      "name": "Frequency-sensitive lossless code assignment",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Frequency-sensitive symbol code length assignment is distinct from replacing consecutive repeated values by run counts."
+    },
+    {
+      "topic_id": "lcrec-v2-005",
+      "name": "Maximum-weight bipartite data association",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Globally exclusive measurement assignment is distinct from independently selecting a nearest feature descriptor."
+    },
+    {
+      "topic_id": "lcrec-v2-006",
+      "name": "Inverse-CDF random sampling",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Inverse cumulative probability mapping is distinct from the previously tested uniform-disk/Box-Muller geometry."
+    },
+    {
+      "topic_id": "lcrec-v2-007",
+      "name": "Round-robin request dispatch",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Cyclic request dispatch is distinct from hashing a key and finding its successor cache position on a ring."
+    },
+    {
+      "topic_id": "lcrec-v2-008",
+      "name": "Capacity-driven quadtree subdivision",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Four-way spatial subdivision is distinct from finding pixel regions connected through adjacency."
+    },
+    {
+      "topic_id": "lcrec-v2-009",
+      "name": "Continuation-bit variable-length integers",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Byte framing by continuation bits is distinct from run-length or byte-pair text compression."
+    },
+    {
+      "topic_id": "lcrec-v2-010",
+      "name": "Broadcast hash joins",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Equality joins through an in-memory lookup input are distinct from merging sorted storage segments."
+    },
+    {
+      "topic_id": "lcrec-v2-011",
+      "name": "Keyed grouping and aggregation",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Keyed grouping/count/sum aggregation was not a prior benchmark topic; it does not test sorted-segment merging."
+    },
+    {
+      "topic_id": "lcrec-v2-012",
+      "name": "Bitmap predicate intersection",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Combining aligned membership predicates is distinct from probabilistic Bloom-filter element membership."
+    },
+    {
+      "topic_id": "lcrec-v2-013",
+      "name": "CKY chart recognition",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Grammar-sanctioned binary constituent composition is distinct from edit-distance alignment and beam-frontier pruning."
+    },
+    {
+      "topic_id": "lcrec-v2-014",
+      "name": "Maximum-spanning-tree dependency parsing",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Optimizing a weighted spanning tree is distinct from finding any parent-before-child topological order."
+    },
+    {
+      "topic_id": "lcrec-v2-015",
+      "name": "Shift-reduce dependency parsing",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Deterministic stack transitions for dependency parsing are distinct from retaining the k best competing hypotheses."
+    },
+    {
+      "topic_id": "lcrec-v2-016",
+      "name": "B-tree page splitting",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Page overflow splitting and parent separator maintenance are distinct from binary search over stored records."
+    },
+    {
+      "topic_id": "lcrec-v2-017",
+      "name": "Bounded-buffer backpressure",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Producer blocking at a full buffer is distinct from timestamp-count admission in rate limiting."
+    },
+    {
+      "topic_id": "lcrec-v2-018",
+      "name": "K-means centroid updates",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "Repeated mean-center updates are distinct from a fixed-descriptor nearest-neighbor lookup; distance and averaging primitives are shared."
+    },
+    {
+      "topic_id": "lcrec-v2-019",
+      "name": "Explicit Sinkhorn naming control",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "The Sinkhorn literal requirement is new; neither the old fundamental-matrix nor n-gram naming control is reused."
+    },
+    {
+      "topic_id": "lcrec-v2-020",
+      "name": "Explicit coreference naming control",
+      "status": "new_primary_topic_in_checked_history",
+      "rationale": "The coreference-resolution literal requirement is new; no old topic or naming-control question is paraphrased."
+    }
+  ],
+  "identity_overlap_policy": "LeetCode identities and general arithmetic/data-structure primitives may recur across different technical topics. Novelty is about prior topic-directed tuning, not unseen public coding problems.",
+  "first_evaluation_status": "not_run",
+  "pipeline_changes_for_v2": false,
+  "paid_api_calls": 0
+}

@@ -1,10 +1,8 @@
-# LeetCode recommendation benchmark
+# LeetCode recommendation benchmarks
 
-One fixed benchmark: **40 questions, 20 topics, 36 ordinary requests and four explicit-naming controls**. Short/descriptive variants retain stable IDs; neither group is held out.
+- [v1/](v1/): the original 40-question development benchmark, historical 180-pair references and the 252-pair annotation expansion. [Saved baseline](../../evaluation-results/leetcode-recommendation/v1/summary.md).
+- [v2/](v2/): 40 questions on 20 new primary topics, complete text screening of all 4,000 statements per topic, and 360 source-audited relationships. [Results](../../evaluation-results/leetcode-recommendation/v2/summary.md).
 
-- `leetcode_benchmark_v1.jsonl`: one question per line, wording, kind and source restrictions.
-- `references_v1.json`: shared technical evidence and **180** reviewed topic/problem pairs with quotes, physical pages, offsets, relevance rationales and limitations.
-- `corpus_manifest_v1.json`: source/data hashes, page counts and version.
-- [SCHEMA.md](SCHEMA.md): scoring rules, reference scope and provenance.
+Configuration selects v2. Both versions use the same production evaluator. Source-audited references remain interpretive and incomplete; unlisted pairs are unassessed. The v1 report retains its historical paths/settings as provenance.
 
-Run `python evaluate_leetcode_recommendation.py` from the repo root, or add `--limit 1`. Only final recommended problems are scored. Labels are incomplete: new pairs are unassessed, not automatically wrong; uncertain pairs remain visible. Useful includes explicitly limited stretch practice, not just implementations of the named method. Quotes establish provenance, not guaranteed explanation correctness. PDFs and persisted indexes are not distributed.
+Preparation and freeze files retain creation-time paths, configuration fingerprints and not-yet-evaluated status. Current execution settings and completion status belong to the versioned evaluation reports, rather than rewriting those historical records.

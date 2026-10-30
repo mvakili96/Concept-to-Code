@@ -2,9 +2,12 @@
 # 1- Load the document
 #########################################################################################################################################
 import json
+import hashlib
 import os
 import pickle
 import re
+import threading
+import time
 import unicodedata
 from pathlib import Path
 
@@ -52,12 +55,18 @@ class AzureOpenAILLM:
             "max_new_tokens", self.settings["generation"]["max_new_tokens"]
         )
         messages = [{"role": "user", "content": prompt}] if isinstance(prompt, str) else prompt
+        request_options = {}
+        if pipeline_kwargs and "timeout_seconds" in pipeline_kwargs:
+            request_options["timeout"] = pipeline_kwargs["timeout_seconds"]
+        if pipeline_kwargs and pipeline_kwargs.get("json_mode"):
+            request_options["response_format"] = {"type": "json_object"}
         completion = self.client.chat.completions.create(
             model=self.settings["model_id"],  # Azure expects the deployment name.
             messages=messages,
             max_completion_tokens=max_tokens,
             reasoning_effort=self.settings["azure"]["reasoning_effort"],
             store=False,
+            **request_options,
         )
         content = completion.choices[0].message.content
         if not isinstance(content, str) or not content.strip():
@@ -70,8 +79,9 @@ class AzureOpenAILLM:
 
 def find_explicit_sources(question, available_sources):
     # Example: according to "Probabilistic Machine Learning.pdf", what is ...?
+    # Any exact filename in quotes restricts the source, regardless of surrounding wording.
     mentioned_names = re.findall(
-        r"\baccording to\s+(?:the\s+(?:file|document)\s+)?[\"\u201c']([^\"\u201d']+)[\"\u201d']",
+        r"[\"\u201c']([^\"\u201d']+)[\"\u201d']",
         question,
         flags=re.IGNORECASE
     )
@@ -100,6 +110,9 @@ class RAGPipeline:
     MODEL_TEXT_NORMALIZATION_VERSION = 1
     # Useful practice can cover only one component; closer connections rank first.
     RELATED_PRACTICE_LEVELS = ("direct_match", "related_practice", "stretch_connection")
+    # Large requests share the deployment's token quota, including evaluator workers.
+    BATCH_REQUEST_LOCK = threading.Lock()
+    BATCH_LAST_REQUEST_AT = 0.0
 
     def __init__(self, config, pdf_paths):
         self.config = config
@@ -1503,14 +1516,15 @@ class RAGPipeline:
             outcome["status"] = "insufficient_evidence"
         return outcome
 
-    def isolate_related_problems(self, shortlisted_docs):
+    def isolate_related_problems(self, shortlisted_docs, page_texts=None):
         settings = self.config["related_problem"]["problem_isolation"]
+        page_texts = self.page_texts if page_texts is None else page_texts
         groups, notes = {}, []
         # Only query-time processing: indexes, retrieval, and original chunk IDs stay unchanged.
         # Saved page text recovers a heading even when the retrieved chunk begins mid-problem.
         for doc, score in shortlisted_docs:
             source, page = doc.metadata["source"], doc.metadata["page"]
-            text = self.page_texts.get((source, page))
+            text = page_texts.get((source, page))
             start = doc.metadata.get("start_index")
             error = None
             if text is None:
@@ -1578,7 +1592,7 @@ class RAGPipeline:
             # Merge overlapping retrieved coverage, but never silently fill an unretrieved gap.
             # Retain that coverage as provenance. Explicitly fetch the whole identified
             # statement from saved source text, bounded by its heading and next heading/footer.
-            page_text = self.page_texts[(metadata["source"], metadata["page"])]
+            page_text = page_texts[(metadata["source"], metadata["page"])]
             body_start, body_end = group["body_span"]
             body = page_text[body_start:body_end]
             metadata.update(start_index=body_start, problem_excerpts=[body],
@@ -1890,7 +1904,381 @@ class RAGPipeline:
         return response, {"status": "validated" if blocks else "no_valid_recommendations", "method": "deterministic_ranked_selection", "attempts": attempts,
                           "rejected_items": rejected, "accepted_problem_ids": [judgment["problem_id"] for judgment in accepted.values()]}
 
+    def prepare_leetcode_catalogue(self):
+        import tiktoken
+
+        settings = self.config["related_problem"]["batched_selection"]
+        if type(settings["expected_problems"]) is not int or settings["expected_problems"] < 1:
+            raise ValueError("batched_selection.expected_problems must be a positive integer.")
+        if self.config["llm"].get("provider", "local") != "azure_openai":
+            raise ValueError('Catalogue selection requires the Azure provider; use method: "retrieval" for local Qwen.')
+
+        source = self.config["related_problem"]["source"]
+        paths = [path for path in Path(".").glob(self.config["documents"]["pdf_glob"]) if path.name == source]
+        if len(paths) != 1:
+            raise ValueError(f"Expected one original LeetCode PDF named {source!r}.")
+        fingerprint = hashlib.sha256(paths[0].read_bytes()).hexdigest()
+        key = (fingerprint, settings["expected_problems"], settings["tokenizer_model"],
+               json.dumps(self.config["related_problem"]["problem_isolation"], sort_keys=True),
+               self.config["text_normalization"]["enabled"])
+        cached = getattr(self, "_batched_leetcode", None)
+        if cached and cached["key"] == key:
+            return cached
+
+        # Read the CURRENT PDF once, independent of chunk sizes and saved LeetCode indexes.
+        reader = pypdf.PdfReader(paths[0])
+        pages, full_pages = {}, []
+        isolation = self.config["related_problem"]["problem_isolation"]
+        for page, pdf_page in enumerate(reader.pages, start=1):
+            text = pdf_page.extract_text() or ""
+            pages[(source, page)] = text
+            if re.search(isolation["header_pattern"], text) or re.search(isolation["page_range_pattern"], text):
+                full_pages.append((Document(page_content=text, metadata={
+                    "source": source, "page": page, "start_index": 0,
+                    "chunk_id": f"{source}::page={page}::full_page",
+                }), 0.0))
+        documents, errors = self.isolate_related_problems(full_pages, page_texts=pages)
+        numbers = [doc.metadata["problem_identity"]["number"] for doc, _ in documents]
+        if errors or sorted(numbers) != list(range(1, settings["expected_problems"] + 1)):
+            raise ValueError("Cannot verify complete, unique LeetCode problem boundaries; no selection calls were made.")
+        if hashlib.sha256(paths[0].read_bytes()).hexdigest() != fingerprint:
+            raise ValueError("The LeetCode PDF changed while it was being parsed.")
+
+        encoder = tiktoken.encoding_for_model(settings["tokenizer_model"])
+        problems, total_tokens, titles = {}, 0, []
+        for doc, _ in sorted(documents, key=lambda item: item[0].metadata["problem_identity"]["number"]):
+            identity = doc.metadata["problem_identity"]
+            number = identity["number"]
+            spans = self.related_evidence_spans(doc.page_content, "P", problem=True)
+            marked = doc.page_content
+            # Insert IDs without deleting prose or constraints. Quote offsets stay raw.
+            for span in reversed(list(spans.values())):
+                marked = marked[:span["start"]] + f"[{span['id']}] " + marked[span["start"]:]
+            rendered = (f"PROBLEM {number}: {identity['title']} "
+                        f"[{identity['difficulty']}; PDF page {doc.metadata['page']}]\n"
+                        + self.normalize_model_text(marked))
+            size = len(encoder.encode(rendered + "\n\n", disallowed_special=()))
+            doc.metadata.update(chunk_id=doc.metadata["problem_id"], parent_chunk_ids=[],
+                                retrieved_problem_spans=[], problem_text_origin="original_pdf_statement",
+                                problem_expanded=False)
+            problems[number] = {"document": doc, "spans": spans, "rendered": rendered, "tokens": size}
+            titles.append(f"{number}. {identity['title']}")
+            total_tokens += size
+        title_text = "\n".join(titles)
+        cached = {"key": key, "source": source, "sha256": fingerprint, "encoder": encoder,
+                  "problems": problems, "problem_text_tokens": total_tokens, "titles": title_text,
+                  "title_tokens": len(encoder.encode(title_text, disallowed_special=()))}
+        self._batched_leetcode = cached
+        return cached
+
+    def prepare_batched_leetcode(self):
+        settings = self.config["related_problem"]["batched_selection"]
+        for name in ("batch_tokens", "max_batches", "max_input_tokens", "context_window_tokens",
+                     "shortlist_size", "max_new_tokens", "timeout_seconds"):
+            if type(settings[name]) is not int or settings[name] < 1:
+                raise ValueError(f"related_problem.batched_selection.{name} must be a positive integer.")
+        for name in ("validation_retries", "rate_limit_retries", "min_batch_interval_seconds"):
+            if type(settings[name]) is not int or settings[name] < 0:
+                raise ValueError(f"batched_selection.{name} must be a nonnegative integer.")
+        limit = self.config["related_problem"]["recommendation_validation"]["max_recommendations"]
+        if type(limit) is not int or not 1 <= limit <= settings["shortlist_size"]:
+            raise ValueError("max_recommendations must be positive and no larger than shortlist_size.")
+        if not settings["batch_tokens"] < settings["max_input_tokens"] or (
+            settings["max_input_tokens"] + settings["max_new_tokens"] > settings["context_window_tokens"]
+        ):
+            raise ValueError("Batch, full-input, and output budgets must fit the configured context window.")
+        cached = self.prepare_leetcode_catalogue()
+        batches, batch, tokens = [], [], 0
+        for number, problem in cached["problems"].items():
+            size = problem["tokens"]
+            if size > settings["batch_tokens"]:
+                raise ValueError(f"Problem {number} exceeds batch_tokens; a complete statement cannot be split.")
+            if batch and tokens + size > settings["batch_tokens"]:
+                batches.append(batch)
+                batch, tokens = [], 0
+            batch.append(number)
+            tokens += size
+        if batch:
+            batches.append(batch)
+        if len(batches) > settings["max_batches"]:
+            raise ValueError(f"The complete PDF needs {len(batches)} batches, exceeding max_batches="
+                             f"{settings['max_batches']}. Increase the budget or call limit; nothing was truncated.")
+        cached["batches"] = batches
+        return cached
+
+    def validate_batched_recommendations(self, response, pool, technical_spans, limit):
+        start = response.find("{")
+        if start < 0:
+            raise ValueError("Selection returned no JSON object.")
+        result, _ = json.JSONDecoder().raw_decode(response[start:])
+        if not isinstance(result, dict) or not isinstance(result.get("recommendations"), list):
+            raise ValueError("Return a JSON object with a recommendations list.")
+        if len(result["recommendations"]) > limit:
+            raise ValueError(f"Return at most {limit} recommendations.")
+        selected, seen = [], set()
+        for item in result["recommendations"]:
+            if not isinstance(item, dict):
+                raise ValueError("Each recommendation must be an object.")
+            number = item.get("problem_number")
+            if type(number) is not int or number not in pool or number in seen:
+                raise ValueError(f"Problem {number!r} is unavailable in this call or duplicated.")
+            level = item.get("connection_level")
+            if level not in self.RELATED_PRACTICE_LEVELS:
+                raise ValueError("Select direct_match, related_practice, or stretch_connection; omit unrelated problems.")
+            for field in ("shared_mechanism", "important_difference"):
+                if not isinstance(item.get(field), str) or not item[field].strip():
+                    raise ValueError(f"Problem {number} needs a nonempty {field}.")
+            technical_id = item.get("technical_span_id")
+            if not isinstance(technical_id, str) or technical_id not in technical_spans:
+                raise ValueError(f"Problem {number} needs an existing technical_span_id.")
+            chunk, tspan = technical_spans[technical_id]
+            problem = pool[number]
+            pspan = self.select_related_evidence(item.get("problem_span_id"), problem["spans"])
+            doc = problem["document"]
+            selected.append({
+                "problem_id": doc.metadata["problem_id"], "problem_identity": doc.metadata["problem_identity"],
+                "chunk_id": doc.metadata["chunk_id"], "source": doc.metadata["source"], "page": doc.metadata["page"],
+                "status": "accepted", "match_label": "supported_match", "connection_level": level,
+                "shared_mechanism": item["shared_mechanism"].strip(),
+                "important_difference": item["important_difference"].strip(),
+                "technical_evidence": {key: chunk[key] for key in ("chunk_id", "source", "page")},
+                "technical_evidence_span": tspan, "problem_evidence_span": pspan,
+                "technical_quote": tspan["quote"], "leetcode_quote": pspan["quote"],
+                "selected_for_context": False,
+                "verification": {"status": "valid", "supported": True, "connection_level": level,
+                                 "method": "original_span_id_validation", "explanation": item["shared_mechanism"].strip(),
+                                 "note": "Python verifies identity and quote provenance; semantic relevance is the selection model's judgment."},
+            })
+            seen.add(number)
+        return selected
+
+    def invoke_batched_selection(self, prompt, settings=None):
+        from openai import RateLimitError
+
+        settings = self.config["related_problem"]["batched_selection"] if settings is None else settings
+        # Serialize large calls in this process; separate Azure clients still keep their own state.
+        with RAGPipeline.BATCH_REQUEST_LOCK:
+            for attempt in range(settings["rate_limit_retries"] + 1):
+                delay = max(0, settings["min_batch_interval_seconds"] - (time.monotonic() - RAGPipeline.BATCH_LAST_REQUEST_AT))
+                if delay:
+                    print(f"Waiting {delay:.0f}s for the Azure batch token budget.", flush=True)
+                while delay > 0:
+                    time.sleep(min(delay, 10))
+                    delay = max(0, settings["min_batch_interval_seconds"] - (time.monotonic() - RAGPipeline.BATCH_LAST_REQUEST_AT))
+                RAGPipeline.BATCH_LAST_REQUEST_AT = time.monotonic()
+                try:
+                    self._batch_call_attempts = getattr(self, "_batch_call_attempts", 0) + 1
+                    return self.llm.invoke(
+                        self.format_chat_prompt([{"role": "user", "content": prompt}],
+                                                tokenize=False, add_generation_prompt=True),
+                        pipeline_kwargs={"max_new_tokens": settings["max_new_tokens"],
+                                         "timeout_seconds": settings["timeout_seconds"], "json_mode": True},
+                    )
+                except RateLimitError as error:
+                    if attempt == settings["rate_limit_retries"]:
+                        raise RuntimeError(
+                            "Azure's token quota still rejects this selection request. "
+                            "Reduce the selection input budget or wait for/increase the deployment's token quota. "
+                            "No final recommendations were published."
+                        ) from error
+                    headers = error.response.headers
+                    try:
+                        cooldown = float(headers.get("retry-after", max(65, settings["min_batch_interval_seconds"])))
+                    except ValueError:
+                        cooldown = max(65, settings["min_batch_interval_seconds"])
+                    cooldown = max(0, cooldown)
+                    RAGPipeline.BATCH_LAST_REQUEST_AT = time.monotonic() + cooldown - settings["min_batch_interval_seconds"]
+                    print(f"Azure token rate limit; retrying the same batch after {cooldown:.0f}s.", flush=True)
+
+    def prepare_related_answer(self, query, catalogue):
+        source = catalogue["source"]
+        explicit = find_explicit_sources(query, self.available_sources)
+        technical_sources = [s for s in explicit if s != source] or [s for s in self.available_sources if s != source]
+        if not technical_sources:
+            raise ValueError("A technical PDF is required before selecting related coding problems.")
+        # Reuse document QA: retrieval, reranking, context, then a grounded answer.
+        technical = self.run(query, source_override=technical_sources,
+                             prompt_template=self.config["related_problem"]["batched_selection"]["technical_answer_prompt"])
+        technical_spans, evidence = {}, []
+        for index, chunk in enumerate(technical["final_chunks"], start=1):
+            spans = self.related_evidence_spans(chunk["text"], f"T{index}.")
+            marked = chunk["text"]
+            for identifier, span in reversed(list(spans.items())):
+                technical_spans[identifier] = (chunk, span)
+                marked = marked[:span["start"]] + f"[{identifier}] " + marked[span["start"]:]
+            evidence.append(f"SOURCE: {chunk['source']}\nPAGE: {chunk['page']}\n{self.normalize_model_text(marked)}")
+        return technical, technical_spans, "\n\n".join(evidence), explicit
+
+    def run_batched_related_problem(self, query):
+        settings = self.config["related_problem"]["batched_selection"]
+        catalogue = self.prepare_batched_leetcode()
+        technical, technical_spans, evidence, explicit = self.prepare_related_answer(query, catalogue)
+        selected, batch_runs = [], []
+        maximum = self.config["related_problem"]["recommendation_validation"]["max_recommendations"]
+        for index, numbers in enumerate(catalogue["batches"], start=1) if technical_spans else []:
+            calls_before = getattr(self, "_batch_call_attempts", 0)
+            carried = [item["problem_identity"]["number"] for item in selected]
+            pool = {number: catalogue["problems"][number] for number in carried + numbers}
+            limit = maximum if index == len(catalogue["batches"]) else settings["shortlist_size"]
+            prompt = settings["prompt"].format(
+                batch_index=index, batch_count=len(catalogue["batches"]), selection_limit=limit,
+                question=self.normalize_model_text(query), grounded_answer=technical["generated_answer"],
+                technical_evidence=evidence,
+                carried_problems="\n\n".join(pool[n]["rendered"] for n in carried) or "None",
+                problems="\n\n".join(pool[n]["rendered"] for n in numbers),
+            )
+            feedback, errors, estimates = "", [], []
+            for attempt in range(settings["validation_retries"] + 1):
+                # Include all prompt text, carried statements, and conservative message overhead.
+                input_tokens = len(catalogue["encoder"].encode(prompt + feedback, disallowed_special=())) + 64
+                if input_tokens > settings["max_input_tokens"]:
+                    raise ValueError(f"LeetCode batch {index} needs {input_tokens} input tokens, exceeding max_input_tokens; reduce batch_tokens.")
+                estimates.append(input_tokens)
+                print(f"LeetCode batch {index}/{len(catalogue['batches'])}: {len(numbers)} new problems, "
+                      f"{len(carried)} carried, ~{input_tokens} input tokens (attempt {attempt + 1}).", flush=True)
+                response = self.invoke_batched_selection(prompt + feedback)
+                try:
+                    selected = self.validate_batched_recommendations(response, pool, technical_spans, limit)
+                    break
+                except (ValueError, TypeError, KeyError) as error:
+                    errors.append(str(error))
+                    if attempt == settings["validation_retries"]:
+                        raise RuntimeError(f"LeetCode batch {index} could not be validated; full-document selection is incomplete: {error}") from error
+                    feedback = "\nCORRECTION: " + str(error) + " Use only supplied problem numbers and their span IDs. Return complete JSON; omit unsupported items."
+            batch_runs.append({"batch_index": index, "presented_problem_numbers": numbers,
+                               "carried_problem_numbers": carried,
+                               "selected_problem_numbers": [j["problem_identity"]["number"] for j in selected],
+                               "input_token_estimates": estimates, "attempts": len(estimates), "validation_errors": errors,
+                               "request_attempts": self._batch_call_attempts - calls_before})
+
+        result = self.build_related_selection_response(technical, selected, catalogue, explicit, "batched")
+        result["batched_selection"] = {
+            "strategy": "rolling_shortlist", "source": catalogue["source"], "source_sha256": catalogue["sha256"],
+            "total_problems": len(catalogue["problems"]), "prepared_batches": len(catalogue["batches"]),
+            "problem_text_tokens": catalogue["problem_text_tokens"], "batches": batch_runs,
+            "status": "completed" if technical_spans else "skipped_no_technical_evidence",
+        }
+        return result
+
+    def build_related_selection_response(self, technical, selected, catalogue, explicit, method):
+        source = catalogue["source"]
+        chunks, context = [], []
+        for rank, item in enumerate(selected, start=1):
+            item["selected_for_context"] = True
+            doc = catalogue["problems"][item["problem_identity"]["number"]]["document"]
+            chunks.append({**doc.metadata, "text": doc.page_content, "selection_rank": rank,
+                           "connection_level": item["connection_level"], "context_role": "leetcode_recommendation"})
+            context.append(self.config["rag"]["context_entry_template"].format(
+                source=doc.metadata["source"], page=doc.metadata["page"], page_content=self.normalize_model_text(doc.page_content)))
+        recommendations, validation = self.generate_related_recommendations(selected)
+        validation["method"] = f"{method}_llm_selection_with_span_validation"
+        leetcode_context = self.config["rag"]["context_separator"].join(context)
+        return {
+            "workflow": "related_problem", "related_problem_method": method,
+            "source_restriction_origin": "related_problem_workflow",
+            "selected_sources": list(dict.fromkeys(technical["selected_sources"] + [source])),
+            "technical_selected_sources": technical["selected_sources"], "leetcode_selected_sources": [source],
+            "explicit_source_restriction_detected": bool(explicit),
+            "query_expansion": technical["query_expansion"], "technical_retrieval_query": technical["retrieval_query"],
+            "technical_context": technical["final_context"], "technical_chunks": technical["final_chunks"],
+            "grounded_answer": technical["generated_answer"],
+            "conceptual_judgments": selected, "recommendation_validation": validation,
+            "leetcode_chunks": chunks, "leetcode_context": leetcode_context,
+            "final_context": technical["final_context"] + "\n\n" + leetcode_context,
+            "final_chunks": technical["final_chunks"] + chunks,
+            "generated_answer": technical["generated_answer"] + "\n\nRelated LeetCode practice:\n" + recommendations,
+        }
+
+    def validate_title_candidates(self, response, catalogue, limit):
+        start = response.find("{")
+        if start < 0:
+            raise ValueError("Title selection returned no JSON object.")
+        result, _ = json.JSONDecoder().raw_decode(response[start:])
+        if not isinstance(result, dict) or not isinstance(result.get("problem_numbers"), list):
+            raise ValueError("Return a JSON object with a problem_numbers list.")
+        numbers = result["problem_numbers"]
+        if any(type(n) is not int or n not in catalogue["problems"] for n in numbers):
+            raise ValueError("Return only existing integer problem numbers.")
+        # Remove repeated IDs without changing the model's ranking.
+        numbers = list(dict.fromkeys(numbers))
+        if len(numbers) > limit:
+            raise ValueError(f"Return at most {limit} distinct problem numbers.")
+        return numbers
+
+    def invoke_title_selection(self, prompt, catalogue, settings, validate, stage):
+        feedback, errors, estimates = "", [], []
+        calls_before = getattr(self, "_batch_call_attempts", 0)
+        for attempt in range(settings["validation_retries"] + 1):
+            size = len(catalogue["encoder"].encode(prompt + feedback, disallowed_special=())) + 64
+            if size > settings["max_input_tokens"]:
+                raise ValueError(f"LeetCode {stage} needs {size} input tokens, exceeding title_selection.max_input_tokens; nothing was truncated.")
+            estimates.append(size)
+            print(f"LeetCode {stage}: ~{size} input tokens (attempt {attempt + 1}).", flush=True)
+            response = self.invoke_batched_selection(prompt + feedback, settings=settings)
+            try:
+                selected = validate(response)
+                return selected, {"stage": stage, "input_token_estimates": estimates,
+                                  "validation_errors": errors, "attempts": len(estimates),
+                                  "request_attempts": self._batch_call_attempts - calls_before}
+            except (ValueError, TypeError, KeyError) as error:
+                errors.append(str(error))
+                if attempt == settings["validation_retries"]:
+                    raise RuntimeError(f"LeetCode {stage} could not be validated: {error}") from error
+                feedback = "\nCORRECTION: " + str(error) + " Return complete JSON using only supplied IDs."
+
+    def run_title_related_problem(self, query):
+        settings = self.config["related_problem"]["title_selection"]
+        for name in ("shortlist_size", "max_input_tokens", "max_new_tokens", "timeout_seconds"):
+            if type(settings[name]) is not int or settings[name] < 1:
+                raise ValueError(f"title_selection.{name} must be a positive integer.")
+        for name in ("validation_retries", "rate_limit_retries", "min_batch_interval_seconds"):
+            if type(settings[name]) is not int or settings[name] < 0:
+                raise ValueError(f"title_selection.{name} must be a nonnegative integer.")
+        maximum = self.config["related_problem"]["recommendation_validation"]["max_recommendations"]
+        if type(maximum) is not int or not 1 <= maximum <= settings["shortlist_size"]:
+            raise ValueError("max_recommendations must be positive and no larger than title_selection.shortlist_size.")
+        if settings["max_input_tokens"] + settings["max_new_tokens"] > self.config["related_problem"]["batched_selection"]["context_window_tokens"]:
+            raise ValueError("Title-selection input and output budgets exceed the model context window.")
+        catalogue = self.prepare_leetcode_catalogue()
+        technical, technical_spans, evidence, explicit = self.prepare_related_answer(query, catalogue)
+        numbers, selected, passes = [], [], []
+        if technical_spans:
+            prompt = settings["prompt"].format(
+                shortlist_size=settings["shortlist_size"], question=self.normalize_model_text(query),
+                grounded_answer=technical["generated_answer"], technical_evidence=evidence, titles=catalogue["titles"])
+            numbers, trace = self.invoke_title_selection(
+                prompt, catalogue, settings,
+                lambda response: self.validate_title_candidates(response, catalogue, settings["shortlist_size"]), "title shortlist")
+            passes.append(trace)
+            if numbers:
+                # Only this pass sees complete problem statements. Titles never establish relevance.
+                pool = {n: catalogue["problems"][n] for n in numbers}
+                prompt = settings["verification_prompt"].format(
+                    selection_limit=maximum, question=self.normalize_model_text(query),
+                    grounded_answer=technical["generated_answer"], technical_evidence=evidence,
+                    problems="\n\n".join(pool[n]["rendered"] for n in numbers))
+                selected, trace = self.invoke_title_selection(
+                    prompt, catalogue, settings,
+                    lambda response: self.validate_batched_recommendations(response, pool, technical_spans, maximum), "statement verification")
+                passes.append(trace)
+        result = self.build_related_selection_response(technical, selected, catalogue, explicit, "titles")
+        result["title_selection"] = {
+            "source": catalogue["source"], "source_sha256": catalogue["sha256"],
+            "total_problems": len(catalogue["problems"]), "title_tokens": catalogue["title_tokens"],
+            "presented_problem_numbers": list(catalogue["problems"]) if passes else [],
+            "shortlisted_problem_numbers": numbers, "passes": passes,
+            "status": "completed" if technical_spans else "skipped_no_technical_evidence",
+        }
+        return result
+
     def run_related_problem(self, query):
+        method = self.config["related_problem"].get("method", "retrieval")
+        if method == "titles":
+            return self.run_title_related_problem(query)
+        if method == "batched":
+            return self.run_batched_related_problem(query)
+        if method != "retrieval":
+            raise ValueError('related_problem.method must be "retrieval", "batched", or "titles".')
         shortlist_top_k = self.config["related_problem"]["conceptual_reranking"]["shortlist_top_k"]
         if type(shortlist_top_k) is not int or shortlist_top_k < 1:
             raise ValueError("related_problem.conceptual_reranking.shortlist_top_k must be a positive integer.")

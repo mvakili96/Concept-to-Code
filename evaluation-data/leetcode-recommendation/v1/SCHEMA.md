@@ -1,6 +1,6 @@
 # LeetCode benchmark schema
 
-Schema and benchmark version: `1.0.0`. All 40 IDs form one fixed development benchmark for comparisons and ablations; there are no train/validation/test splits or held-out-generalization claims.
+Schema version: `1.0.0`. Current annotation/benchmark version: `1.1.0`; historical `1.0.0` references remain available. All 40 IDs form one fixed development benchmark for comparisons and ablations; there are no train/validation/test splits or held-out-generalization claims.
 
 ## Questions
 
@@ -15,6 +15,10 @@ The runtime calls `main.RAGPipeline.run_related_problem(question)` with the orig
 `pairs` uses stable `topic_id::lcNUMBER` IDs. Each record has the exact source filename, physical page, source-owned number/title/difficulty, statement body bounds, exact `problem_evidence` quote and absolute page offsets, technical evidence links, rationale, limitation and review provenance. No reference depends on current chunk IDs. Full problem bodies are not duplicated in the published data.
 
 The 173 broader-rubric labels are preserved. Seven previously reviewed positive targets are promoted using `direct`/`specialization` → `direct_match` and `shared_subproblem` → `related_practice`. Legacy weak/negative labels are not automatically imported into this broader rubric. Review fields distinguish automated source auditing from human approval; verification does not guarantee correctness.
+
+Version 1.0 contains those 180 pairs, collected from earlier diagnostic outputs and original targets; it is a pooled assessment, not an exhaustive scan assigning a label to every problem. Version 1.1 preserves all 180 records and adds 72 source-audited pairs collected without reading prediction files. It has 252 labels in total, including eight uncertain pairs. The old five uncertain relationships are unchanged. See [COLLECTION.md](COLLECTION.md) for the limitations of post-hoc collection and automated semantic review.
+
+New pairs retain the same required fields and add `discovery` (method, rank and score), `review_model`, `review_date`, and `verification_notes`. The top-level `annotation_provenance` identifies the base reference hash, collection plan/pool, reviewer scope and lack of human approval. `candidate_pool_v1_1.jsonl` records each collected pair's source-owned identity, physical page, body offsets, exact query and all discovery methods; it contains no relevance label or body text. `collection_manifest_v1_1.json` records the scan count, package versions, parsing rules, plan/collector/pool hashes and all-statement naming-control results. `corpus_manifest_v1_1.json` adds `annotation_artifact_sha256` and retains the source and runtime data hashes expected by the evaluator. No reference uses chunk IDs.
 
 ## Scoring
 
@@ -40,3 +44,5 @@ The imported published baseline has no live checkpoint; `--resume` applies to ru
 Reports include actual settings/concurrency, source/index/code/data fingerprints, timings, call counts, candidate-validation failures and available Azure token usage. Recorded usage excludes unobserved interrupted calls or SDK retries and is not the Azure bill. Credentials and bulk API traces are not published.
 
 Question IDs remain stable. Changes to questions, reference meaning or source bytes require a documented benchmark-version update and updated hashes. The included results preserve the historical GPT-5.1 inference/configuration and timing provenance; they are not evidence of a fresh run or a pure model-size effect.
+
+This directory preserves the v1.0/v1.1 references and manifests; current configuration selects the separate v2 dataset. Checkpoint fingerprints from another version are incompatible. Preserve the old configuration/reference version when reproducing an experiment, or explicitly start a new run. Historical published v1 reports are unchanged and describe the 180-pair version; expansion alone does not create new evaluation results.
