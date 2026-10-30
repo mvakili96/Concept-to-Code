@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "collection_id": "output_independent_lexical_pool_v1_1",
+  "base_manifest": "corpus_manifest_v1.json",
+  "base_references": "references_v1.json",
+  "top_k_per_method": 3,
+  "negative_sampling_seed": 20261026,
+  "methods": ["bm25_statement", "character_4gram_tfidf"],
+  "scope": "Queries describe mechanisms in existing technical evidence. No question, target number, prior relevance label, production index, or saved recommendation is used to rank candidates. This is a post-hoc development annotation expansion, not a held-out experiment. One seeded random candidate per ordinary topic broadens negative coverage; it must be audited before labeling.",
+  "queries": {
+    "related-diag-001": "points vote for possible lines count collinear points on a straight line",
+    "related-diag-002": "grid output values weighted sum neighboring input values local linear filter",
+    "related-diag-003": "precompute running sums matrix answer rectangle region sum queries four corners",
+    "related-diag-004": "grid connected regions adjacent cells equal value horizontal vertical neighbors",
+    "related-diag-005": "minimum operations insert delete replace characters transform one string into another",
+    "related-diag-006": "store strings prefix tree characters find words starting with a prefix",
+    "related-diag-007": "bounded cache access recently used keys evict least recently accessed item when full",
+    "related-diag-008": "directed graph dependencies order nodes parents before children",
+    "related-diag-009": "sorted keys records binary search find a value in an ordered array",
+    "related-diag-010": "set membership hash functions bit vector insert elements test whether present false positives",
+    "related-diag-011": "hash key ring wrap around find first cache clockwise successor position",
+    "related-diag-012": "extend candidate sequences score hypotheses keep k best partial sequences prune frontier",
+    "related-fresh-001": "select median value from each local neighborhood sliding window",
+    "related-fresh-002": "rank feature vectors by Euclidean distance choose nearest matching point",
+    "related-fresh-003": "generate random points uniformly inside unit circle disk sampling",
+    "related-fresh-004": "merge sorted input sequences repeatedly select lowest next key output sorted sequence",
+    "related-fresh-005": "timestamp requests sliding time window remove old timestamps count requests accept reject limit",
+    "related-fresh-006": "compress consecutive repeated values run length encoding counts"
+  },
+  "control_policy": "For explicit naming controls, scan every original problem title/body for the required literal after NFKC, case folding, line-break dehyphenation and whitespace normalization. Literal absence only establishes that naming condition, not absence of broader practice connections."
+}

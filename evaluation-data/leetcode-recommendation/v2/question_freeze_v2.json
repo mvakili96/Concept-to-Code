@@ -1,0 +1,1350 @@
+{
+  "freeze": {
+    "schema_version": "1.0.0",
+    "benchmark_version": "2.0.0",
+    "topics": {
+      "lcrec-v2-001": {
+        "topic_id": "lcrec-v2-001",
+        "name": "Intelligent-scissors minimum-cost paths",
+        "allowed_technical_sources": [
+          "Computer Vision: Algorithms and Applications.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-001-t1",
+            "source": "Computer Vision: Algorithms and Applications.pdf",
+            "page": 499,
+            "start": 1434,
+            "end_exclusive": 1792,
+            "quote": "To compute the optimal curve path (live-wire), the image is ﬁrst pre-processed to associate\nlow costs with edges (links between neighboring horizontal, vertical, and diagonal, i.e., N8\nneighbors) that are likely to be boundary elements. Their system uses a combination of zero-\ncrossing, gradient magnitudes, and gradient orientations to compute these costs."
+          },
+          {
+            "id": "lcrec-v2-001-t2",
+            "source": "Computer Vision: Algorithms and Applications.pdf",
+            "page": 499,
+            "start": 1793,
+            "end_exclusive": 1973,
+            "quote": "Next, as the user traces a rough curve, the system continuously recomputes the lowest-\ncost path between the starting seed point and the current mouse location using Dijkstra’s al-"
+          }
+        ],
+        "mechanism": "finding the lowest-cost path between a seed point and a moving endpoint",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "(shortest|minimum|cheapest|least).*(path|route|cost|distance)",
+          "graph|edges|roads|cities|vertices|nodes|flights|network|grid|matrix"
+        ]
+      },
+      "lcrec-v2-002": {
+        "topic_id": "lcrec-v2-002",
+        "name": "Graph-cut energy minimization",
+        "allowed_technical_sources": [
+          "Computer Vision: Algorithms and Applications.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-002-t1",
+            "source": "Computer Vision: Algorithms and Applications.pdf",
+            "page": 242,
+            "start": 2094,
+            "end_exclusive": 2472,
+            "quote": "For binary images, a much better technique, introduced to the computer vision com-\nmunity by Boykov, Veksler, and Zabih (2001) is to re-formulate the energy minimization as\na max-ﬂow/min-cut graph optimization problem (Greig, Porteous, and Seheult 1989). This\ntechnique has informally come to be known as graph cuts in the computer vision community\n(Boykov and Kolmogorov 2011)."
+          }
+        ],
+        "mechanism": "separating a graph through a minimum cut rather than local pixel flips",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "disconnect|cut|remove.*(?:edge|vertex|node|cell)|min.?cut|max.?flow",
+          "graph|edges|nodes|vertices|grid|matrix|island|path|network"
+        ]
+      },
+      "lcrec-v2-003": {
+        "topic_id": "lcrec-v2-003",
+        "name": "Histogram equalization",
+        "allowed_technical_sources": [
+          "Computer Vision: Algorithms and Applications.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-003-t1",
+            "source": "Computer Vision: Algorithms and Applications.pdf",
+            "page": 143,
+            "start": 46,
+            "end_exclusive": 387,
+            "quote": "Think of the original histogram h(I) as the distribution of grades in a class after some\nexam. How can we map a particular grade to its corresponding percentile, so that students at\nthe 75% percentile range scored better than 3/4 of their classmates? The answer is to integrate\nthe distributionh(I) to obtain the cumulative distributionc(I),"
+          }
+        ],
+        "mechanism": "mapping intensity frequencies to cumulative ranks or percentiles",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "histogram|percentile|cumulative|rank.*(?:score|value)|smaller.*(?:numbers|elements).*(?:current|self)"
+        ]
+      },
+      "lcrec-v2-004": {
+        "topic_id": "lcrec-v2-004",
+        "name": "Frequency-sensitive lossless code assignment",
+        "allowed_technical_sources": [
+          "Probabilistic Machine Learning.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-004-t1",
+            "source": "Probabilistic Machine Learning.pdf",
+            "page": 281,
+            "start": 1258,
+            "end_exclusive": 1487,
+            "quote": "The reason for this is as follows: if we can model\nthe probability of different kinds of data samples, then we can assign shortcode wordsto the\nmost frequently occuring ones, reserving longer encodings for the less frequent ones."
+          }
+        ],
+        "mechanism": "assigning shorter representations to frequent symbols and longer ones to rare symbols",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "keypad|keyboard|keypress|pushes|codeword|huffman|encod.*(?:frequen|length)|(?:assign|map).*(?:letters|characters).*(?:cost|length)"
+        ]
+      },
+      "lcrec-v2-005": {
+        "topic_id": "lcrec-v2-005",
+        "name": "Maximum-weight bipartite data association",
+        "allowed_technical_sources": [
+          "Probabilistic Machine Learning.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-005-t1",
+            "source": "Probabilistic Machine Learning.pdf",
+            "page": 1052,
+            "start": 632,
+            "end_exclusive": 1248,
+            "quote": "A common way to perform approximate inference in this model is to compute anN×M weight\nmatrix, whereWim measures the “compatibility” between objecti and measurementm, typically\nbased on how closem is to where the model thinksi is (the so-callednearest neighbor data\nassociationheuristic).\nWe can make this into a square matrix by adding dummy background objects, which can explain\nall the false alarms, and adding dummy observations, which can explain all the missed detections.\nWe can then compute the maximal weight bipartite matching using theHungarian algorithm,\nwhich takesO(max(N,M) 3)time (see e.g., [BDM09])."
+          }
+        ],
+        "mechanism": "assigning measurements to tracked objects using a compatibility matrix and one-to-one matching",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "assign|match|pair|invit|compatib|bipartite",
+          "cost|maximum|minimum|xor|score|students|workers|jobs|bikes|robots|chairs|seat"
+        ]
+      },
+      "lcrec-v2-006": {
+        "topic_id": "lcrec-v2-006",
+        "name": "Inverse-CDF random sampling",
+        "allowed_technical_sources": [
+          "Probabilistic Machine Learning.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-006-t1",
+            "source": "Probabilistic Machine Learning.pdf",
+            "page": 520,
+            "start": 1299,
+            "end_exclusive": 1747,
+            "quote": "Hence we can sample from any univariate distribution, for which we can evaluate its inverse cdf, as\nfollows: generate a random numberu∼U (0, 1)using apseudorandom number generator(see\ne.g., [Pre+88] for details). Letu represent the height up they axis. Then “slide along” thex axis\nuntil you intersect theF curve, and then “drop down” and return the correspondingx value. This\ncorresponds to computingx=F −1(u). See Figure 11.3 for an illustration."
+          }
+        ],
+        "mechanism": "mapping a uniform random draw through a cumulative distribution to select an outcome",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "random|probability|uniform|weighted",
+          "pick|sample|point|index|element|weight|number"
+        ]
+      },
+      "lcrec-v2-007": {
+        "topic_id": "lcrec-v2-007",
+        "name": "Round-robin request dispatch",
+        "allowed_technical_sources": [
+          "Grokking-the-system-design-interview-free.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-007-t1",
+            "source": "Grokking-the-system-design-interview-free.pdf",
+            "page": 175,
+            "start": 163,
+            "end_exclusive": 457,
+            "quote": "Round Robin Method — This method cycles through a list of servers and \nsends each new request to the next server. When it reaches the end of the list, \nit starts over at the beginning. It is most useful when the servers are of equal \nspecification and there are not many persistent connections."
+          }
+        ],
+        "mechanism": "cycling through servers in order and restarting at the beginning after the last server",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "round.robin|cyclic|circular|clockwise|zigzag|servers"
+        ]
+      },
+      "lcrec-v2-008": {
+        "topic_id": "lcrec-v2-008",
+        "name": "Capacity-driven quadtree subdivision",
+        "allowed_technical_sources": [
+          "Grokking-the-system-design-interview-free.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-008-t1",
+            "source": "Grokking-the-system-design-interview-free.pdf",
+            "page": 142,
+            "start": 1050,
+            "end_exclusive": 1396,
+            "quote": "How will we build a QuadTree? We will start with one node that will represent the \nwhole world in one grid. Since it will have more than 500 locations, we will break it \ndown into four nodes and distribute locations among them. We will keep repeating \nthis process with each child node until there are no nodes left with more than 500 \nlocations."
+          }
+        ],
+        "mechanism": "recursively splitting a spatial region into four child regions until each satisfies a capacity bound",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "quad.?tree|four.*(?:region|quadrant)|(?:region|matrix|square).*(?:divide|split).*(?:four|4)"
+        ]
+      },
+      "lcrec-v2-009": {
+        "topic_id": "lcrec-v2-009",
+        "name": "Continuation-bit variable-length integers",
+        "allowed_technical_sources": [
+          "Designing Data-Intensive Applications.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-009-t1",
+            "source": "Designing Data-Intensive Applications.pdf",
+            "page": 141,
+            "start": 914,
+            "end_exclusive": 1359,
+            "quote": "It\ndoes this by packing the field type and tag number into a single byte, and by using\nvariable-length integers. Rather than using a full eight bytes for the number 1337, it is\nencoded in two bytes, with the top bit of each byte used to indicate whether there are\nstill more bytes to come. This means numbers between –64 and 63 are encoded in\none byte, numbers between –8192 and 8191 are encoded in two bytes, etc. Bigger\nnumbers use more bytes."
+          }
+        ],
+        "mechanism": "using the high bit of each byte to indicate whether more bytes belong to the same encoded integer",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "utf.?8|bytes?|binary.*encod|bit.*(?:encod|decod)|decod.*(?:bit|binary)"
+        ]
+      },
+      "lcrec-v2-010": {
+        "topic_id": "lcrec-v2-010",
+        "name": "Broadcast hash joins",
+        "allowed_technical_sources": [
+          "Designing Data-Intensive Applications.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-010-t1",
+            "source": "Designing Data-Intensive Applications.pdf",
+            "page": 431,
+            "start": 579,
+            "end_exclusive": 957,
+            "quote": "For example, imagine in the case of Figure 10-2  that the user database is small\nenough to fit in memory. In this case, when a mapper starts up, it can first read the\nuser database from the distributed filesystem into an in-memory hash table. Once\nthis is done, the mapper can scan over the user activity events and simply look up the\nuser ID for each event in the hash table.vi"
+          }
+        ],
+        "mechanism": "loading a small input into a key-indexed hash table and matching records from another input",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "join|matching|match|common|intersection|merge",
+          "tables|objects|records|arrays|dictionaries|keys|employees|users|\\bid\\b"
+        ]
+      },
+      "lcrec-v2-011": {
+        "topic_id": "lcrec-v2-011",
+        "name": "Keyed grouping and aggregation",
+        "allowed_technical_sources": [
+          "Designing Data-Intensive Applications.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-011-t1",
+            "source": "Designing Data-Intensive Applications.pdf",
+            "page": 429,
+            "start": 0,
+            "end_exclusive": 417,
+            "quote": "records with the same key form a group, and the next step is often to perform some\nkind of aggregation within each group—for example:\n• Counting the number of records in each group (like in our example of counting\npage views, which you would express as a COUNT(*) aggregation in SQL)\n• Adding up the values in one particular field (SUM(fieldname)) in SQL\n• Picking the top k records according to some ranking function"
+          }
+        ],
+        "mechanism": "grouping records by equal keys and counting or summing values within each group",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "group|frequenc|occurrences|count.*each|for each.*count|number of.*each"
+        ]
+      },
+      "lcrec-v2-012": {
+        "topic_id": "lcrec-v2-012",
+        "name": "Bitmap predicate intersection",
+        "allowed_technical_sources": [
+          "Designing Data-Intensive Applications.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-012-t1",
+            "source": "Designing Data-Intensive Applications.pdf",
+            "page": 121,
+            "start": 40,
+            "end_exclusive": 303,
+            "quote": "Load the bitmaps for product_sk = 31 and store_sk = 3, and calculate the bit‐\nwise AND. This works because the columns contain the rows in the same order,\nso the kth bit in one column’s bitmap corresponds to the same row as the kth bit\nin another column’s bitmap."
+          }
+        ],
+        "mechanism": "combining aligned row-membership bitmaps with bitwise AND to apply multiple predicates",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "bitwise (?:and|or)|bitmask|bitmap|intersection.*sets|intersect.*arrays"
+        ]
+      },
+      "lcrec-v2-013": {
+        "topic_id": "lcrec-v2-013",
+        "name": "CKY chart recognition",
+        "allowed_technical_sources": [
+          "Speech and Language Processing.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-013-t1",
+            "source": "Speech and Language Processing.pdf",
+            "page": 446,
+            "start": 631,
+            "end_exclusive": 871,
+            "quote": "At each such split, the algorithm considers whether the contents of the two cells can\nbe combined in a way that is sanctioned by a rule in the grammar. If such a rule\nexists, the non-terminal on its left-hand side is entered into the table."
+          }
+        ],
+        "mechanism": "combining two adjacent substring constituents only when a grammar rule permits their combination",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "parenthes|pars(?:e|ing)|grammar|expression|pyramid|scramble|boolean|valid.*substitut"
+        ]
+      },
+      "lcrec-v2-014": {
+        "topic_id": "lcrec-v2-014",
+        "name": "Maximum-spanning-tree dependency parsing",
+        "allowed_technical_sources": [
+          "Speech and Language Processing.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-014-t1",
+            "source": "Speech and Language Processing.pdf",
+            "page": 473,
+            "start": 143,
+            "end_exclusive": 683,
+            "quote": "The first step of the algorithm itself is quite straightforward. For each vertex\nin the graph, an incoming edge (representing a possible head assignment) with the\nhighest score is chosen. If the resulting set of edges produces a spanning tree then\nwe’re done. More formally, given the original fully-connected graphG= (V,E), a\nsubgraphT= (V,F)is a spanning tree if it has no cycles and each vertex (other than\nthe root) has exactly one edge entering it. If the greedy selection process produces\nsuch a tree then it is the best possible one."
+          }
+        ],
+        "mechanism": "selecting high-scoring dependency edges while requiring a spanning tree without cycles",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "spanning tree|connect.*(?:all|every).*(?:cost|point|cit|node)|(?:minimum|maximum).*(?:cost|weight).*(?:connect|edge)"
+        ]
+      },
+      "lcrec-v2-015": {
+        "topic_id": "lcrec-v2-015",
+        "name": "Shift-reduce dependency parsing",
+        "allowed_technical_sources": [
+          "Speech and Language Processing.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-015-t1",
+            "source": "Speech and Language Processing.pdf",
+            "page": 463,
+            "start": 45,
+            "end_exclusive": 600,
+            "quote": "SHIFT: Remove the word from the front of the input buffer and push it onto\nthe stack.\nWe’ll sometimes call operations likeLEFTARCandRIGHTARCreduceoperations,\nbased on a metaphor from shift-reduce parsing, in which reducing means combin-\ning elements on the stack. There are some preconditions for using operators. The\nLEFTARCoperator cannot be applied whenROOTis the second element of the stack\n(since by definition theROOTnode cannot have any incoming arcs). And both the\nLEFTARCandRIGHTARCoperators require two elements to be on the stack to be\napplied."
+          }
+        ],
+        "mechanism": "shifting incoming tokens onto a stack and reducing entries subject to stack preconditions",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "stack|parenthes|nested|expression|pars(?:e|ing)|remove.*(?:adjacent|substring)|substitut"
+        ]
+      },
+      "lcrec-v2-016": {
+        "topic_id": "lcrec-v2-016",
+        "name": "B-tree page splitting",
+        "allowed_technical_sources": [
+          "Designing Data-Intensive Applications.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-016-t1",
+            "source": "Designing Data-Intensive Applications.pdf",
+            "page": 103,
+            "start": 884,
+            "end_exclusive": 1197,
+            "quote": "If you want to add a new key, you\nneed to find the page whose range encompasses the new key and add it to that page.\nIf there isn’t enough free space in the page to accommodate the new key, it is split\ninto two half-full pages, and the parent page is updated to account for the new subdi‐\nvision of key ranges—see"
+          }
+        ],
+        "mechanism": "splitting an overflowing ordered page into two pages and updating its parent key ranges",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "split.*(?:tree|bst)|balanc.*(?:tree|bst)|(?:tree|bst).*balanc|insert.*(?:tree|bst)|delete.*(?:tree|bst)"
+        ]
+      },
+      "lcrec-v2-017": {
+        "topic_id": "lcrec-v2-017",
+        "name": "Bounded-buffer backpressure",
+        "allowed_technical_sources": [
+          "Designing Data-Intensive Applications.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-017-t1",
+            "source": "Designing Data-Intensive Applications.pdf",
+            "page": 463,
+            "start": 2251,
+            "end_exclusive": 2645,
+            "quote": "What happens if the producers send messages faster than the consumers can pro‐\ncess them? Broadly speaking, there are three options: the system can drop mes‐\nsages, buffer messages in a queue, or apply backpressure (also known as flow\ncontrol; i.e., blocking the producer from sending more messages). For example,\nUnix pipes and TCP use backpressure: they have a small fixed-size buffer, and if"
+          },
+          {
+            "id": "lcrec-v2-017-t2",
+            "source": "Designing Data-Intensive Applications.pdf",
+            "page": 464,
+            "start": 0,
+            "end_exclusive": 136,
+            "quote": "it fills up, the sender is blocked until the recipient takes data out of the buffer (see\n“Network congestion and queueing” on page 282)."
+          }
+        ],
+        "mechanism": "blocking a producer when its fixed-capacity buffer is full until a consumer removes data",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "blocking|bounded|circular queue|circular deque|producer|consumer|semaphore"
+        ]
+      },
+      "lcrec-v2-018": {
+        "topic_id": "lcrec-v2-018",
+        "name": "K-means centroid updates",
+        "allowed_technical_sources": [
+          "Speech and Language Processing.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-018-t1",
+            "source": "Speech and Language Processing.pdf",
+            "page": 395,
+            "start": 3332,
+            "end_exclusive": 3661,
+            "quote": "The k-means algorithm for clustering starts by assigning a random vector to each\nclusterk. Then there are two iterative steps. In theassignmentstep, given a set of\nkcurrent centroids and the entire dataset of vectors, each vector is assigned to the\ncluster whose codeword is the closest (by squared Euclidean distance). In there-"
+          }
+        ],
+        "mechanism": "repeatedly updating cluster centers from the samples assigned to each center",
+        "control": null,
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "cluster|centroid|center|average|mean",
+          "point|vector|sample|group|subset"
+        ]
+      },
+      "lcrec-v2-019": {
+        "topic_id": "lcrec-v2-019",
+        "name": "Explicit Sinkhorn naming control",
+        "allowed_technical_sources": [
+          "Probabilistic Machine Learning.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-019-t1",
+            "source": "Probabilistic Machine Learning.pdf",
+            "page": 356,
+            "start": 972,
+            "end_exclusive": 1368,
+            "quote": "Problem (6.215) can be solved using a fairly simple strategy that has proved very sturdy in practice:\na simple block-coordinate ascent (optimizing alternatively the objective infand theng), resulting in\nthe famous Sinkhorn algorithm [Sin67], here expressed with log-sum-exp updates, starting from an\narbitrary initialization forg, to carry out these two updates sequentially, until they converge:"
+          }
+        ],
+        "mechanism": "Sinkhorn algorithm",
+        "control": {
+          "type": "explicit_literal_requirement",
+          "required_literal": "Sinkhorn algorithm",
+          "expected_behavior": "abstain_if_absent_from_all_original_problem_statements",
+          "scope": "Only the explicitly required phrase; not absence of broader practice."
+        },
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "sinkhorn algorithm"
+        ]
+      },
+      "lcrec-v2-020": {
+        "topic_id": "lcrec-v2-020",
+        "name": "Explicit coreference naming control",
+        "allowed_technical_sources": [
+          "Speech and Language Processing.pdf"
+        ],
+        "technical_evidence": [
+          {
+            "id": "lcrec-v2-020-t1",
+            "source": "Speech and Language Processing.pdf",
+            "page": 504,
+            "start": 1012,
+            "end_exclusive": 1149,
+            "quote": "The merging algorithm, after performing coreference resolution, merges two activi-\nties that are likely to be describing the same events."
+          }
+        ],
+        "mechanism": "coreference resolution",
+        "control": {
+          "type": "explicit_literal_requirement",
+          "required_literal": "coreference resolution",
+          "expected_behavior": "abstain_if_absent_from_all_original_problem_statements",
+          "scope": "Only the explicitly required phrase; not absence of broader practice."
+        },
+        "target_problem_numbers": [],
+        "screening_patterns": [
+          "coreference resolution"
+        ]
+      }
+    },
+    "api_calls_allowed": false,
+    "production_runs_allowed": false,
+    "caveat": "Full statement screening is not equivalent to an independent semantic relevance judgment. Source-audit coverage is reported separately.",
+    "code_sha256": {
+      "main.py": "aeaa73072371229c2cf3ed985af52191af034f6367244c0779965fd5866707fe",
+      "evaluate_leetcode_recommendation.py": "0dde69c1d7c4e819bea2a86325d3856b7c25e45465d63367bebca9ae35a8d371",
+      "config.yml": "823a123c0f612a618c441f54ebce621a3aba139462f5194a399dfd5b04199113"
+    }
+  },
+  "questions": [
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-001-short",
+      "topic_id": "lcrec-v2-001",
+      "question": "According to \"Computer Vision: Algorithms and Applications.pdf\", recommend a related LeetCode problem for Dijkstra shortest-path contour tracing.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Computer Vision: Algorithms and Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-001-descriptive",
+      "topic_id": "lcrec-v2-001",
+      "question": "Using \"Computer Vision: Algorithms and Applications.pdf\", suggest LeetCode practice for finding the lowest-cost path between a seed point and a moving endpoint. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Computer Vision: Algorithms and Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-002-short",
+      "topic_id": "lcrec-v2-002",
+      "question": "According to \"Computer Vision: Algorithms and Applications.pdf\", recommend a related LeetCode problem for graph-cut energy minimization.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Computer Vision: Algorithms and Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-002-descriptive",
+      "topic_id": "lcrec-v2-002",
+      "question": "Using \"Computer Vision: Algorithms and Applications.pdf\", suggest LeetCode practice for separating a graph through a minimum cut rather than local pixel flips. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Computer Vision: Algorithms and Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-003-short",
+      "topic_id": "lcrec-v2-003",
+      "question": "According to \"Computer Vision: Algorithms and Applications.pdf\", recommend a related LeetCode problem for histogram equalization.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Computer Vision: Algorithms and Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-003-descriptive",
+      "topic_id": "lcrec-v2-003",
+      "question": "Using \"Computer Vision: Algorithms and Applications.pdf\", suggest LeetCode practice for mapping intensity frequencies to cumulative ranks or percentiles. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Computer Vision: Algorithms and Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-004-short",
+      "topic_id": "lcrec-v2-004",
+      "question": "According to \"Probabilistic Machine Learning.pdf\", recommend a related LeetCode problem for frequency-sensitive lossless code assignment.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Probabilistic Machine Learning.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-004-descriptive",
+      "topic_id": "lcrec-v2-004",
+      "question": "Using \"Probabilistic Machine Learning.pdf\", suggest LeetCode practice for assigning shorter representations to frequent symbols and longer ones to rare symbols. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Probabilistic Machine Learning.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-005-short",
+      "topic_id": "lcrec-v2-005",
+      "question": "According to \"Probabilistic Machine Learning.pdf\", recommend a related LeetCode problem for maximum-weight bipartite data association.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Probabilistic Machine Learning.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-005-descriptive",
+      "topic_id": "lcrec-v2-005",
+      "question": "Using \"Probabilistic Machine Learning.pdf\", suggest LeetCode practice for assigning measurements to tracked objects using a compatibility matrix and one-to-one matching. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Probabilistic Machine Learning.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-006-short",
+      "topic_id": "lcrec-v2-006",
+      "question": "According to \"Probabilistic Machine Learning.pdf\", recommend a related LeetCode problem for inverse-CDF random sampling.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Probabilistic Machine Learning.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-006-descriptive",
+      "topic_id": "lcrec-v2-006",
+      "question": "Using \"Probabilistic Machine Learning.pdf\", suggest LeetCode practice for mapping a uniform random draw through a cumulative distribution to select an outcome. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Probabilistic Machine Learning.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-007-short",
+      "topic_id": "lcrec-v2-007",
+      "question": "According to \"Grokking-the-system-design-interview-free.pdf\", recommend a related LeetCode problem for round-robin request dispatch.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Grokking-the-system-design-interview-free.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-007-descriptive",
+      "topic_id": "lcrec-v2-007",
+      "question": "Using \"Grokking-the-system-design-interview-free.pdf\", suggest LeetCode practice for cycling through servers in order and restarting at the beginning after the last server. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Grokking-the-system-design-interview-free.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-008-short",
+      "topic_id": "lcrec-v2-008",
+      "question": "According to \"Grokking-the-system-design-interview-free.pdf\", recommend a related LeetCode problem for quadtree spatial subdivision.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Grokking-the-system-design-interview-free.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-008-descriptive",
+      "topic_id": "lcrec-v2-008",
+      "question": "Using \"Grokking-the-system-design-interview-free.pdf\", suggest LeetCode practice for recursively splitting a spatial region into four child regions until each satisfies a capacity bound. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Grokking-the-system-design-interview-free.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-009-short",
+      "topic_id": "lcrec-v2-009",
+      "question": "According to \"Designing Data-Intensive Applications.pdf\", recommend a related LeetCode problem for continuation-bit variable-length integer encoding.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-009-descriptive",
+      "topic_id": "lcrec-v2-009",
+      "question": "Using \"Designing Data-Intensive Applications.pdf\", suggest LeetCode practice for using the high bit of each byte to indicate whether more bytes belong to the same encoded integer. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-010-short",
+      "topic_id": "lcrec-v2-010",
+      "question": "According to \"Designing Data-Intensive Applications.pdf\", recommend a related LeetCode problem for broadcast hash joins.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-010-descriptive",
+      "topic_id": "lcrec-v2-010",
+      "question": "Using \"Designing Data-Intensive Applications.pdf\", suggest LeetCode practice for loading a small input into a key-indexed hash table and matching records from another input. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-011-short",
+      "topic_id": "lcrec-v2-011",
+      "question": "According to \"Designing Data-Intensive Applications.pdf\", recommend a related LeetCode problem for keyed grouping and aggregation.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-011-descriptive",
+      "topic_id": "lcrec-v2-011",
+      "question": "Using \"Designing Data-Intensive Applications.pdf\", suggest LeetCode practice for grouping records by equal keys and counting or summing values within each group. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-012-short",
+      "topic_id": "lcrec-v2-012",
+      "question": "According to \"Designing Data-Intensive Applications.pdf\", recommend a related LeetCode problem for bitmap predicate intersection.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-012-descriptive",
+      "topic_id": "lcrec-v2-012",
+      "question": "Using \"Designing Data-Intensive Applications.pdf\", suggest LeetCode practice for combining aligned row-membership bitmaps with bitwise AND to apply multiple predicates. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-013-short",
+      "topic_id": "lcrec-v2-013",
+      "question": "According to \"Speech and Language Processing.pdf\", recommend a related LeetCode problem for CKY chart recognition.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-013-descriptive",
+      "topic_id": "lcrec-v2-013",
+      "question": "Using \"Speech and Language Processing.pdf\", suggest LeetCode practice for combining two adjacent substring constituents only when a grammar rule permits their combination. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-014-short",
+      "topic_id": "lcrec-v2-014",
+      "question": "According to \"Speech and Language Processing.pdf\", recommend a related LeetCode problem for maximum-spanning-tree dependency parsing.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-014-descriptive",
+      "topic_id": "lcrec-v2-014",
+      "question": "Using \"Speech and Language Processing.pdf\", suggest LeetCode practice for selecting high-scoring dependency edges while requiring a spanning tree without cycles. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-015-short",
+      "topic_id": "lcrec-v2-015",
+      "question": "According to \"Speech and Language Processing.pdf\", recommend a related LeetCode problem for shift-reduce dependency parsing.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-015-descriptive",
+      "topic_id": "lcrec-v2-015",
+      "question": "Using \"Speech and Language Processing.pdf\", suggest LeetCode practice for shifting incoming tokens onto a stack and reducing entries subject to stack preconditions. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-016-short",
+      "topic_id": "lcrec-v2-016",
+      "question": "According to \"Designing Data-Intensive Applications.pdf\", recommend a related LeetCode problem for B-tree page splitting.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-016-descriptive",
+      "topic_id": "lcrec-v2-016",
+      "question": "Using \"Designing Data-Intensive Applications.pdf\", suggest LeetCode practice for splitting an overflowing ordered page into two pages and updating its parent key ranges. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-017-short",
+      "topic_id": "lcrec-v2-017",
+      "question": "According to \"Designing Data-Intensive Applications.pdf\", recommend a related LeetCode problem for bounded-buffer backpressure.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-017-descriptive",
+      "topic_id": "lcrec-v2-017",
+      "question": "Using \"Designing Data-Intensive Applications.pdf\", suggest LeetCode practice for blocking a producer when its fixed-capacity buffer is full until a consumer removes data. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Designing Data-Intensive Applications.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-018-short",
+      "topic_id": "lcrec-v2-018",
+      "question": "According to \"Speech and Language Processing.pdf\", recommend a related LeetCode problem for k-means centroid updates.",
+      "wording": "short",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-018-descriptive",
+      "topic_id": "lcrec-v2-018",
+      "question": "Using \"Speech and Language Processing.pdf\", suggest LeetCode practice for repeatedly updating cluster centers from the samples assigned to each center. Explain the computational connection and its limitations.",
+      "wording": "descriptive",
+      "kind": "ordinary",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "recommend_useful_practice_when_supported",
+      "origin_batch": "fresh_v2",
+      "difficulty": "hard",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "practice_transfer"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-019-short",
+      "topic_id": "lcrec-v2-019",
+      "question": "According to \"Probabilistic Machine Learning.pdf\", recommend a LeetCode problem only if its statement explicitly names Sinkhorn algorithm. Otherwise say no such problem was found.",
+      "wording": "short",
+      "kind": "explicit_naming_control",
+      "allowed_technical_sources": [
+        "Probabilistic Machine Learning.pdf"
+      ],
+      "expected_behavior": "honor_explicit_literal_requirement",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "literal_requirement"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-019-descriptive",
+      "topic_id": "lcrec-v2-019",
+      "question": "Find coding practice for Sinkhorn algorithm in \"Probabilistic Machine Learning.pdf\". Require the literal phrase \"Sinkhorn algorithm\" in the LeetCode statement; do not offer analogies instead.",
+      "wording": "descriptive",
+      "kind": "explicit_naming_control",
+      "allowed_technical_sources": [
+        "Probabilistic Machine Learning.pdf"
+      ],
+      "expected_behavior": "honor_explicit_literal_requirement",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "literal_requirement"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-020-short",
+      "topic_id": "lcrec-v2-020",
+      "question": "According to \"Speech and Language Processing.pdf\", recommend a LeetCode problem only if its statement explicitly names coreference resolution. Otherwise say no such problem was found.",
+      "wording": "short",
+      "kind": "explicit_naming_control",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "honor_explicit_literal_requirement",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "short",
+        "literal_requirement"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "lcrec-v2-020-descriptive",
+      "topic_id": "lcrec-v2-020",
+      "question": "Find coding practice for coreference resolution in \"Speech and Language Processing.pdf\". Require the literal phrase \"coreference resolution\" in the LeetCode statement; do not offer analogies instead.",
+      "wording": "descriptive",
+      "kind": "explicit_naming_control",
+      "allowed_technical_sources": [
+        "Speech and Language Processing.pdf"
+      ],
+      "expected_behavior": "honor_explicit_literal_requirement",
+      "origin_batch": "fresh_v2",
+      "difficulty": "medium",
+      "tags": [
+        "fresh_topic",
+        "source_restricted",
+        "paired_wording",
+        "descriptive",
+        "literal_requirement"
+      ]
+    }
+  ]
+}

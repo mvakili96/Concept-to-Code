@@ -1,2 +1,9 @@
 documents/
 index-data/
+__pycache__/
+.env
+.env.*
+!.env.example
+diagnostics/
+.checkpoint/
+.vscode/

@@ -1,0 +1,1340 @@
+run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-001-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", recommend a related LeetCode problem for Dijkstra shortest-path contour tracing.",ordinary,completed,,,0,0,,0,0,0,True,,5.167546650860459,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-001-descriptive,"Using ""Computer Vision: Algorithms and Applications.pdf"", suggest LeetCode practice for finding the lowest-cost path between a seed point and a moving endpoint. Explain the computational connection and its limitations.",ordinary,completed,1810;3651;3596,related_practice;related_practice;related_practice,3,3,1.0,0,0,0,False,,160.3721058338415,65,"1810. Minimum Path Cost in a Hidden Grid (Medium)
+Connection: Direct match
+Related practice pattern: Graph shortest-path search (Dijkstra) over grid neighbors
+What transfers: Technical component: Graph shortest-path search (Dijkstra) over grid neighbors. Problem component: Find the least movement cost from a robot's initial cell to a target in a hidden grid, or -1 if unreachable.. Shared component: computing a minimum-cost path on a grid using shortest-path search (Dijkstra-like).
+Important difference: live-wire recomputes interactively with moving endpoint and vision-based costs; LeetCode target and weights are static
+Technical quote: Next, as the user traces a rough curve, the system continuously recomputes the lowest-
+cost path between the starting seed point and the current mouse location using Dijkstra’s al-
+Problem quote: Find the least movement cost from a robot's initial cell to a target in a hidden grid, or -1 if
+unreachable.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 499; LeetCode_4000_Problem_Reference.pdf, PAGE: 906
+
+3651. Minimum Cost Path with Teleportations (Hard)
+Connection: Direct match
+Related practice pattern: Graph shortest-path search (Dijkstra) over grid neighbors
+What transfers: Technical component: Graph shortest-path search (Dijkstra) over grid neighbors. Problem component: Required result: the smallest total cost to reach cell (m - 1, n - 1) from (0, 0).. Shared component: compute minimal accumulated path cost from a fixed start to a target using shortest-path logic.
+Important difference: technical path endpoint moves interactively; problem endpoint is fixed and static
+Technical quote: Next, as the user traces a rough curve, the system continuously recomputes the lowest-
+cost path between the starting seed point and the current mouse location using Dijkstra’s al-
+Problem quote: Required result: the
+smallest total cost to reach cell (m - 1, n - 1) from (0, 0).
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 499; LeetCode_4000_Problem_Reference.pdf, PAGE: 1827
+
+3596. Minimum Cost Path with Alternating Directions I (Medium)
+Connection: Direct match
+Related practice pattern: Graph shortest-path search (Dijkstra) over grid neighbors
+What transfers: Technical component: Graph shortest-path search (Dijkstra) over grid neighbors. Problem component: Required result: the smallest total cost required to reach (m - 1, n - 1).. Shared component: computing minimal accumulated path cost over a grid using shortest-path logic.
+Important difference: technical path endpoint moves interactively; coding endpoint and costs are static
+Technical quote: Next, as the user traces a rough curve, the system continuously recomputes the lowest-
+cost path between the starting seed point and the current mouse location using Dijkstra’s al-
+Problem quote: Required result: the smallest
+total cost required to reach (m - 1, n - 1).
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 499; LeetCode_4000_Problem_Reference.pdf, PAGE: 1800",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-002-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", recommend a related LeetCode problem for graph-cut energy minimization.",ordinary,completed,2493;3789;1547,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,142.81618185597472,60,"2493. Divide Nodes Into the Maximum Number of Groups (Hard)
+Connection: Related practice
+Related practice pattern: model a discrete optimization problem as a flow network and solve it via max-flow/min-cut to obtain a binary labeling
+What transfers: Technical component: model a discrete optimization problem as a flow network and solve it via max-flow/min-cut to obtain a binary labeling. Problem component: Divide the nodes of the graph into m groups. Shared component: partitioning graph vertices into disjoint subsets based on optimization constraints.
+Important difference: technical pattern enforces binary s-t cut; problem uses multiple ordered groups
+Technical quote: munity by Boykov, Veksler, and Zabih (2001) is to re-formulate the energy minimization as
+a max-ﬂow/min-cut graph optimization problem (Greig, Porteous, and Seheult 1989).
+Problem quote: Divide the nodes of the graph into m groups (indexed
+from one) such that: Each node in the graph belongs to exactly one group.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 242; LeetCode_4000_Problem_Reference.pdf, PAGE: 1247
+
+3789. Minimum Cost to Acquire Required Items (Medium)
+Connection: Stretch connection
+Related practice pattern: model a discrete optimization problem as a flow network and solve it via max-flow/min-cut to obtain a binary labeling
+What transfers: Technical component: model a discrete optimization problem as a flow network and solve it via max-flow/min-cut to obtain a binary labeling. Problem component: an integer representing the smallest attainable total cost to achieve these requirements. Shared component: computing a minimum-cost objective value under constraints.
+Important difference: vision uses graph cuts; problem evidence omits any graph or flow structure
+Technical quote: munity by Boykov, Veksler, and Zabih (2001) is to re-formulate the energy minimization as
+a max-ﬂow/min-cut graph optimization problem (Greig, Porteous, and Seheult 1989).
+Problem quote: Required result: an integer
+representing the smallest attainable total cost to achieve these requirements.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 242; LeetCode_4000_Problem_Reference.pdf, PAGE: 1896
+
+1547. Minimum Cost to Cut a Stick (Hard)
+Connection: Stretch connection
+Related practice pattern: model a discrete optimization problem as a flow network and solve it via max-flow/min-cut to obtain a binary labeling
+What transfers: Technical component: model a discrete optimization problem as a flow network and solve it via max-flow/min-cut to obtain a binary labeling. Problem component: Return the smallest total cost over all cut orders.. Shared component: global minimization of an objective over combinatorial configurations.
+Important difference: technical uses flow-based min-cut; problem uses interval DP on cuts
+Technical quote: munity by Boykov, Veksler, and Zabih (2001) is to re-formulate the energy minimization as
+a max-ﬂow/min-cut graph optimization problem (Greig, Porteous, and Seheult 1989).
+Problem quote: Return the smallest
+total cost over all cut orders.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 242; LeetCode_4000_Problem_Reference.pdf, PAGE: 774",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-002-descriptive,"Using ""Computer Vision: Algorithms and Applications.pdf"", suggest LeetCode practice for separating a graph through a minimum cut rather than local pixel flips. Explain the computational connection and its limitations.",ordinary,completed,3547;2642;3924,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,122.84323432692327,50,"3547. Maximum Sum of Edge Values in a Graph (Hard)
+Connection: Related practice
+Related practice pattern: Model segmentation as a weighted graph and use global minimum-cut/maximum-flow instead of local node updates to partition nodes into two labeled sets.
+What transfers: Technical component: Model segmentation as a weighted graph and use global minimum-cut/maximum-flow instead of local node updates to partition nodes into two labeled sets.. Problem component: compute the total of the values of all edges in the graph. Shared component: aggregating edge weights over a cut or subgraph for an objective value.
+Important difference: vision uses global min-cut constraints; problem sums all edges, not a cut
+Technical quote: The capacities of the other edges in the graph are derived from the region and boundary
+energy terms, i.e., pixels that are more compatible with the foreground or background region
+get stronger connections to the respective source or sink; adjacent pixels with greater smooth-
+ness also get stronger links.
+Problem quote: Your score is the total of
+the values of all edges in the graph.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 254; LeetCode_4000_Problem_Reference.pdf, PAGE: 1775
+
+2642. Design Graph With Shortest Path Calculator (Hard)
+Connection: Related practice
+Related practice pattern: Model segmentation as a weighted graph and use global minimum-cut/maximum-flow instead of local node updates to partition nodes into two labeled sets.
+What transfers: Technical component: Model segmentation as a weighted graph and use global minimum-cut/maximum-flow instead of local node updates to partition nodes into two labeled sets.. Problem component: returns the smallest cost of a path from node1 to node2. Shared component: optimization over weighted graph structures using global cost criteria.
+Important difference: min-cut partitions a graph; shortest-path finds a single minimal route
+Technical quote: Once the minimum-cut/maximum-ﬂow problem has been solved
+using a polynomial time algorithm (Goldberg and Tarjan 1988; Boykov and Kolmogorov
+2004), pixels on either side of the computed cut are labeled according to the source or sink to
+which they remain connected.
+Problem quote: Input
+guarantee: there is no edge between the two nodes before adding this one. int shortestPath(int
+node1, int node2) returns the smallest cost of a path from node1 to node2.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 254; LeetCode_4000_Problem_Reference.pdf, PAGE: 1322
+
+3924. Minimum Threshold Path With Limited Heavy Edges (Hard)
+Connection: Related practice
+Related practice pattern: Model segmentation as a weighted graph and use global minimum-cut/maximum-flow instead of local node updates to partition nodes into two labeled sets.
+What transfers: Technical component: Model segmentation as a weighted graph and use global minimum-cut/maximum-flow instead of local node updates to partition nodes into two labeled sets.. Problem component: Required result: the smallest integer threshold such that one or more valid path exists from source to target.. Shared component: global reasoning over all source–target connections instead of local edge decisions.
+Important difference: one optimizes cut capacity for segmentation, the other threshold for path feasibility
+Technical quote: Once the minimum-cut/maximum-ﬂow problem has been solved
+using a polynomial time algorithm (Goldberg and Tarjan 1988; Boykov and Kolmogorov
+2004), pixels on either side of the computed cut are labeled according to the source or sink to
+which they remain connected.
+Problem quote: Required result: the smallest integer threshold such that one or more valid path exists from source
+to target.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 254; LeetCode_4000_Problem_Reference.pdf, PAGE: 1964",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-003-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", recommend a related LeetCode problem for histogram equalization.",ordinary,completed,3555;3422;2470,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,154.25471141701564,65,"3555. Smallest Subarray to Sort in Every Sliding Window (Medium)
+Connection: Related practice
+Related practice pattern: sliding-window cumulative counts with incremental updates
+What transfers: Technical component: sliding-window cumulative counts with incremental updates. Problem component: determine the smallest length of a continuous segment that must be sorted. Shared component: maintaining and updating state incrementally as a window slides over data.
+Important difference: technical task tracks frequency counts; coding task measures sorting segment length
+Technical quote: This process can be quite slow
+(M 2 operations per pixel), although with clever programming only the histogram entries
+corresponding to the pixels entering and leaving the block (in a raster scan across the image)
+Problem quote: For each unbroken subarray of length k,
+determine the smallest length of a continuous segment that must be sorted so that the entire
+window becomes non‑decreasing; if the window is already sorted, its required length is zero.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 1779
+
+3422. Minimum Operations to Make Subarray Elements Equal (Medium)
+Connection: Related practice
+Related practice pattern: sliding-window cumulative counts with incremental updates
+What transfers: Technical component: sliding-window cumulative counts with incremental updates. Problem component: Ensure that one or more subarray of size k in nums has all elements equal.. Shared component: reasoning over all sliding windows/subarrays of fixed size across data.
+Important difference: technical uses histograms; coding changes numeric values to equalize elements
+Technical quote: One way to eliminate blocking artifacts is to use a moving window, i.e., to recompute the
+histogram for every M×M block centered at each pixel.
+Problem quote: Required result: the smallest count of
+operations required to ensure that one or more subarray of size k in nums has all elements equal.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 1713
+
+2470. Number of Subarrays With LCM Equal to K (Medium)
+Connection: Related practice
+Related practice pattern: sliding-window cumulative counts with incremental updates
+What transfers: Technical component: sliding-window cumulative counts with incremental updates. Problem component: compute the count of subarrays of nums where the least common multiple of the subarray's elements is k. Shared component: maintaining a sliding-window aggregate via incremental updates rather than full recomputation.
+Important difference: histogram uses counts over intensities; subarray task tracks arithmetic LCM value
+Technical quote: This process can be quite slow
+(M 2 operations per pixel), although with clever programming only the histogram entries
+corresponding to the pixels entering and leaving the block (in a raster scan across the image)
+Problem quote: For an array of integers nums and an integer k, compute the count of subarrays of nums where the
+least common multiple of the subarray's elements is k.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 1236",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-003-descriptive,"Using ""Computer Vision: Algorithms and Applications.pdf"", suggest LeetCode practice for mapping intensity frequencies to cumulative ranks or percentiles. Explain the computational connection and its limitations.",ordinary,completed,2080;506;3945,unassessed;related_practice;unassessed,1,1,1.0,2,0,0,False,,164.37485170387663,62,"2080. Range Frequency Queries (Medium)
+Connection: Related practice
+Related practice pattern: Build a prefix-sum cumulative distribution to map discrete frequencies to percentiles or ranks.
+What transfers: Technical component: Build a prefix-sum cumulative distribution to map discrete frequencies to percentiles or ranks.. Problem component: Design a data structure to find the frequency of a given value in a given subarray.. Shared component: Counting occurrences of a discrete value within a bounded index range..
+Important difference: Technical pattern maps counts to cumulative percentiles; problem only returns raw counts.
+Technical quote: The answer is to integrate
+the distributionh(I) to obtain the cumulative distributionc(I),
+c(I) = 1
+N
+I∑
+i=0
+h(i) =c(I− 1) + 1
+Nh(I), (3.9)
+whereN is the number of pixels in the image or students in the class.
+Problem quote: Design a data structure to find the frequency of a given value in a given subarray.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 1041
+
+506. Relative Ranks (Easy)
+Connection: Related practice
+Related practice pattern: Build a prefix-sum cumulative distribution to map discrete frequencies to percentiles or ranks.
+What transfers: Technical component: Build a prefix-sum cumulative distribution to map discrete frequencies to percentiles or ranks.. Problem component: assign competition placements in descending score order. Shared component: mapping discrete values to ranks via cumulative ordering of frequencies.
+Important difference: technical normalizes to percentiles; problem outputs integer placements and medals
+Technical quote: The answer is to integrate
+the distributionh(I) to obtain the cumulative distributionc(I),
+c(I) = 1
+N
+I∑
+i=0
+h(i) =c(I− 1) + 1
+Nh(I), (3.9)
+whereN is the number of pixels in the image or students in the class.
+Problem quote: Given distinct scores, assign competition placements in descending score order.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 253
+
+3945. Digit Frequency Score (Easy)
+Connection: Related practice
+Related practice pattern: Build a prefix-sum cumulative distribution to map discrete frequencies to percentiles or ranks.
+What transfers: Technical component: Build a prefix-sum cumulative distribution to map discrete frequencies to percentiles or ranks.. Problem component: The score of n means the total of d * freq(d) over all different digits d, where freq(d) specifies the count of times the digit d appears in n.. Shared component: Building and using a discrete frequency histogram over a bounded symbol set..
+Important difference: Technical uses prefix sums for cumulative percentiles; coding sums weighted frequencies once.
+Technical quote: The answer is to integrate
+the distributionh(I) to obtain the cumulative distributionc(I),
+c(I) = 1
+N
+I∑
+i=0
+h(i) =c(I− 1) + 1
+Nh(I), (3.9)
+whereN is the number of pixels in the image or students in the class.
+Problem quote: The score of n means the total of d * freq(d) over all different digits d,
+where freq(d) specifies the count of times the digit d appears in n.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 1974",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-004-short,"According to ""Probabilistic Machine Learning.pdf"", recommend a related LeetCode problem for frequency-sensitive lossless code assignment.",ordinary,completed,3663;3005;2641,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,185.10132534592412,72,"3663. Find The Least Frequent Digit (Easy)
+Connection: Stretch connection
+Related practice pattern: Greedy frequency-based assignment of shorter codes to more probable symbols
+What transfers: Technical component: Greedy frequency-based assignment of shorter codes to more probable symbols. Problem component: For an integer n, compute the digit that occurs least frequently in its decimal representation.. Shared component: counting symbol frequencies as a basis for later coding decisions.
+Important difference: technical pattern assigns code lengths; problem only finds a rare digit
+Technical quote: Common techniques for realizing lossless codes include Huffman coding, arithmetic coding, and
+asymmetric numeral systems [Dud13].
+Problem quote: For an integer n, compute the digit that occurs least frequently in its decimal representation.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1833
+
+3005. Count Elements With Maximum Frequency (Easy)
+Connection: Stretch connection
+Related practice pattern: Greedy frequency-based assignment of shorter codes to more probable symbols
+What transfers: Technical component: Greedy frequency-based assignment of shorter codes to more probable symbols. Problem component: The frequency of an element is the count of occurrences of that element in the array.. Shared component: Estimating empirical symbol probabilities via occurrence counts.
+Important difference: Technical pattern proceeds to code construction; problem stops at frequency definition
+Technical quote: The input to these algorithms is a probability distribution
+over strings (which is where ML comes in).
+Problem quote: The frequency of an
+element is the count of occurrences of that element in the array.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1503
+
+2641. Cousins in Binary Tree II (Medium)
+Connection: Stretch connection
+Related practice pattern: Greedy frequency-based assignment of shorter codes to more probable symbols
+What transfers: Technical component: Greedy frequency-based assignment of shorter codes to more probable symbols. Problem component: replace the value of each node in the tree with the total of all its cousins' values.. Shared component: assigning new values to items based on values of a related subset.
+Important difference: technical pattern optimizes code length via probabilities; problem uses tree-level cousin sums
+Technical quote: Common techniques for realizing lossless codes include Huffman coding, arithmetic coding, and
+asymmetric numeral systems [Dud13].
+Problem quote: With the root of a binary tree, replace the value of each node in the tree with the total of all its
+cousins' values.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1321",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-004-descriptive,"Using ""Probabilistic Machine Learning.pdf"", suggest LeetCode practice for assigning shorter representations to frequent symbols and longer ones to rare symbols. Explain the computational connection and its limitations.",ordinary,completed,3663;3318;3541,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,171.632384755183,66,"3663. Find The Least Frequent Digit (Easy)
+Connection: Related practice
+Related practice pattern: Greedy frequency-aware encoding where symbols are counted, mapped to probabilities, and then assigned shorter bit-strings for higher-probability symbols and longer bit-strings for lower-probability symbols.
+What transfers: Technical component: Greedy frequency-aware encoding where symbols are counted, mapped to probabilities, and then assigned shorter bit-strings for higher-probability symbols and longer bit-strings for lower-probability symbols.. Problem component: For an integer n, compute the digit that occurs least frequently in its decimal representation.. Shared component: count symbol occurrences to derive a frequency-based ranking.
+Important difference: technical encoding uses full distribution to build codes; problem only finds rarest digit
+Technical quote: The reason for this is as follows: if we can model
+the probability of different kinds of data samples, then we can assign shortcode wordsto the
+most frequently occuring ones, reserving longer encodings for the less frequent ones.
+Problem quote: For an integer n, compute the digit that occurs least frequently in its decimal representation.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1833
+
+3318. Find X-Sum of All K-Long Subarrays I (Easy)
+Connection: Related practice
+Related practice pattern: Greedy frequency-aware encoding where symbols are counted, mapped to probabilities, and then assigned shorter bit-strings for higher-probability symbols and longer bit-strings for lower-probability symbols.
+What transfers: Technical component: Greedy frequency-aware encoding where symbols are counted, mapped to probabilities, and then assigned shorter bit-strings for higher-probability symbols and longer bit-strings for lower-probability symbols.. Problem component: Count the occurrences of all elements in the array.. Shared component: build a frequency table as basis for frequency-aware encoding decisions.
+Important difference: technical pattern then designs variable-length codes; problem only computes counts
+Technical quote: The reason for this is as follows: if we can model
+the probability of different kinds of data samples, then we can assign shortcode wordsto the
+most frequently occuring ones, reserving longer encodings for the less frequent ones.
+Problem quote: The x-sum of an array is
+calculated by the following procedure: Count the occurrences of all elements in the array.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1660
+
+3541. Find Most Frequent Vowel and Consonant (Easy)
+Connection: Related practice
+Related practice pattern: Greedy frequency-aware encoding where symbols are counted, mapped to probabilities, and then assigned shorter bit-strings for higher-probability symbols and longer bit-strings for lower-probability symbols.
+What transfers: Technical component: Greedy frequency-aware encoding where symbols are counted, mapped to probabilities, and then assigned shorter bit-strings for higher-probability symbols and longer bit-strings for lower-probability symbols.. Problem component: Find the vowel (one of 'a', 'e', 'i', 'o', or 'u') with the largest frequency.. Shared component: computing symbol frequencies and identifying the most frequent symbol.
+Important difference: technical pattern builds variable-length codes; problem only finds max-frequency vowel
+Technical quote: The reason for this is as follows: if we can model
+the probability of different kinds of data samples, then we can assign shortcode wordsto the
+most frequently occuring ones, reserving longer encodings for the less frequent ones.
+Problem quote: Your task is to: Find the vowel (one of
+'a', 'e', 'i', 'o', or 'u') with the largest frequency.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1772",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-005-short,"According to ""Probabilistic Machine Learning.pdf"", recommend a related LeetCode problem for maximum-weight bipartite data association.",ordinary,completed,2323;1057;3693,unassessed;related_practice;unassessed,1,1,1.0,2,0,0,False,,141.80456106201746,59,"2323. Find Minimum Time to Finish All Jobs II (Medium)
+Connection: Related practice
+Related practice pattern: Model bipartite data association as a cost/weight matrix and solve an optimal matching using the Hungarian algorithm
+What transfers: Technical component: Model bipartite data association as a cost/weight matrix and solve an optimal matching using the Hungarian algorithm. Problem component: Each job should be assigned to exactly one worker. Shared component: construct one-to-one matching between two node sets in a bipartite graph.
+Important difference: technical maximizes weight; problem emphasizes feasibility and minimal days objective
+Technical quote: We can then compute the maximal weight bipartite matching using theHungarian algorithm,
+which takesO(max(N,M) 3)time (see e.g., [BDM09]).
+Problem quote: Each job should be assigned to exactly one worker, such that each
+worker completes exactly one job.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1162
+
+1057. Campus Bikes (Medium)
+Connection: Related practice
+Related practice pattern: Model bipartite data association as a cost/weight matrix and solve an optimal matching using the Hungarian algorithm
+What transfers: Technical component: Model bipartite data association as a cost/weight matrix and solve an optimal matching using the Hungarian algorithm. Problem component: Assign a bike to each worker.. Shared component: constructing a one-to-one assignment between two disjoint sets.
+Important difference: technical pattern optimizes over a cost matrix; problem omits optimization details
+Technical quote: We can then compute the maximal weight bipartite matching using theHungarian algorithm,
+which takesO(max(N,M) 3)time (see e.g., [BDM09]).
+Problem quote: Assign a bike to each worker.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 529
+
+3693. Climbing Stairs II (Medium)
+Connection: Related practice
+Related practice pattern: Model bipartite data association as a cost/weight matrix and solve an optimal matching using the Hungarian algorithm
+What transfers: Technical component: Model bipartite data association as a cost/weight matrix and solve an optimal matching using the Hungarian algorithm. Problem component: Required result: the smallest total cost to reach step n.. Shared component: optimization of global objective over many local costs.
+Important difference: bipartite assignment vs sequential path with constrained transitions
+Technical quote: We can then compute the maximal weight bipartite matching using theHungarian algorithm,
+which takesO(max(N,M) 3)time (see e.g., [BDM09]).
+Problem quote: Required result: the smallest total cost to reach step n.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1848",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-005-descriptive,"Using ""Probabilistic Machine Learning.pdf"", suggest LeetCode practice for assigning measurements to tracked objects using a compatibility matrix and one-to-one matching. Explain the computational connection and its limitations.",ordinary,completed,3476;1947;2323,unassessed;direct_match;unassessed,1,1,1.0,2,0,0,False,,137.87437019310892,56,"3476. Maximize Profit from Task Assignment (Medium)
+Connection: Direct match
+Related practice pattern: Model measurement-to-track assignment as a maximal weight bipartite matching over a compatibility matrix, padding with dummy nodes to enforce one-to-one matches and handle false alarms or missed detections.
+What transfers: Technical component: Model measurement-to-track assignment as a maximal weight bipartite matching over a compatibility matrix, padding with dummy nodes to enforce one-to-one matches and handle false alarms or missed detections.. Problem component: Required result: the largest total profit that can be earned by optimally assigning the tasks to the workers.. Shared component: optimal one-to-one assignment maximizing total weight over a bipartite graph.
+Important difference: measurement-to-track uses probabilistic compatibilities and dummies; task-profit is simpler, deterministic
+Technical quote: We can then compute the maximal weight bipartite matching using theHungarian algorithm,
+which takesO(max(N,M) 3)time (see e.g., [BDM09]).
+Problem quote: Required result: the largest total profit that can be earned
+by optimally assigning the tasks to the workers.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1740
+
+1947. Maximum Compatibility Score Sum (Medium)
+Connection: Direct match
+Related practice pattern: Model measurement-to-track assignment as a maximal weight bipartite matching over a compatibility matrix, padding with dummy nodes to enforce one-to-one matches and handle false alarms or missed detections.
+What transfers: Technical component: Model measurement-to-track assignment as a maximal weight bipartite matching over a compatibility matrix, padding with dummy nodes to enforce one-to-one matches and handle false alarms or missed detections.. Problem component: You are tasked with finding the optimal student-mentor pairings to maximize the total of the compatibility scores.. Shared component: solving a maximum-weight bipartite matching over a pairwise compatibility matrix.
+Important difference: technical pattern uses dummy nodes and continuous scores; LeetCode uses discrete answers only
+Technical quote: We can then compute the maximal weight bipartite matching using theHungarian algorithm,
+which takesO(max(N,M) 3)time (see e.g., [BDM09]).
+Problem quote: You are tasked
+with finding the optimal student-mentor pairings to maximize the total of the compatibility scores.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 974
+
+2323. Find Minimum Time to Finish All Jobs II (Medium)
+Connection: Related practice
+Related practice pattern: Model measurement-to-track assignment as a maximal weight bipartite matching over a compatibility matrix, padding with dummy nodes to enforce one-to-one matches and handle false alarms or missed detections.
+What transfers: Technical component: Model measurement-to-track assignment as a maximal weight bipartite matching over a compatibility matrix, padding with dummy nodes to enforce one-to-one matches and handle false alarms or missed detections.. Problem component: Each job should be assigned to exactly one worker, such that each worker completes exactly one job.. Shared component: construct and solve a one-to-one bipartite matching between two finite sets.
+Important difference: technical task maximizes compatibility weights; frozen task omits objective and costs
+Technical quote: We can then compute the maximal weight bipartite matching using theHungarian algorithm,
+which takesO(max(N,M) 3)time (see e.g., [BDM09]).
+Problem quote: Each job should be assigned to exactly one worker, such that each
+worker completes exactly one job.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1162",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-006-short,"According to ""Probabilistic Machine Learning.pdf"", recommend a related LeetCode problem for inverse-CDF random sampling.",ordinary,completed,398;2191;2699,related_practice;unassessed;unassessed,1,1,1.0,2,0,0,False,,145.5888967269566,58,"398. Random Pick Index (Medium)
+Connection: Related practice
+Related practice pattern: Map uniform [0,1] samples through a monotone inverse-CDF-like function to generate values matching a target distribution
+What transfers: Technical component: Map uniform [0,1] samples through a monotone inverse-CDF-like function to generate values matching a target distribution. Problem component: design pick(target) to return an index whose value equals target, uniformly among all such indices.. Shared component: construct a mapping from uniform randomness to a target distribution over outcomes.
+Important difference: technical pattern targets continuous cdf; LeetCode uses discrete index distribution
+Technical quote: Hence we can sample from any univariate distribution, for which we can evaluate its inverse cdf, as
+follows: generate a random numberu∼U (0, 1)using apseudorandom number generator(see
+e.g., [Pre+88] for details).
+Problem quote: Given integer array nums, design pick(target) to return an index whose value equals target,
+uniformly among all such indices.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 520; LeetCode_4000_Problem_Reference.pdf, PAGE: 199
+
+2191. Sort the Jumbled Numbers (Medium)
+Connection: Related practice
+Related practice pattern: Map uniform [0,1] samples through a monotone inverse-CDF-like function to generate values matching a target distribution
+What transfers: Technical component: Map uniform [0,1] samples through a monotone inverse-CDF-like function to generate values matching a target distribution. Problem component: Required result: the array nums sorted in nondecreasing order based on the mapped values of its elements.. Shared component: Design and apply a monotone mapping from base inputs to ordered target outputs.
+Important difference: Technical pattern is probabilistic sampling; coding task is deterministic sorting by mapped keys
+Technical quote: Hence we can sample from any univariate distribution, for which we can evaluate its inverse cdf, as
+follows: generate a random numberu∼U (0, 1)using apseudorandom number generator(see
+e.g., [Pre+88] for details).
+Problem quote: Required result: the array nums sorted in nondecreasing order based on the mapped values of its
+elements.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 520; LeetCode_4000_Problem_Reference.pdf, PAGE: 1096
+
+2699. Modify Graph Edge Weights (Hard)
+Connection: Stretch connection
+Related practice pattern: Map uniform [0,1] samples through a monotone inverse-CDF-like function to generate values matching a target distribution
+What transfers: Technical component: Map uniform [0,1] samples through a monotone inverse-CDF-like function to generate values matching a target distribution. Problem component: modify all edges with a weight of -1 by assigning them integer greater than zero values. Shared component: choosing numeric values within a specified range to satisfy a higher-level constraint.
+Important difference: technical samples randomness; coding deterministically tunes weights to hit shortest-path target
+Technical quote: Hence we can sample from any univariate distribution, for which we can evaluate its inverse cdf, as
+follows: generate a random numberu∼U (0, 1)using apseudorandom number generator(see
+e.g., [Pre+88] for details).
+Problem quote: Goal: modify all edges with a weight of -1 by assigning
+them integer greater than zero values in the range [1, 2 * 10^9] so that the shortest distance
+between the nodes source and destination becomes equal to an integer target.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 520; LeetCode_4000_Problem_Reference.pdf, PAGE: 1350",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-006-descriptive,"Using ""Probabilistic Machine Learning.pdf"", suggest LeetCode practice for mapping a uniform random draw through a cumulative distribution to select an outcome. Explain the computational connection and its limitations.",ordinary,completed,528;381;497,direct_match;related_practice;related_practice,3,3,1.0,0,0,0,False,,141.8684096429497,55,"528. Random Pick with Weight (Medium)
+Connection: Direct match
+Related practice pattern: map a uniform random draw through an inverse CDF (inverse transform sampling) to generate samples from a target distribution
+What transfers: Technical component: map a uniform random draw through an inverse CDF (inverse transform sampling) to generate samples from a target distribution. Problem component: pickIndex() returns a zero-based position randomly, with probability equal to its weight divided by the sum of all weights.. Shared component: use cumulative distribution over outcomes and a uniform random draw to select an index.
+Important difference: technical pattern uses continuous inverse CDF; coding task uses discrete prefix sums and search
+Technical quote: Recall that inverse transform sampling (Section 11.3.1) samples random
+variables from a uniform distribution and transforms them using the inverse cumulative distribution
+function (cdf) to generate samples from the desired density.
+Problem quote: Construct Solution(w) from positive integer weights. pickIndex() returns a zero-based position
+randomly, with probability equal to its weight divided by the sum of all weights.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 864; LeetCode_4000_Problem_Reference.pdf, PAGE: 264
+
+381. Insert Delete GetRandom O(1) - Duplicates allowed (Hard)
+Connection: Direct match
+Related practice pattern: map a uniform random draw through an inverse CDF (inverse transform sampling) to generate samples from a target distribution
+What transfers: Technical component: map a uniform random draw through an inverse CDF (inverse transform sampling) to generate samples from a target distribution. Problem component: getRandom() samples uniformly among stored occurrences, so repeated values have proportional probability.. Shared component: mapping a base uniform random draw through a cumulative distribution to select outcomes.
+Important difference: technical pattern uses continuous inverse CDF; problem uses discrete indexing and implicit CDF
+Technical quote: Recall that inverse transform sampling (Section 11.3.1) samples random
+variables from a uniform distribution and transforms them using the inverse cumulative distribution
+function (cdf) to generate samples from the desired density.
+Problem quote: Design RandomizedCollection, a multiset. insert(val) adds an occurrence and reports whether val
+was previously absent. remove(val) removes one occurrence if present and reports success.
+getRandom() samples uniformly among stored occurrences, so repeated values have proportional
+probability.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 864; LeetCode_4000_Problem_Reference.pdf, PAGE: 191
+
+497. Random Point in Non-overlapping Rectangles (Medium)
+Connection: Related practice
+Related practice pattern: map a uniform random draw through an inverse CDF (inverse transform sampling) to generate samples from a target distribution
+What transfers: Technical component: map a uniform random draw through an inverse CDF (inverse transform sampling) to generate samples from a target distribution. Problem component: Rectangles with more lattice points must have proportionally greater selection probability.. Shared component: use a cumulative distribution over outcomes and map a uniform draw to one outcome.
+Important difference: technical pattern continuous and general; coding task discrete rectangles and lattice points
+Technical quote: Recall that inverse transform sampling (Section 11.3.1) samples random
+variables from a uniform distribution and transforms them using the inverse cumulative distribution
+function (cdf) to generate samples from the desired density.
+Problem quote: Rectangles with more lattice
+points must have proportionally greater selection probability.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 864; LeetCode_4000_Problem_Reference.pdf, PAGE: 249",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-007-short,"According to ""Grokking-the-system-design-interview-free.pdf"", recommend a related LeetCode problem for round-robin request dispatch.",ordinary,completed,1606;2747;1656,related_practice;unassessed;unassessed,1,1,1.0,2,0,0,False,,127.15373668982647,53,"1606. Find Servers That Handled Most Number of Requests (Hard)
+Connection: Direct match
+Related practice pattern: Use a circular index over a server list to dispatch each new request to the next available server, skipping any marked as dead
+What transfers: Technical component: Use a circular index over a server list to dispatch each new request to the next available server, skipping any marked as dead. Problem component: If the (i % k)^th server is available, assign the request to that server.. Shared component: Using modular indexing to assign each incoming request to a server in turn..
+Important difference: Technical pattern mentions skipping dead servers; frozen operation only checks availability.
+Technical quote: Initially, a simple 
+Round Robin approach can be adopted; that distributes incoming requests equally 
+among servers.
+Problem quote: If the (i % k)^th server is available, assign the request to that server.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 80; LeetCode_4000_Problem_Reference.pdf, PAGE: 804
+
+2747. Count Zero Request Servers (Medium)
+Connection: Related practice
+Related practice pattern: Use a circular index over a server list to dispatch each new request to the next available server, skipping any marked as dead
+What transfers: Technical component: Use a circular index over a server list to dispatch each new request to the next available server, skipping any marked as dead. Problem component: arr[i] identifies the count of servers that did not receive any requests during the time interval [queries[i] - x, queries[i]]. Shared component: reasoning about which servers receive or miss requests over time.
+Important difference: technical describes dispatch policy; problem measures request absence counts, not dispatch logic
+Technical quote: Initially, a simple 
+Round Robin approach can be adopted; that distributes incoming requests equally 
+among servers.
+Problem quote: Required result: an indexed-from-zero integer array arr of length queries.length where arr[i]
+identifies the count of servers that did not receive any requests during the time interval [queries[i]
+- x, queries[i]].
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 80; LeetCode_4000_Problem_Reference.pdf, PAGE: 1374
+
+1656. Design an Ordered Stream (Easy)
+Connection: Related practice
+Related practice pattern: Use a circular index over a server list to dispatch each new request to the next available server, skipping any marked as dead
+What transfers: Technical component: Use a circular index over a server list to dispatch each new request to the next available server, skipping any marked as dead. Problem component: returns the values in increasing order of their IDs by returning a chunk. Shared component: maintaining and advancing a fixed ordering to serve items sequentially.
+Important difference: round-robin cycles servers; stream emits contiguous ID chunks, not circular scheduling
+Technical quote: Initially, a simple 
+Round Robin approach can be adopted; that distributes incoming requests equally 
+among servers.
+Problem quote: Design a stream
+that returns the values in increasing order of their IDs by returning a chunk (list) of values after
+each insertion.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 80; LeetCode_4000_Problem_Reference.pdf, PAGE: 829",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-007-descriptive,"Using ""Grokking-the-system-design-interview-free.pdf"", suggest LeetCode practice for cycling through servers in order and restarting at the beginning after the last server. Explain the computational connection and its limitations.",ordinary,completed,2757;2515;3354,stretch_connection;unassessed;unassessed,1,1,1.0,2,0,0,False,,161.39367065392435,60,"2757. Generate Circular Array Values (Medium)
+Connection: Direct match
+Related practice pattern: circular index iteration over a fixed array
+What transfers: Technical component: circular index iteration over a fixed array. Problem component: If jump is positive, the index should increase by that value, however if the current index is the last index, it should instead jump to the first index.. Shared component: circular index iteration over a fixed array using wraparound behavior.
+Important difference: coding task omits real-world load differences and dynamic server health changes
+Technical quote: When it reaches the end of the list, 
+it starts over at the beginning.
+Problem quote: If jump is positive, the index should increase by that value, however if
+the current index is the last index, it should instead jump to the first index.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 175; LeetCode_4000_Problem_Reference.pdf, PAGE: 1379
+
+2515. Shortest Distance to Target String in a Circular Array (Easy)
+Connection: Related practice
+Related practice pattern: circular index iteration over a fixed array
+What transfers: Technical component: circular index iteration over a fixed array. Problem component: Starting from startIndex, you can move to either the next word or the previous word with 1 step at a time.. Shared component: iterating over positions in a fixed list by unit index steps.
+Important difference: problem allows bidirectional moves; technical pattern is strictly forward round-robin
+Technical quote: When it reaches the end of the list, 
+it starts over at the beginning.
+Problem quote: Starting from startIndex, you can move to either the next word or the
+previous word with 1 step at a time.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 175; LeetCode_4000_Problem_Reference.pdf, PAGE: 1258
+
+3354. Make Array Elements Equal to Zero (Easy)
+Connection: Related practice
+Related practice pattern: circular index iteration over a fixed array
+What transfers: Technical component: circular index iteration over a fixed array. Problem component: If nums[curr] == 0, move in the current direction by incrementing curr if you are moving right, or decrementing curr if you are moving left.. Shared component: maintaining and updating a pointer to step through positions in order.
+Important difference: coding step lacks explicit wraparound; load balancer restarts at index 0
+Technical quote: When it reaches the end of the list, 
+it starts over at the beginning.
+Problem quote: If nums[curr] == 0,
+move in the current direction by incrementing curr if you are moving right, or decrementing curr if
+you are moving left.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 175; LeetCode_4000_Problem_Reference.pdf, PAGE: 1678",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-008-short,"According to ""Grokking-the-system-design-interview-free.pdf"", recommend a related LeetCode problem for quadtree spatial subdivision.",ordinary,completed,1828;2013;3624,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,145.04538836493157,61,"1828. Queries on Number of Points Inside a Circle (Medium)
+Connection: Related practice
+Related practice pattern: Spatial index with dynamic point updates and region queries
+What transfers: Technical component: Spatial index with dynamic point updates and region queries. Problem component: For each query queries[j], compute the count of points inside the j^th circle.. Shared component: Executing region queries over a set of points in 2D space..
+Important difference: Technical pattern emphasizes dynamic updates; frozen problem is static queries only.
+Technical quote: So, we have two issues with our Dynamic Grid solution: 
+ Since all active drivers are reporting their locations every three seconds, we 
+need to update our data structures to reflect that.
+Problem quote: For each query
+queries[j], compute the count of points inside the j^th circle.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 149; LeetCode_4000_Problem_Reference.pdf, PAGE: 915
+
+2013. Detect Squares (Medium)
+Connection: Related practice
+Related practice pattern: Spatial index with dynamic point updates and region queries
+What transfers: Technical component: Spatial index with dynamic point updates and region queries. Problem component: add([x,y]) records a point occurrence, allowing duplicates.. Shared component: maintaining a dynamic multiset of 2D points to support later queries.
+Important difference: technical pattern uses spatial index and movement; problem focuses on combinatorial square counts
+Technical quote: So, we have two issues with our Dynamic Grid solution: 
+ Since all active drivers are reporting their locations every three seconds, we 
+need to update our data structures to reflect that.
+Problem quote: Implement DetectSquares(). add([x,y]) records a point occurrence, allowing duplicates.
+count([x,y]) returns the number of choices of three recorded occurrences which, together with that
+supplied query point, form an axis-aligned square of positive area.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 149; LeetCode_4000_Problem_Reference.pdf, PAGE: 1007
+
+3624. Number of Integers With Popcount-Depth Equal to K II (Hard)
+Connection: Related practice
+Related practice pattern: Spatial index with dynamic point updates and region queries
+What transfers: Technical component: Spatial index with dynamic point updates and region queries. Problem component: Update nums[idx] to val.. Shared component: supporting point updates within an indexed structure while preserving queryability.
+Important difference: spatial subdivision and range queries differ from scalar array indices and counts
+Technical quote: To update a driver to its new location, we must find the right grid 
+based on the driver’s previous location.
+Problem quote: Input data: a
+two-dimensional array of integers queries, with each queries[i] is either: [1, l, r, k] - Determine the
+count of indices j such that l <= j <= r and the popcount-depth of nums[j] is equal to k. [2, idx, val]
+- Update nums[idx] to val.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 149; LeetCode_4000_Problem_Reference.pdf, PAGE: 1814",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-008-descriptive,"Using ""Grokking-the-system-design-interview-free.pdf"", suggest LeetCode practice for recursively splitting a spatial region into four child regions until each satisfies a capacity bound. Explain the computational connection and its limitations.",ordinary,completed,3271;3710;3195,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,186.8319381030742,73,"3271. Hash Divided String (Medium)
+Connection: Related practice
+Related practice pattern: recursive spatial partitioning based on capacity limits (quadtree-style)
+What transfers: Technical component: recursive spatial partitioning based on capacity limits (quadtree-style). Problem component: split it into consecutive k-character blocks. Shared component: partitioning an input sequence into contiguous subregions based on a fixed granularity.
+Important difference: text blocks are 1D fixed-length; QuadTree regions are 2D, recursively capacity-driven
+Technical quote: Sharding based on regions: We can divide our places into regions (like zip 
+codes), such that all places belonging to a region will be stored on a fixed node.
+Problem quote: Given lowercase s and a divisor k of its length, split it into consecutive k-character blocks.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 144; LeetCode_4000_Problem_Reference.pdf, PAGE: 1636
+
+3710. Maximum Partition Factor (Hard)
+Connection: Related practice
+Related practice pattern: recursive spatial partitioning based on capacity limits (quadtree-style)
+What transfers: Technical component: recursive spatial partitioning based on capacity limits (quadtree-style). Problem component: Split the n points into exactly two nonempty groups.. Shared component: partitioning a set of spatial points into disjoint groups based on capacity or criteria.
+Important difference: technical pattern recursively splits into many regions; operation only allows one binary split
+Technical quote: Sharding based on regions: We can divide our places into regions (like zip 
+codes), such that all places belonging to a region will be stored on a fixed node.
+Problem quote: Split the n points into exactly
+two nonempty groups.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 144; LeetCode_4000_Problem_Reference.pdf, PAGE: 1857
+
+3195. Find the Minimum Area to Cover All Ones I (Medium)
+Connection: Related practice
+Related practice pattern: recursive spatial partitioning based on capacity limits (quadtree-style)
+What transfers: Technical component: recursive spatial partitioning based on capacity limits (quadtree-style). Problem component: Find a rectangle with horizontal and vertical sides with the smallest area, such that all the 1's in grid lie inside this rectangle.. Shared component: reasoning about axis-aligned rectangular regions that enclose a spatial point set.
+Important difference: technical pattern recursively refines many regions; problem finds one bounding rectangle only
+Technical quote: Sharding based on regions: We can divide our places into regions (like zip 
+codes), such that all places belonging to a region will be stored on a fixed node.
+Problem quote: Find a rectangle with horizontal and vertical sides with the
+smallest area, such that all the 1's in grid lie inside this rectangle.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 144; LeetCode_4000_Problem_Reference.pdf, PAGE: 1598",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-009-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for continuation-bit variable-length integer encoding.",ordinary,completed,2526;385;3023,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,163.09321109601296,68,"2526. Find Consecutive Integers from a Data Stream (Medium)
+Connection: Stretch connection
+Related practice pattern: Bit-flag–driven loop for variable-length integer parsing
+What transfers: Technical component: Bit-flag–driven loop for variable-length integer parsing. Problem component: add num to the stream of integers. Shared component: processing a sequential stream of integers in arrival order.
+Important difference: technical uses bit flags for variable-length decoding; problem only stores integers
+Technical quote: Rather than using a full eight bytes for the number 1337, it is
+encoded in two bytes, with the top bit of each byte used to indicate whether there are
+still more bytes to come.
+Problem quote: Build DataStream class: DataStream(int value, int k) Initializes the
+object with an empty integer stream and the two integers value and k. boolean consec(int num)
+Adds num to the stream of integers.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 1264
+
+385. Mini Parser (Medium)
+Connection: Stretch connection
+Related practice pattern: Bit-flag–driven loop for variable-length integer parsing
+What transfers: Technical component: Bit-flag–driven loop for variable-length integer parsing. Problem component: Parse s into a NestedInteger representing an integer or nested bracketed integer lists.. Shared component: incremental parsing of a serialized integer representation into an internal value.
+Important difference: technical focuses on bitwise varint loop; problem uses nested textual lists
+Technical quote: Rather than using a full eight bytes for the number 1337, it is
+encoded in two bytes, with the top bit of each byte used to indicate whether there are
+still more bytes to come.
+Problem quote: Parse s into a NestedInteger representing an integer or nested bracketed integer lists.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 193
+
+3023. Find Pattern in Infinite Stream I (Medium)
+Connection: Stretch connection
+Related practice pattern: Bit-flag–driven loop for variable-length integer parsing
+What transfers: Technical component: Bit-flag–driven loop for variable-length integer parsing. Problem component: Reads a single bit (which is either 0 or 1) from the stream and returns it.. Shared component: bit-level interpretation of a 0/1 value while processing a serialized stream.
+Important difference: technical pattern decodes multi-bit varints; problem only exposes isolated bit reads
+Technical quote: Rather than using a full eight bytes for the number 1337, it is
+encoded in two bytes, with the top bit of each byte used to indicate whether there are
+still more bytes to come.
+Problem quote: The class InfiniteStream contains the following function:
+int next(): Reads a single bit (which is either 0 or 1) from the stream and returns it.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 1512",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-009-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for using the high bit of each byte to indicate whether more bytes belong to the same encoded integer. Explain the computational connection and its limitations.",ordinary,completed,67;369;1734,unrelated;unassessed;unassessed,0,1,0.0,2,0,0,False,,168.89850391307846,72,"67. Add Binary (Easy)
+Connection: Related practice
+Related practice pattern: Variable-length integer encoding using the high bit as a continuation flag
+What transfers: Technical component: Variable-length integer encoding using the high bit as a continuation flag. Problem component: Preserve any carry that increases the result's length.. Shared component: Handling a carry/overflow bit that extends representation length across fixed-size chunks..
+Important difference: One uses high bits as explicit continuation flags, the other as implicit arithmetic carries.
+Technical quote: Rather than using a full eight bytes for the number 1337, it is
+encoded in two bytes, with the top bit of each byte used to indicate whether there are
+still more bytes to come.
+Problem quote: Preserve any carry that increases
+the result's length.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 34
+
+369. Plus One Linked List (Medium)
+Connection: Related practice
+Related practice pattern: Variable-length integer encoding using the high bit as a continuation flag
+What transfers: Technical component: Variable-length integer encoding using the high bit as a continuation flag. Problem component: Add one and return the updated digit list.. Shared component: implementing increment with carry over a multi-unit numeric representation.
+Important difference: technical pattern uses bitwise byte flags; problem uses abstract base-10 digits
+Technical quote: Rather than using a full eight bytes for the number 1337, it is
+encoded in two bytes, with the top bit of each byte used to indicate whether there are
+still more bytes to come.
+Problem quote: Add one
+and return the updated digit list.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 185
+
+1734. Decode XORed Permutation (Medium)
+Connection: Related practice
+Related practice pattern: Variable-length integer encoding using the high bit as a continuation flag
+What transfers: Technical component: Variable-length integer encoding using the high bit as a continuation flag. Problem component: produce the original array perm. Shared component: decoding a compact representation to reconstruct the original sequence of values.
+Important difference: LeetCode task need not involve bitwise continuation flags or variable-length bytes
+Technical quote: Rather than using a full eight bytes for the number 1337, it is
+encoded in two bytes, with the top bit of each byte used to indicate whether there are
+still more bytes to come.
+Problem quote: With the encoded array, produce the original array perm.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 868",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-010-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for broadcast hash joins.",ordinary,completed,1817;1500;1892,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,121.75431013898924,51,"1817. Finding the Users Active Minutes (Medium)
+Connection: Related practice
+Related practice pattern: Preload a small lookup table into an in-memory hash map to join it efficiently with a larger streaming dataset.
+What transfers: Technical component: Preload a small lookup table into an in-memory hash map to join it efficiently with a larger streaming dataset.. Problem component: You are to calculate a indexed from one array answer of size k such that, for each j (1 <= j <= k), answer[j] is the count of users whose UAM equals j.. Shared component: group data by user ID and aggregate a per-user metric.
+Important difference: technical pattern joins datasets via hash map; problem computes frequency histogram
+Technical quote: This example assumes that there is exactly one entry for each key in the hash table, which is probably true
+with a user database (a user ID uniquely identifies a user).
+Problem quote: You are to
+calculate a indexed from one array answer of size k such that, for each j (1 <= j <= k), answer[j] is
+the count of users whose UAM equals j.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 431; LeetCode_4000_Problem_Reference.pdf, PAGE: 909
+
+1500. Design a File Sharing System (Medium)
+Connection: Related practice
+Related practice pattern: Preload a small lookup table into an in-memory hash map to join it efficiently with a larger streaming dataset.
+What transfers: Technical component: Preload a small lookup table into an in-memory hash map to join it efficiently with a larger streaming dataset.. Problem component: request(userID, chunkID) returns the sorted IDs of current users holding that chunk before the transfer. Shared component: hash-based lookup from an ID to associated users or chunks.
+Important difference: technical join streams a large dataset; problem handles interactive updates
+Technical quote: In this case, when a mapper starts up, it can first read the
+user database from the distributed filesystem into an in-memory hash table.
+Problem quote: Implement FileSharing(m) for chunks numbered 1-m. join(ownedChunks) registers a user with
+those chunks and returns the smallest unused positive user ID; departed IDs may be reused.
+leave(userID) removes that user and their available copies. request(userID, chunkID) returns the
+sorted IDs of current users holding that chunk before the transfer.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 431; LeetCode_4000_Problem_Reference.pdf, PAGE: 751
+
+1892. Page Recommendations II (Hard)
+Connection: Related practice
+Related practice pattern: Preload a small lookup table into an in-memory hash map to join it efficiently with a larger streaming dataset.
+What transfers: Technical component: Preload a small lookup table into an in-memory hash map to join it efficiently with a larger streaming dataset.. Problem component: Find all the possible page recommendations for every user.. Shared component: joining a large relation with a smaller user-based relation via preloaded hash lookups.
+Important difference: SQL-style recommendation logic differs from map-side broadcast join execution environment
+Technical quote: In this case, when a mapper starts up, it can first read the
+user database from the distributed filesystem into an in-memory hash table.
+Problem quote: Find all the possible page recommendations for every user.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 431; LeetCode_4000_Problem_Reference.pdf, PAGE: 947",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-010-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for loading a small input into a key-indexed hash table and matching records from another input. Explain the computational connection and its limitations.",ordinary,completed,3063;2227;1948,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,146.81477873283438,59,"3063. Linked List Frequency (Easy)
+Connection: Related practice
+Related practice pattern: Load the small input into an in-memory hash map keyed by the join field, then stream the larger input once, probing the map for each record to emit matched pairs (and potentially multiple matches per key).
+What transfers: Technical component: Load the small input into an in-memory hash map keyed by the join field, then stream the larger input once, probing the map for each record to emit matched pairs (and potentially multiple matches per key).. Problem component: compute the head to a linked list of length k containing the frequency of each different element. Shared component: counting occurrences of distinct keys by aggregating over a scanned input.
+Important difference: technical pattern joins two inputs; frozen operation only aggregates within one list
+Technical quote: Thus, you can start a mapper for each partition of the
+large join input, load the hash table for the small input into each mapper, and
+then scan over the large input one record at a time, querying the hash table for
+each record.
+Problem quote: For the head of a linked list containing k different elements, compute the head to a linked list of
+length k containing the frequency of each different element in the given linked list in an
+unrestricted order.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 452; LeetCode_4000_Problem_Reference.pdf, PAGE: 1532
+
+2227. Encrypt and Decrypt Strings (Hard)
+Connection: Related practice
+Related practice pattern: Load the small input into an in-memory hash map keyed by the join field, then stream the larger input once, probing the map for each record to emit matched pairs (and potentially multiple matches per key).
+What transfers: Technical component: Load the small input into an in-memory hash map keyed by the join field, then stream the larger input once, probing the map for each record to emit matched pairs (and potentially multiple matches per key).. Problem component: maps each unique key character to its corresponding two-character value. Shared component: building an in-memory key-indexed hash map for constant-time key lookup.
+Important difference: technical pattern joins two datasets; frozen operation builds substitution cipher mapping
+Technical quote: Broadcast hash joins
+One of the two join inputs is small, so it is not partitioned and it can be entirely
+loaded into a hash table.
+Problem quote: Encrypter(keys,values,dictionary) maps each unique key character to its corresponding
+two-character value; values need not be unique. encrypt(word1) concatenates the mapped values,
+returning an empty string if any character lacks a key. decrypt(word2) returns the number of
+dictionary words whose encryption equals word2.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 452; LeetCode_4000_Problem_Reference.pdf, PAGE: 1114
+
+1948. Delete Duplicate Folders in System (Hard)
+Connection: Related practice
+Related practice pattern: Load the small input into an in-memory hash map keyed by the join field, then stream the larger input once, probing the map for each record to emit matched pairs (and potentially multiple matches per key).
+What transfers: Technical component: Load the small input into an in-memory hash map keyed by the join field, then stream the larger input once, probing the map for each record to emit matched pairs (and potentially multiple matches per key).. Problem component: Mark every member of every duplicate group and all their descendants. Shared component: iterating a larger structure while checking membership against a precomputed index.
+Important difference: technical join emits matched pairs; problem marks hierarchical duplicates and descendants
+Technical quote: Thus, you can start a mapper for each partition of the
+large join input, load the hash table for the small input into each mapper, and
+then scan over the large input one record at a time, querying the hash table for
+each record.
+Problem quote: Mark every member of every duplicate group
+and all their descendants using the original structure, then delete all marked folders
+simultaneously.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 452; LeetCode_4000_Problem_Reference.pdf, PAGE: 975",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-011-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for keyed grouping and aggregation.",ordinary,completed,1113;1934;3808,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,218.77467744704336,62,"1113. Reported Posts (Easy)
+Connection: Direct match
+Related practice pattern: Keyed grouping followed by per-key aggregation
+What transfers: Technical component: Keyed grouping followed by per-key aggregation. Problem component: Report the count of posts reported yesterday for each report reason.. Shared component: Per-key counting using a key-to-count aggregation structure..
+Important difference: Technical text is abstract MapReduce; problem is concrete reporting query.
+Technical quote: records with the same key form a group, and the next step is often to perform some
+kind of aggregation within each group—for example:
+• Counting the number of records in each group (like in our example of counting
+page views, which you would express as a COUNT(*) aggregation in SQL)
+• Adding up the values in one particular field (SUM(fieldname)) in SQL
+• Picking the top k records according to some ranking function
+The simplest way of implementing such a grouping operation with MapReduce is to
+set up the mappers so that the key-value pairs they produce use the desired grouping
+key.
+Problem quote: Report the count of posts reported yesterday for each
+report reason.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 557
+
+1934. Confirmation Rate (Medium)
+Connection: Direct match
+Related practice pattern: Keyed grouping followed by per-key aggregation
+What transfers: Technical component: Keyed grouping followed by per-key aggregation. Problem component: The confirmation rate of a user is the count of 'confirmed' messages divided by the total number of requested confirmation messages.. Shared component: Per-key aggregation of counts to compute a derived metric for each key..
+Important difference: Technical text is generic MapReduce; problem defines a specific confirmation-rate metric.
+Technical quote: records with the same key form a group, and the next step is often to perform some
+kind of aggregation within each group—for example:
+• Counting the number of records in each group (like in our example of counting
+page views, which you would express as a COUNT(*) aggregation in SQL)
+• Adding up the values in one particular field (SUM(fieldname)) in SQL
+• Picking the top k records according to some ranking function
+The simplest way of implementing such a grouping operation with MapReduce is to
+set up the mappers so that the key-value pairs they produce use the desired grouping
+key.
+Problem quote: The confirmation rate of a user is the count of 'confirmed' messages divided
+by the total number of requested confirmation messages.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 968
+
+3808. Find Emotionally Consistent Users (Medium)
+Connection: Direct match
+Related practice pattern: Keyed grouping followed by per-key aggregation
+What transfers: Technical component: Keyed grouping followed by per-key aggregation. Problem component: For each user, count the total number of reactions they have given.. Shared component: maintaining per-key counters while grouping records by user id.
+Important difference: technical text is generic MapReduce; problem is domain-specific analytics
+Technical quote: records with the same key form a group, and the next step is often to perform some
+kind of aggregation within each group—for example:
+• Counting the number of records in each group (like in our example of counting
+page views, which you would express as a COUNT(*) aggregation in SQL)
+• Adding up the values in one particular field (SUM(fieldname)) in SQL
+• Picking the top k records according to some ranking function
+The simplest way of implementing such a grouping operation with MapReduce is to
+set up the mappers so that the key-value pairs they produce use the desired grouping
+key.
+Problem quote: Report identify emotionally consistent users based on the following requirements: For
+each user, count the total number of reactions they have given.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 1906",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-011-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for grouping records by equal keys and counting or summing values within each group. Explain the computational connection and its limitations.",ordinary,completed,1336;3808;3521,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,152.17400977597572,58,"1336. Number of Transactions per Visit (Hard)
+Connection: Direct match
+Related practice pattern: Key-based grouping followed by per-group aggregation (count/sum) using a two-phase reduce pattern
+What transfers: Technical component: Key-based grouping followed by per-group aggregation (count/sum) using a two-phase reduce pattern. Problem component: Count transactions for each visit, including zero, then produce a histogram. Shared component: key-based grouping then counting records per key to produce aggregates.
+Important difference: technical pattern is distributed MapReduce; LeetCode is single-machine, in-memory
+Technical quote: records with the same key form a group, and the next step is often to perform some
+kind of aggregation within each group—for example:
+• Counting the number of records in each group (like in our example of counting
+page views, which you would express as a COUNT(*) aggregation in SQL)
+• Adding up the values in one particular field (SUM(fieldname)) in SQL
+• Picking the top k records according to some ranking function
+The simplest way of implementing such a grouping operation with MapReduce is to
+set up the mappers so that the key-value pairs they produce use the desired grouping
+key.
+Problem quote: Count transactions for each visit, including zero, then produce a histogram:
+transactions_count and the number of corresponding visits, visits_count.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 668
+
+3808. Find Emotionally Consistent Users (Medium)
+Connection: Direct match
+Related practice pattern: Key-based grouping followed by per-group aggregation (count/sum) using a two-phase reduce pattern
+What transfers: Technical component: Key-based grouping followed by per-group aggregation (count/sum) using a two-phase reduce pattern. Problem component: For each user, count the total number of reactions they have given.. Shared component: Per-key aggregation: group records by key and compute a count per group..
+Important difference: Technical pattern is distributed MapReduce; LeetCode solutions are single-machine in-memory.
+Technical quote: records with the same key form a group, and the next step is often to perform some
+kind of aggregation within each group—for example:
+• Counting the number of records in each group (like in our example of counting
+page views, which you would express as a COUNT(*) aggregation in SQL)
+• Adding up the values in one particular field (SUM(fieldname)) in SQL
+• Picking the top k records according to some ranking function
+The simplest way of implementing such a grouping operation with MapReduce is to
+set up the mappers so that the key-value pairs they produce use the desired grouping
+key.
+Problem quote: Report identify emotionally consistent users based on the following requirements: For
+each user, count the total number of reactions they have given.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 1906
+
+3521. Find Product Recommendation Pairs (Medium)
+Connection: Direct match
+Related practice pattern: Key-based grouping followed by per-group aggregation (count/sum) using a two-phase reduce pattern
+What transfers: Technical component: Key-based grouping followed by per-group aggregation (count/sum) using a two-phase reduce pattern. Problem component: For each product pair, determine how many customers purchased both products. Shared component: group-by key aggregation: build groups by equal key and compute a count per key.
+Important difference: technical pattern uses MapReduce/distributed reducers; problem is single-query pair counting
+Technical quote: records with the same key form a group, and the next step is often to perform some
+kind of aggregation within each group—for example:
+• Counting the number of records in each group (like in our example of counting
+page views, which you would express as a COUNT(*) aggregation in SQL)
+• Adding up the values in one particular field (SUM(fieldname)) in SQL
+• Picking the top k records according to some ranking function
+The simplest way of implementing such a grouping operation with MapReduce is to
+set up the mappers so that the key-value pairs they produce use the desired grouping
+key.
+Problem quote: Report : Identify different product pairs frequently purchased together by the same customers
+(where product1_id < product2_id) For each product pair, determine how many customers
+purchased both products A product pair qualifies as for recommendation if at least 3 different
+customers have purchased both products.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 1762",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-012-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for bitmap predicate intersection.",ordinary,completed,2275;2823;3653,related_practice;unassessed;unassessed,1,1,1.0,2,0,0,False,,172.73735704901628,61,"2275. Largest Combination With Bitwise AND Greater Than Zero (Medium)
+Connection: Related practice
+Related practice pattern: bitset-based predicate combination
+What transfers: Technical component: bitset-based predicate combination. Problem component: Compute the bitwise AND for all possible combinations of elements in the candidates array.. Shared component: using bitwise operators to combine bitmask-encoded predicates.
+Important difference: technical uses OR over value bitmaps; problem uses AND over subsets
+Technical quote: For example:
+WHERE product_sk IN (30, 68, 69):
+Load the three bitmaps for product_sk = 30, product_sk = 68, and product_sk
+= 69, and calculate the bitwise OR of the three bitmaps, which can be done very
+efficiently.
+98 | Chapter 3: Storage and Retrieval
+Problem quote: Compute the bitwise
+AND for all possible combinations of elements in the candidates array.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 120; LeetCode_4000_Problem_Reference.pdf, PAGE: 1138
+
+2823. Deep Object Filter (Medium)
+Connection: Related practice
+Related practice pattern: bitset-based predicate combination
+What transfers: Technical component: bitset-based predicate combination. Problem component: For an object or an array obj and a function fn, compute a filtered object or array filteredObject.. Shared component: combining per-item predicate results into a derived collection.
+Important difference: bitmaps use bitwise OR; deep filter uses functional removal logic
+Technical quote: For example:
+WHERE product_sk IN (30, 68, 69):
+Load the three bitmaps for product_sk = 30, product_sk = 68, and product_sk
+= 69, and calculate the bitwise OR of the three bitmaps, which can be done very
+efficiently.
+98 | Chapter 3: Storage and Retrieval
+Problem quote: For an object or an array obj and a function fn, compute a filtered object or array filteredObject.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 120; LeetCode_4000_Problem_Reference.pdf, PAGE: 1412
+
+3653. XOR After Range Multiplication Queries I (Medium)
+Connection: Related practice
+Related practice pattern: bitset-based predicate combination
+What transfers: Technical component: bitset-based predicate combination. Problem component: Required result: the bitwise XOR of all elements in nums after processing all queries.. Shared component: implementing a reduction over an array using a bitwise operator.
+Important difference: technical pattern ORs bitmaps; problem XORs scalar array elements
+Technical quote: For example:
+WHERE product_sk IN (30, 68, 69):
+Load the three bitmaps for product_sk = 30, product_sk = 68, and product_sk
+= 69, and calculate the bitwise OR of the three bitmaps, which can be done very
+efficiently.
+98 | Chapter 3: Storage and Retrieval
+Problem quote: Required result: the bitwise XOR of all elements in nums after processing all queries.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 120; LeetCode_4000_Problem_Reference.pdf, PAGE: 1828",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-012-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for combining aligned row-membership bitmaps with bitwise AND to apply multiple predicates. Explain the computational connection and its limitations.",ordinary,completed,2901;3117;2411,unassessed;stretch_connection;stretch_connection,2,2,1.0,1,0,0,False,,183.3460061121732,70,"2901. Longest Unequal Adjacent Groups Subsequence II (Medium)
+Connection: Related practice
+Related practice pattern: Use aligned bit arrays to represent row sets and apply bitwise AND across columns to enforce multiple predicates efficiently.
+What transfers: Technical component: Use aligned bit arrays to represent row sets and apply bitwise AND across columns to enforce multiple predicates efficiently.. Problem component: select the longest subsequence from an array of indices [0, 1,..., n - 1]. Shared component: intersecting multiple constraint-defined index sets to find elements meeting all predicates.
+Important difference: bitmap pattern uses bitwise operations; subsequence problem needs ordering and path search
+Technical quote: WHERE product_sk = 31 AND store_sk = 3:
+Load the bitmaps for product_sk = 31 and store_sk = 3, and calculate the bit‐
+wise AND.
+Problem quote: The task is to select the longest subsequence from an
+array of indices [0, 1,..., n - 1], such that for the subsequence denoted as [i_0, i_1,..., i_k-1] having
+length k, the following holds: For adjacent indices in the subsequence, their corresponding groups
+are unequal, i.e., groups[i_j] != groups[i_j+1], for each j where 0 < j + 1 < k. words[i_j] and
+words[i_j+1] are equal in length, and the hamming distance between them is 1, where 0 < j + 1 <
+k, for all indices in the subsequence.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 121; LeetCode_4000_Problem_Reference.pdf, PAGE: 1451
+
+3117. Minimum Sum of Values by Dividing Array (Hard)
+Connection: Related practice
+Related practice pattern: Use aligned bit arrays to represent row sets and apply bitwise AND across columns to enforce multiple predicates efficiently.
+What transfers: Technical component: Use aligned bit arrays to represent row sets and apply bitwise AND across columns to enforce multiple predicates efficiently.. Problem component: nums[l_i] & nums[l_i + 1] &... & nums[r_i] == andValues[i]. Shared component: using bitwise AND across multiple integers to enforce a conjunction condition.
+Important difference: DB uses aligned row bitmaps; LeetCode ANDs raw values over ranges.
+Technical quote: WHERE product_sk = 31 AND store_sk = 3:
+Load the bitmaps for product_sk = 31 and store_sk = 3, and calculate the bit‐
+wise AND.
+Problem quote: Available: to divide nums into m disjoint unbroken
+subarrays such that for the i^th subarray [l_i, r_i], the bitwise AND of the subarray elements is
+equal to andValues[i], in other words, nums[l_i] & nums[l_i + 1] &... & nums[r_i] == andValues[i]
+for all 1 <= i <= m, where & identifies the bitwise AND operator.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 121; LeetCode_4000_Problem_Reference.pdf, PAGE: 1559
+
+2411. Smallest Subarrays With Maximum Bitwise OR (Medium)
+Connection: Related practice
+Related practice pattern: Use aligned bit arrays to represent row sets and apply bitwise AND across columns to enforce multiple predicates efficiently.
+What transfers: Technical component: Use aligned bit arrays to represent row sets and apply bitwise AND across columns to enforce multiple predicates efficiently.. Problem component: For each index i from 0 to n - 1, you must determine the size of the smallest sized nonempty subarray of nums starting at i (inclusive) that has the largest attainable bitwise OR.. Shared component: Practicing fast bitwise aggregation over aligned positions in an array/bitmask..
+Important difference: Technical ANDs intersect row sets; problem ORs accumulate bits over ranges.
+Technical quote: WHERE product_sk = 31 AND store_sk = 3:
+Load the bitmaps for product_sk = 31 and store_sk = 3, and calculate the bit‐
+wise AND.
+Problem quote: For
+each index i from 0 to n - 1, you must determine the size of the smallest sized nonempty subarray
+of nums starting at i (inclusive) that has the largest attainable bitwise OR. let B_ij be the bitwise OR
+of the subarray nums[i...j].
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 121; LeetCode_4000_Problem_Reference.pdf, PAGE: 1206",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-013-short,"According to ""Speech and Language Processing.pdf"", recommend a related LeetCode problem for CKY chart recognition.",ordinary,completed,1593;1520;3298,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,151.28652772586793,66,"1593. Split a String Into the Max Number of Unique Substrings (Medium)
+Connection: Related practice
+Related practice pattern: 2D dynamic programming over spans (i, j) with table reuse
+What transfers: Technical component: 2D dynamic programming over spans (i, j) with table reuse. Problem component: compute the largest count of unique substrings that the given string can be split into. Shared component: systematic reuse/checking of previously considered substrings or substructures.
+Important difference: CKY parses with grammar rules; problem optimizes counts of unique splits
+Technical quote: This provides both time and storage efficiencies since subtrees
+can be looked up in a table, not reanalyzed.
+Problem quote: For a string s, compute the largest count of unique substrings that the given string can be split
+into.
+SOURCES: Speech and Language Processing.pdf, PAGE: 443; LeetCode_4000_Problem_Reference.pdf, PAGE: 797
+
+1520. Maximum Number of Non-Overlapping Substrings (Hard)
+Connection: Related practice
+Related practice pattern: 2D dynamic programming over spans (i, j) with table reuse
+What transfers: Technical component: 2D dynamic programming over spans (i, j) with table reuse. Problem component: find the largest count of nonempty substrings of s that meet these requirements. Shared component: reasoning over substrings with reusable intermediate results and global optimality.
+Important difference: technical pattern parses grammar structures; coding task optimizes substring selection counts
+Technical quote: This provides both time and storage efficiencies since subtrees
+can be looked up in a table, not reanalyzed.
+Problem quote: For a string s of lowercase letters, you need to find the largest count of nonempty substrings of s
+that meet these requirements: The substrings do not overlap, that is for any two substrings s[i..j]
+and s[x..y], either j < x or i > y is true.
+SOURCES: Speech and Language Processing.pdf, PAGE: 443; LeetCode_4000_Problem_Reference.pdf, PAGE: 761
+
+3298. Count Substrings That Can Be Rearranged to Contain a String II (Hard)
+Connection: Related practice
+Related practice pattern: 2D dynamic programming over spans (i, j) with table reuse
+What transfers: Technical component: 2D dynamic programming over spans (i, j) with table reuse. Problem component: Required result: the total number of valid substrings of word1.. Shared component: systematic enumeration of substrings/spans with reused intermediate results.
+Important difference: CKY builds parse structures; problem only counts valid substrings.
+Technical quote: This provides both time and storage efficiencies since subtrees
+can be looked up in a table, not reanalyzed.
+Problem quote: Required result: the total number of valid substrings of word1.
+SOURCES: Speech and Language Processing.pdf, PAGE: 443; LeetCode_4000_Problem_Reference.pdf, PAGE: 1650",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-013-descriptive,"Using ""Speech and Language Processing.pdf"", suggest LeetCode practice for combining two adjacent substring constituents only when a grammar rule permits their combination. Explain the computational connection and its limitations.",ordinary,completed,2311;2914;97,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,178.97153801913373,72,"2311. Longest Binary Subsequence Less Than or Equal to K (Medium)
+Connection: Related practice
+Related practice pattern: Dynamic-programming over spans that only combines adjacent substrings when a grammar rule licenses the resulting constituent.
+What transfers: Technical component: Dynamic-programming over spans that only combines adjacent substrings when a grammar rule licenses the resulting constituent.. Problem component: Required result: the length of the longest subsequence of s that makes up a binary number less than or equal to k.. Shared component: Dynamic reasoning over substrings/subsequences under legality constraints to optimize an objective..
+Important difference: CKY enforces grammar-licensed span combinations; subsequence problem enforces numeric ≤ k constraint.
+Technical quote: Common sources
+of structural ambiguity includePP-attachmentandcoordination ambiguity.
+•Dynamic programmingparsing algorithms, such asCKY, use a table of
+partial parses to efficiently parse ambiguous sentences.
+•CKYrestricts the form of the grammar to Chomsky normal form (CNF).
+• The basic CKY algorithm compactly represents all possible parses of the sen-
+tence but doesn’t choose a single best parse.
+• Choosing a single parse from all possible parses (disambiguation) can be
+done byneural constituency parsers.
+• Span-based neural constituency parses train a neural classifier to assign a score
+to each constituent, and then use a modified version of CKY to combine these
+constituent scores to find the best-scoring parse tree.
+Problem quote: Required result: the length of the
+longest subsequence of s that makes up a binary number less than or equal to k.
+SOURCES: Speech and Language Processing.pdf, PAGE: 454; LeetCode_4000_Problem_Reference.pdf, PAGE: 1156
+
+2914. Minimum Number of Changes to Make Binary String Beautiful (Medium)
+Connection: Related practice
+Related practice pattern: Dynamic-programming over spans that only combines adjacent substrings when a grammar rule licenses the resulting constituent.
+What transfers: Technical component: Dynamic-programming over spans that only combines adjacent substrings when a grammar rule licenses the resulting constituent.. Problem component: Each substring has an even length.. Shared component: Constrained segmentation of a string into substrings that satisfy local structural rules..
+Important difference: CKY uses grammar-based constituent rules; the LeetCode rule is just even-length.
+Technical quote: Common sources
+of structural ambiguity includePP-attachmentandcoordination ambiguity.
+•Dynamic programmingparsing algorithms, such asCKY, use a table of
+partial parses to efficiently parse ambiguous sentences.
+•CKYrestricts the form of the grammar to Chomsky normal form (CNF).
+• The basic CKY algorithm compactly represents all possible parses of the sen-
+tence but doesn’t choose a single best parse.
+• Choosing a single parse from all possible parses (disambiguation) can be
+done byneural constituency parsers.
+• Span-based neural constituency parses train a neural classifier to assign a score
+to each constituent, and then use a modified version of CKY to combine these
+constituent scores to find the best-scoring parse tree.
+Problem quote: A string is beautiful if it's
+possible to partition it into one or more substrings such that: Each substring has an even length.
+SOURCES: Speech and Language Processing.pdf, PAGE: 454; LeetCode_4000_Problem_Reference.pdf, PAGE: 1458
+
+97. Interleaving String (Medium)
+Connection: Related practice
+Related practice pattern: Dynamic-programming over spans that only combines adjacent substrings when a grammar rule licenses the resulting constituent.
+What transfers: Technical component: Dynamic-programming over spans that only combines adjacent substrings when a grammar rule licenses the resulting constituent.. Problem component: return whether s3 can be formed by interleaving all characters of s1 and s2.. Shared component: Dynamic programming over substrings, building larger spans from smaller constrained combinations..
+Important difference: CKY combines grammar-licensed constituents; interleaving only matches characters without grammar rules.
+Technical quote: Common sources
+of structural ambiguity includePP-attachmentandcoordination ambiguity.
+•Dynamic programmingparsing algorithms, such asCKY, use a table of
+partial parses to efficiently parse ambiguous sentences.
+•CKYrestricts the form of the grammar to Chomsky normal form (CNF).
+• The basic CKY algorithm compactly represents all possible parses of the sen-
+tence but doesn’t choose a single best parse.
+• Choosing a single parse from all possible parses (disambiguation) can be
+done byneural constituency parsers.
+• Span-based neural constituency parses train a neural classifier to assign a score
+to each constituent, and then use a modified version of CKY to combine these
+constituent scores to find the best-scoring parse tree.
+Problem quote: Given strings s1, s2, and s3, return whether s3 can be formed by interleaving all characters of s1
+and s2.
+SOURCES: Speech and Language Processing.pdf, PAGE: 454; LeetCode_4000_Problem_Reference.pdf, PAGE: 49",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-014-short,"According to ""Speech and Language Processing.pdf"", recommend a related LeetCode problem for maximum-spanning-tree dependency parsing.",ordinary,completed,3600;685;2374,stretch_connection;unassessed;unassessed,1,1,1.0,2,0,0,False,,138.98238590196706,64,"3600. Maximize Spanning Tree Stability with Upgrades (Hard)
+Connection: Direct match
+Related practice pattern: Model the problem as finding a maximum-weight spanning tree over a fully-connected directed graph with a ROOT node and edge scores, then apply a generic MST algorithm to select the best-scoring tree.
+What transfers: Technical component: Model the problem as finding a maximum-weight spanning tree over a fully-connected directed graph with a ROOT node and edge scores, then apply a generic MST algorithm to select the best-scoring tree.. Problem component: Required result: the largest attainable stability of any valid spanning tree.. Shared component: Optimization over all valid spanning trees to maximize an aggregate weight..
+Important difference: Different domains and weight semantics; technical graph is directed with ROOT.
+Technical quote: A maximum spanning tree is the spanning tree
+with the highest score.
+Problem quote: Required result: the largest
+attainable stability of any valid spanning tree.
+SOURCES: Speech and Language Processing.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 1802
+
+685. Redundant Connection II (Hard)
+Connection: Related practice
+Related practice pattern: Model the problem as selecting a maximum-weight spanning arborescence over a fully-connected directed graph with a designated ROOT and edge scores, mirroring maximum spanning tree dependency parsing.
+What transfers: Technical component: Model the problem as selecting a maximum-weight spanning arborescence over a fully-connected directed graph with a designated ROOT and edge scores, mirroring maximum spanning tree dependency parsing.. Problem component: Remove one edge so every nonroot vertex again has one parent. Shared component: enforcing arborescence constraints: one parent per node, global reachability.
+Important difference: coding task fixes a given tree; parsing searches best-scoring tree from scratch
+Technical quote: A spanning tree over a graphGis a subsetmaximum
+spanning tree
+ofGthat is a tree and covers all the vertices in G; a spanning tree overGthat starts
+from theROOTis a valid parse ofS.
+Problem quote: Remove
+one edge so every nonroot vertex again has one parent, the root none, and every vertex is
+reachable from the root.
+SOURCES: Speech and Language Processing.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 343
+
+2374. Node With Highest Edge Score (Medium)
+Connection: Related practice
+Related practice pattern: Model the problem as finding a maximum-weight spanning tree over a fully-connected directed graph with a ROOT node and edge scores, then apply a generic MST algorithm to select the best-scoring tree.
+What transfers: Technical component: Model the problem as finding a maximum-weight spanning tree over a fully-connected directed graph with a ROOT node and edge scores, then apply a generic MST algorithm to select the best-scoring tree.. Problem component: The edge score of a node i means the total of the labels of all the nodes that have an edge pointing to i.. Shared component: aggregating and assigning numeric scores to edges in a directed graph.
+Important difference: technical scores come from a parsing model; problem sums given labels
+Technical quote: The weights of each edge inGreflect the score for each possible head-dependent
+relation assigned by some scoring algorithm.
+Problem quote: The
+edge score of a node i means the total of the labels of all the nodes that have an edge pointing to
+i.
+SOURCES: Speech and Language Processing.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 1188",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-014-descriptive,"Using ""Speech and Language Processing.pdf"", suggest LeetCode practice for selecting high-scoring dependency edges while requiring a spanning tree without cycles. Explain the computational connection and its limitations.",ordinary,completed,685;2378;2360,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,126.89000929309987,54,"685. Redundant Connection II (Hard)
+Connection: Related practice
+Related practice pattern: Greedy edge selection followed by maximum spanning tree constraint
+What transfers: Technical component: Greedy edge selection followed by maximum spanning tree constraint. Problem component: Remove one edge so every nonroot vertex again has one parent. Shared component: Enforcing single incoming edge per nonroot to restore arborescence structure..
+Important difference: Problem ignores edge scores; technical pattern optimizes for maximum total score.
+Technical quote: More formally, given the original fully-connected graphG= (V,E), a
+subgraphT= (V,F)is a spanning tree if it has no cycles and each vertex (other than
+the root) has exactly one edge entering it.
+Problem quote: Remove
+one edge so every nonroot vertex again has one parent, the root none, and every vertex is
+reachable from the root.
+SOURCES: Speech and Language Processing.pdf, PAGE: 473; LeetCode_4000_Problem_Reference.pdf, PAGE: 343
+
+2378. Choose Edges to Maximize Score in a Tree (Medium)
+Connection: Related practice
+Related practice pattern: Greedy edge selection followed by maximum spanning tree constraint
+What transfers: Technical component: Greedy edge selection followed by maximum spanning tree constraint. Problem component: the total of the weights of the chosen edges is maximized. Shared component: Optimizing selection of weighted edges to maximize an objective function.
+Important difference: Technical pattern enforces spanning tree; coding task forbids adjacent edges in given tree
+Technical quote: For each vertex
+in the graph, an incoming edge (representing a possible head assignment) with the
+highest score is chosen.
+Problem quote: Choose some edges from the tree such that no two chosen edges are adjacent and the total of the
+weights of the chosen edges is maximized.
+SOURCES: Speech and Language Processing.pdf, PAGE: 473; LeetCode_4000_Problem_Reference.pdf, PAGE: 1190
+
+2360. Longest Cycle in a Graph (Hard)
+Connection: Related practice
+Related practice pattern: Greedy edge selection followed by maximum spanning tree constraint
+What transfers: Technical component: Greedy edge selection followed by maximum spanning tree constraint. Problem component: Required result: the length of the longest cycle in the graph.. Shared component: reasoning about and detecting cycles in a directed graph.
+Important difference: parsing forbids cycles; the LeetCode task measures and returns them
+Technical quote: Unfortunately, this approach doesn’t always lead to a tree since the set of edges
+selected may contain cycles.
+Problem quote: Required result: the length of the longest cycle in the graph.
+SOURCES: Speech and Language Processing.pdf, PAGE: 473; LeetCode_4000_Problem_Reference.pdf, PAGE: 1181",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-015-short,"According to ""Speech and Language Processing.pdf"", recommend a related LeetCode problem for shift-reduce dependency parsing.",ordinary,completed,1441;1597;32,stretch_connection;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,138.17010970809497,62,"1441. Build an Array With Stack Operations (Medium)
+Connection: Direct match
+Related practice pattern: Model parsing as stack-buffer transitions with shift and reduce operations
+What transfers: Technical component: Model parsing as stack-buffer transitions with shift and reduce operations. Problem component: If the stream of the integers is not empty, pick the next integer from the stream and push it to the top of the stack.. Shared component: Pushing next input element from an input sequence onto a stack.
+Important difference: Technical push is part of parsing transitions; problem push targets numeric configuration
+Technical quote: 20.2 • TRANSITION-BASEDDEPENDENCYPARSING455
+•SHIFT: Remove the word from the front of the input buffer and push it onto
+the stack.
+Problem quote: You should follow these rules: If the stream of the integers is not empty, pick the next integer from
+the stream and push it to the top of the stack.
+SOURCES: Speech and Language Processing.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 721
+
+1597. Build Binary Expression Tree From Infix Expression (Hard)
+Connection: Related practice
+Related practice pattern: Model parsing as stack-buffer transitions with shift and reduce operations
+What transfers: Technical component: Model parsing as stack-buffer transitions with shift and reduce operations. Problem component: Given a valid infix expression s using single-digit operands, +,-,*,/, and parentheses, build a binary expression tree.. Shared component: Stack-based shift of symbols from input sequence to build a parse structure..
+Important difference: Technical pattern builds dependency arcs; coding builds arithmetic expression tree.
+Technical quote: 20.2 • TRANSITION-BASEDDEPENDENCYPARSING455
+•SHIFT: Remove the word from the front of the input buffer and push it onto
+the stack.
+Problem quote: Given a valid infix expression s using single-digit operands, +,-,*,/, and parentheses, build a binary
+expression tree.
+SOURCES: Speech and Language Processing.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 799
+
+32. Longest Valid Parentheses (Hard)
+Connection: Related practice
+Related practice pattern: Model parsing as stack-buffer transitions with shift and reduce operations
+What transfers: Technical component: Model parsing as stack-buffer transitions with shift and reduce operations. Problem component: return the length of its longest contiguous segment that forms a properly balanced parentheses sequence.. Shared component: Practicing stack-based validation of balanced parentheses sequences..
+Important difference: Technical parser builds dependency arcs; problem only checks balance length.
+Technical quote: 20.2 • TRANSITION-BASEDDEPENDENCYPARSING455
+•SHIFT: Remove the word from the front of the input buffer and push it onto
+the stack.
+Problem quote: For a string s containing only round parentheses, return the length of its longest contiguous
+segment that forms a properly balanced parentheses sequence.
+SOURCES: Speech and Language Processing.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 16",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-015-descriptive,"Using ""Speech and Language Processing.pdf"", suggest LeetCode practice for shifting incoming tokens onto a stack and reducing entries subject to stack preconditions. Explain the computational connection and its limitations.",ordinary,completed,1441;946;1381,stretch_connection;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,146.04104479006492,60,"1441. Build an Array With Stack Operations (Medium)
+Connection: Related practice
+Related practice pattern: Stack-based shift and reduce with explicit operator preconditions
+What transfers: Technical component: Stack-based shift and reduce with explicit operator preconditions. Problem component: pick the next integer from the stream and push it to the top of the stack.. Shared component: Implementing a SHIFT-like operation: move next input item onto a stack under rules..
+Important difference: Parsing uses grammar-driven reduces; LeetCode stack tasks target numeric configurations instead.
+Technical quote: Input tokens are
+successively shifted onto the stack and the top two elements of the stack are matched
+against the right-hand side of the rules in the grammar; when a match is found the
+matched elements are replaced on the stack (reduced) by the non-terminal from the
+Problem quote: You should follow these rules: If the stream of the integers is not empty, pick the next integer from
+the stream and push it to the top of the stack.
+SOURCES: Speech and Language Processing.pdf, PAGE: 479; LeetCode_4000_Problem_Reference.pdf, PAGE: 721
+
+946. Validate Stack Sequences (Medium)
+Connection: Related practice
+Related practice pattern: Stack-based shift and reduce with explicit operator preconditions
+What transfers: Technical component: Stack-based shift and reduce with explicit operator preconditions. Problem component: return whether a stack can push in the first order and pop in the second. Shared component: implementing and reasoning about valid push/pop sequences on a single stack.
+Important difference: parsing uses grammar-driven reductions; LeetCode stack validation has no grammar or labels
+Technical quote: Input tokens are
+successively shifted onto the stack and the top two elements of the stack are matched
+against the right-hand side of the rules in the grammar; when a match is found the
+matched elements are replaced on the stack (reduced) by the non-terminal from the
+Problem quote: Given distinct pushed and popped sequences, return whether a stack can push in the first order
+and pop in the second.
+SOURCES: Speech and Language Processing.pdf, PAGE: 479; LeetCode_4000_Problem_Reference.pdf, PAGE: 473
+
+1381. Design a Stack With Increment Operation (Medium)
+Connection: Related practice
+Related practice pattern: Stack-based shift and reduce with explicit operator preconditions
+What transfers: Technical component: Stack-based shift and reduce with explicit operator preconditions. Problem component: Adds x to the top of the stack if the stack has not reached the maxSize.. Shared component: Conditionally pushing incoming items onto a stack subject to stack-state preconditions..
+Important difference: Parsing uses grammar-driven reduce transitions; CustomStack lacks reductions and token interpretation.
+Technical quote: Input tokens are
+successively shifted onto the stack and the top two elements of the stack are matched
+against the right-hand side of the rules in the grammar; when a match is found the
+matched elements are replaced on the stack (reduced) by the non-terminal from the
+Problem quote: Build CustomStack class:
+CustomStack(int maxSize) Initializes the object with maxSize which is the largest count of
+elements in the stack. void push(int x) Adds x to the top of the stack if the stack has not reached
+the maxSize. int pop() Pops and returns the top of the stack or -1 if the stack is empty. void inc(int
+k, int val) Increments the bottom k elements of the stack by val.
+SOURCES: Speech and Language Processing.pdf, PAGE: 479; LeetCode_4000_Problem_Reference.pdf, PAGE: 691",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-016-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for B-tree page splitting.",ordinary,completed,708;147;109,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,203.90381951699965,72,"708. Insert into a Sorted Circular Linked List (Medium)
+Connection: Related practice
+Related practice pattern: balanced node split and merge operations on ordered containers
+What transfers: Technical component: balanced node split and merge operations on ordered containers. Problem component: insert one new node while preserving the circular nondecreasing order, allowing its wrap from maximum to minimum.. Shared component: maintaining global sorted order when inserting and redistributing elements.
+Important difference: B-tree splits manage pages; list insertion manages single-node placement only
+Technical quote: of the data ends up on each side of the split [ 26].
+Problem quote: Given any node in a sorted circular singly linked list and insertVal, insert one new node while
+preserving the circular nondecreasing order, allowing its wrap from maximum to minimum.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 234; LeetCode_4000_Problem_Reference.pdf, PAGE: 354
+
+147. Insertion Sort List (Medium)
+Connection: Related practice
+Related practice pattern: balanced node split and merge operations on ordered containers
+What transfers: Technical component: balanced node split and merge operations on ordered containers. Problem component: Sort the supplied singly linked list into nondecreasing order using insertion sort: process successive nodes and insert each into its correct position within the already sorted portion.. Shared component: maintaining global order by placing elements in correct sorted position during updates.
+Important difference: B-tree uses node splits under capacity constraints; insertion sort uses linear list insertion
+Technical quote: of the data ends up on each side of the split [ 26].
+Problem quote: Sort the supplied singly linked list into nondecreasing order using insertion sort: process
+successive nodes and insert each into its correct position within the already sorted portion.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 234; LeetCode_4000_Problem_Reference.pdf, PAGE: 74
+
+109. Convert Sorted List to Binary Search Tree (Medium)
+Connection: Related practice
+Related practice pattern: balanced node split and merge operations on ordered containers
+What transfers: Technical component: balanced node split and merge operations on ordered containers. Problem component: Convert a sorted singly linked list into a binary search tree retaining every value.. Shared component: partitioning an ordered sequence into left and right subsets when constructing a search tree.
+Important difference: technical split maintains fixed-size pages; coding task builds balanced tree without page constraints
+Technical quote: of the data ends up on each side of the split [ 26].
+Problem quote: Convert a sorted singly linked list into a binary search tree retaining every value.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 234; LeetCode_4000_Problem_Reference.pdf, PAGE: 55",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-016-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for splitting an overflowing ordered page into two pages and updating its parent key ranges. Explain the computational connection and its limitations.",ordinary,completed,295;1902;26,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,191.78617906104773,66,"295. Find Median from Data Stream (Hard)
+Connection: Related practice
+Related practice pattern: Balanced node-splitting with parent range updates
+What transfers: Technical component: Balanced node-splitting with parent range updates. Problem component: Return the median of all inserted values: the middle sorted value for odd size, or the mean of the two middle values for even size.. Shared component: Identifying the median element that splits a sorted set into two halves..
+Important difference: B-tree split updates parent ranges; median problem only reports a value, no structure.
+Technical quote: If there isn’t enough free space in the page to accommodate the new key, it is split
+into two half-full pages, and the parent page is updated to account for the new subdi‐
+vision of key ranges—see Figure 3-7.ii
+Figure 3-7.
+Problem quote: Return the median of all inserted
+values: the middle sorted value for odd size, or the mean of the two middle values for even size.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 103; LeetCode_4000_Problem_Reference.pdf, PAGE: 148
+
+1902. Depth of BST Given Insertion Order (Medium)
+Connection: Related practice
+Related practice pattern: Balanced node-splitting with parent range updates
+What transfers: Technical component: Balanced node-splitting with parent range updates. Problem component: All subsequent elements are inserted as the child of any existing node such that the binary search tree properties hold.. Shared component: ordered insertion maintaining search-tree key ordering constraints.
+Important difference: BST insertion lacks node-splitting and parent key-range updates present in B-trees
+Technical quote: If you want to add a new key, you
+need to find the page whose range encompasses the new key and add it to that page.
+Problem quote: All subsequent elements are inserted as the
+child of any existing node such that the binary search tree properties hold.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 103; LeetCode_4000_Problem_Reference.pdf, PAGE: 952
+
+26. Remove Duplicates from Sorted Array (Easy)
+Connection: Related practice
+Related practice pattern: Balanced node-splitting with parent range updates
+What transfers: Technical component: Balanced node-splitting with parent range updates. Problem component: Modify it in place so that its initial k positions contain exactly one occurrence of each distinct input value, still sorted.. Shared component: in-place reorganization of a sorted array while preserving global order.
+Important difference: B-tree split manages node capacity and parent metadata; dedup just compacts values
+Technical quote: If there isn’t enough free space in the page to accommodate the new key, it is split
+into two half-full pages, and the parent page is updated to account for the new subdi‐
+vision of key ranges—see Figure 3-7.ii
+Figure 3-7.
+Problem quote: Modify it in place so that its initial k
+positions contain exactly one occurrence of each distinct input value, still sorted.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 103; LeetCode_4000_Problem_Reference.pdf, PAGE: 13",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-017-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for bounded-buffer backpressure.",ordinary,completed,1188;1670;622,direct_match;unassessed;related_practice,2,2,1.0,1,0,0,False,,134.80339450691827,56,"1188. Design Bounded Blocking Queue (Medium)
+Connection: Related practice
+Related practice pattern: Implement a bounded circular buffer that enforces backpressure by blocking or rejecting producers when the buffer is full and potentially discarding oldest items, modeling a ring buffer with flow control.
+What transfers: Technical component: Implement a bounded circular buffer that enforces backpressure by blocking or rejecting producers when the buffer is full and potentially discarding oldest items, modeling a ring buffer with flow control.. Problem component: The constructor initializes the queue with a largest capacity.. Shared component: defining a fixed upper capacity for a bounded buffer/queue.
+Important difference: technical buffer may discard items; coding queue blocks instead of discarding
+Technical quote: Effectively, the log implements a bounded-size buffer that dis‐
+cards old messages when it gets full, also known as a circular buffer  or ring buffer .
+Problem quote: Build thread-safe bounded blocking queue that has the following methods:
+BoundedBlockingQueue(int capacity) The constructor initializes the queue with a largest capacity.
+void enqueue(int element) Adds an element to the front of the queue.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 594
+
+1670. Design Front Middle Back Queue (Medium)
+Connection: Related practice
+Related practice pattern: Implement a bounded circular buffer that enforces backpressure by blocking or rejecting producers when the buffer is full and potentially discarding oldest items, modeling a ring buffer with flow control.
+What transfers: Technical component: Implement a bounded circular buffer that enforces backpressure by blocking or rejecting producers when the buffer is full and potentially discarding oldest items, modeling a ring buffer with flow control.. Problem component: Design a queue that supports push and pop operations in the front, middle, and back.. Shared component: manipulating a finite-capacity linear sequence with enqueue/dequeue-style operations.
+Important difference: technical buffer enforces backpressure and discarding; coding queue focuses on index positions
+Technical quote: Effectively, the log implements a bounded-size buffer that dis‐
+cards old messages when it gets full, also known as a circular buffer  or ring buffer .
+Problem quote: Design a queue that supports push and pop operations in the front, middle, and back.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 836
+
+622. Design Circular Queue (Medium)
+Connection: Related practice
+Related practice pattern: Implement a bounded circular buffer that enforces backpressure by blocking or rejecting producers when the buffer is full and potentially discarding oldest items, modeling a ring buffer with flow control.
+What transfers: Technical component: Implement a bounded circular buffer that enforces backpressure by blocking or rejecting producers when the buffer is full and potentially discarding oldest items, modeling a ring buffer with flow control.. Problem component: Design MyCircularQueue(k) with fixed capacity.. Shared component: implementing a fixed-capacity circular buffer structure.
+Important difference: technical buffer models log segments and message loss; LeetCode queue omits backpressure behavior
+Technical quote: Effectively, the log implements a bounded-size buffer that dis‐
+cards old messages when it gets full, also known as a circular buffer  or ring buffer .
+Problem quote: Design MyCircularQueue(k) with fixed capacity. enQueue(value) and deQueue() report whether
+insertion at the rear or removal at the front succeeds.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 311",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-017-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for blocking a producer when its fixed-capacity buffer is full until a consumer removes data. Explain the computational connection and its limitations.",ordinary,completed,1188;1670;641,direct_match;unassessed;related_practice,2,2,1.0,1,0,0,False,,159.94902838091366,63,"1188. Design Bounded Blocking Queue (Medium)
+Connection: Direct match
+Related practice pattern: Bounded blocking queue with producer backpressure
+What transfers: Technical component: Bounded blocking queue with producer backpressure. Problem component: If the queue is full, the calling thread is blocked until the queue is no longer full.. Shared component: implement blocking behavior on producers when fixed-capacity buffer is full.
+Important difference: technical text is conceptual; coding task fixes specific API and thread model
+Technical quote: Broadly speaking, there are three options: the system can drop mes‐
+sages, buffer messages in a queue, or apply backpressure (also known as flow
+control; i.e., blocking the producer from sending more messages).
+Problem quote: If the queue is full, the
+calling thread is blocked until the queue is no longer full. int dequeue() Returns the element at the
+rear of the queue and removes it.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 594
+
+1670. Design Front Middle Back Queue (Medium)
+Connection: Related practice
+Related practice pattern: Bounded blocking queue with producer backpressure
+What transfers: Technical component: Bounded blocking queue with producer backpressure. Problem component: Design a queue that supports push and pop operations in the front, middle, and back.. Shared component: designing and manipulating a bounded queue data structure.
+Important difference: coding task lacks blocking behavior and producer-consumer synchronization
+Technical quote: For example,
+Unix pipes and TCP use backpressure: they have a small fixed-size buffer, and if
+Transmitting Event Streams | 441
+Problem quote: Design a queue that supports push and pop operations in the front, middle, and back.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 836
+
+641. Design Circular Deque (Medium)
+Connection: Related practice
+Related practice pattern: Bounded blocking queue with producer backpressure
+What transfers: Technical component: Bounded blocking queue with producer backpressure. Problem component: isEmpty and isFull report status. Shared component: detecting buffer-full condition in a fixed-capacity queue/deque structure.
+Important difference: technical side blocks producers; deque operation only reports full without blocking
+Technical quote: For example,
+Unix pipes and TCP use backpressure: they have a small fixed-size buffer, and if
+Transmitting Event Streams | 441
+Problem quote: Design MyCircularDeque(k) with fixed capacity. insertFront/insertLast and deleteFront/deleteLast
+report success. getFront/getRear return endpoint values or -1 if empty. isEmpty and isFull report
+status.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 321",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-018-short,"According to ""Speech and Language Processing.pdf"", recommend a related LeetCode problem for k-means centroid updates.",ordinary,completed,1515;1828;780,uncertain;unassessed;unassessed,0,0,,2,1,0,False,,148.39732124307193,59,"1515. Best Position for a Service Centre (Hard)
+Connection: Related practice
+Related practice pattern: Iteratively update cluster centroids by recomputing mean vectors from assigned points until convergence
+What transfers: Technical component: Iteratively update cluster centroids by recomputing mean vectors from assigned points until convergence. Problem component: Minimize the sum of ordinary Euclidean distances from that point to all listed customers.. Shared component: Choosing a point that minimizes total Euclidean distance to a set of points..
+Important difference: K-means updates multiple centroids iteratively; the problem minimizes distance for a single point.
+Technical quote: A
+centroidis the geometric center of a set of a points in n-dimensional space.centroid
+The k-means algorithm for clustering starts by assigning a random vector to each
+clusterk.
+Problem quote: Minimize the sum of ordinary Euclidean distances from that point to all listed customers.
+SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 758
+
+1828. Queries on Number of Points Inside a Circle (Medium)
+Connection: Related practice
+Related practice pattern: Iteratively update cluster centroids by recomputing mean vectors from assigned points until convergence
+What transfers: Technical component: Iteratively update cluster centroids by recomputing mean vectors from assigned points until convergence. Problem component: For each query queries[j], compute the count of points inside the j^th circle.. Shared component: per-group aggregation over a subset of points determined by a geometric condition.
+Important difference: technical updates means for fixed clusters; problem only counts per query circle
+Technical quote: Recall from Section 16.4.3 that k-means
+is a two-step algorithm based on iteratively updating a set ofkcentroidvectors.
+Problem quote: For each query
+queries[j], compute the count of points inside the j^th circle.
+SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 915
+
+780. Reaching Points (Hard)
+Connection: Stretch connection
+Related practice pattern: Iteratively update cluster centroids by recomputing mean vectors from assigned points until convergence
+What transfers: Technical component: Iteratively update cluster centroids by recomputing mean vectors from assigned points until convergence. Problem component: Starting at (sx,sy), repeatedly replace coordinates by (x+y,y) or (x,x+y).. Shared component: implementing iterative state updates over repeated operations.
+Important difference: no grouping or mean-based aggregation; updates are deterministic coordinate transforms
+Technical quote: Recall from Section 16.4.3 that k-means
+is a two-step algorithm based on iteratively updating a set ofkcentroidvectors.
+Problem quote: Starting at (sx,sy), repeatedly replace coordinates by (x+y,y) or (x,x+y).
+SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 390",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-018-descriptive,"Using ""Speech and Language Processing.pdf"", suggest LeetCode practice for repeatedly updating cluster centers from the samples assigned to each center. Explain the computational connection and its limitations.",ordinary,completed,3923;2090;25,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,173.11336444085464,63,"3923. Minimum Generations to Target Point (Medium)
+Connection: Related practice
+Related practice pattern: Iterative centroid recomputation from assigned samples
+What transfers: Technical component: Iterative centroid recomputation from assigned samples. Problem component: take every pair of coordinate-distinct points available from generations 0 through k-1 and produce their coordinatewise midpoint rounded down. Shared component: computing a new representative point via coordinatewise averaging of existing points.
+Important difference: technical pattern averages all assigned points; problem uses pairwise midpoints only
+Technical quote: Recall from Section 16.4.3 that k-means
+is a two-step algorithm based on iteratively updating a set ofkcentroidvectors.
+Problem quote: For generation k>=1, take every
+pair of coordinate-distinct points available from generations 0 through k-1 and produce their
+coordinatewise midpoint rounded down.
+SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 1963
+
+2090. K Radius Subarray Averages (Medium)
+Connection: Related practice
+Related practice pattern: Iterative centroid recomputation from assigned samples
+What transfers: Technical component: Iterative centroid recomputation from assigned samples. Problem component: Build and produce an array avgs of length n where avgs[i] is the k-radius average for the subarray centered at index i.. Shared component: compute means by aggregating assigned elements into a representative average value.
+Important difference: technical pattern iterates cluster centers; coding task computes one-pass local averages
+Technical quote: Recall from Section 16.4.3 that k-means
+is a two-step algorithm based on iteratively updating a set ofkcentroidvectors.
+Problem quote: Build and produce an array avgs of length n
+where avgs[i] is the k-radius average for the subarray centered at index i.
+SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 1046
+
+25. Reverse Nodes in k-Group (Hard)
+Connection: Related practice
+Related practice pattern: Iterative centroid recomputation from assigned samples
+What transfers: Technical component: Iterative centroid recomputation from assigned samples. Problem component: divide the list from the front into consecutive groups of k nodes.. Shared component: partitioning a sequence of items into k-indexed groups for further processing.
+Important difference: clusters are similarity-based partitions; list groups are fixed-size, position-based
+Technical quote: Then we cluster all theseNvectors intokclusters;kis set
+by the designer as a parameter to the algorithm as the number of discrete symbols
+we want, generally withk<<N.
+Problem quote: Given a singly linked list head and positive integer k, divide the list from the front into consecutive
+groups of k nodes.
+SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 13",
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-019-short,"According to ""Probabilistic Machine Learning.pdf"", recommend a LeetCode problem only if its statement explicitly names Sinkhorn algorithm. Otherwise say no such problem was found.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,4.539358081063256,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-019-descriptive,"Find coding practice for Sinkhorn algorithm in ""Probabilistic Machine Learning.pdf"". Require the literal phrase ""Sinkhorn algorithm"" in the LeetCode statement; do not offer analogies instead.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.637310686055571,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-020-short,"According to ""Speech and Language Processing.pdf"", recommend a LeetCode problem only if its statement explicitly names coreference resolution. Otherwise say no such problem was found.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.9372015870176256,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-020-descriptive,"Find coding practice for coreference resolution in ""Speech and Language Processing.pdf"". Require the literal phrase ""coreference resolution"" in the LeetCode statement; do not offer analogies instead.",explicit_naming_control,completed,734;1583;49,unassessed;unassessed;unassessed,0,0,,3,0,0,False,False,150.16316631087102,60,"734. Sentence Similarity (Easy)
+Connection: Related practice
+Related practice pattern: Two-stage pipeline: first classify mention pairs as coreferent or not, then cluster mentions into coreference chains based on pairwise decisions.
+What transfers: Technical component: Two-stage pipeline: first classify mention pairs as coreferent or not, then cluster mentions into coreference chains based on pairwise decisions.. Problem component: return whether corresponding words are similar at every position.. Shared component: Binary classification over aligned item pairs using learned/defined similarity criteria..
+Important difference: Coreference chains and clustering over mentions are absent in the word similarity task.
+Technical quote: A pair
+of NPs is classiﬁed as coreferring or not based on constraints that are learned from
+an annotated corpus.
+Problem quote: Given two word arrays and explicitly similar word pairs, return whether corresponding words are
+similar at every position.
+SOURCES: Speech and Language Processing.pdf, PAGE: 589; LeetCode_4000_Problem_Reference.pdf, PAGE: 367
+
+1583. Count Unhappy Friends (Medium)
+Connection: Related practice
+Related practice pattern: Two-stage pipeline: first classify mention pairs as coreferent or not, then cluster mentions into coreference chains based on pairwise decisions.
+What transfers: Technical component: Two-stage pipeline: first classify mention pairs as coreferent or not, then cluster mentions into coreference chains based on pairwise decisions.. Problem component: A friend x is unhappy if x is paired with y and there exists a friend u who is paired with v but: x prefers u over y, and u prefers x over v.. Shared component: Binary decision on a specific pair based on relational constraints with others..
+Important difference: Coreference labels linguistic NP pairs; unhappy-friend logic labels social pair states.
+Technical quote: A pair
+of NPs is classiﬁed as coreferring or not based on constraints that are learned from
+an annotated corpus.
+Problem quote: A friend x is unhappy if x is paired with y and there exists a
+friend u who is paired with v but: x prefers u over y, and u prefers x over v.
+SOURCES: Speech and Language Processing.pdf, PAGE: 589; LeetCode_4000_Problem_Reference.pdf, PAGE: 792
+
+49. Group Anagrams (Medium)
+Connection: Related practice
+Related practice pattern: Two-stage pipeline: first classify mention pairs as coreferent or not, then cluster mentions into coreference chains based on pairwise decisions.
+What transfers: Technical component: Two-stage pipeline: first classify mention pairs as coreferent or not, then cluster mentions into coreference chains based on pairwise decisions.. Problem component: collect strings into groups so that two strings are in the same group exactly when they have the same characters with the same occurrence counts.. Shared component: partitioning items into equivalence classes based on pairwise or intrinsic features.
+Important difference: technical task is semantic coreference; problem groups exact-anagram strings
+Technical quote: A separate clustering mechanism then coordinates the possibly
+contradictory pairwise classiﬁcations and constructs a partition on the set of NPs.
+Problem quote: Given an array strs of strings, collect strings into groups so that two strings are in the same group
+exactly when they have the same characters with the same occurrence counts.
+SOURCES: Speech and Language Processing.pdf, PAGE: 589; LeetCode_4000_Problem_Reference.pdf, PAGE: 25",

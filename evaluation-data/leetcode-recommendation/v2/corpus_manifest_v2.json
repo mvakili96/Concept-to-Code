@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0.0",
+  "benchmark_version": "2.0.0",
+  "corpus_root": "documents",
+  "extractor": {
+    "library": "pypdf",
+    "version": "6.16.2",
+    "method": "page.extract_text()"
+  },
+  "page_numbering": "one-based physical PDF pages; offsets are zero-based characters",
+  "documents": [
+    {
+      "source": "Computer Vision: Algorithms and Applications.pdf",
+      "relative_path": "documents/Computer Vision: Algorithms and Applications.pdf",
+      "sha256": "515894714d4fae375b1d2a33cd86e2e365b1ced2de21a57af96d23f0658d2b65",
+      "size_bytes": 43190964,
+      "pdf_pages": 1232,
+      "page_numbering": "one_based_physical_pdf_page",
+      "printed_page_offset_for_benchmark_evidence": -26,
+      "pdf_metadata_title": "Computer Vision: Algorithms and Applications, 2nd Edition"
+    },
+    {
+      "source": "Designing Data-Intensive Applications.pdf",
+      "relative_path": "documents/Designing Data-Intensive Applications.pdf",
+      "sha256": "39cc0d1842a56367eb79273f15b0a91fe783644155f987a32b9939daa4b2110d",
+      "size_bytes": 24443850,
+      "pdf_pages": 613,
+      "page_numbering": "one_based_physical_pdf_page",
+      "printed_page_offset_for_benchmark_evidence": -22,
+      "pdf_metadata_title": "Designing Data-Intensive Applications"
+    },
+    {
+      "source": "Grokking-the-system-design-interview-free.pdf",
+      "relative_path": "documents/Grokking-the-system-design-interview-free.pdf",
+      "sha256": "6a832b25a2557ad08e1b979e05a1605835493592c1b65afb7af9cf754bbb49a3",
+      "size_bytes": 4424660,
+      "pdf_pages": 196,
+      "page_numbering": "one_based_physical_pdf_page",
+      "printed_page_offset_for_benchmark_evidence": 0,
+      "pdf_metadata_title": null
+    },
+    {
+      "source": "LeetCode_4000_Problem_Reference.pdf",
+      "relative_path": "documents/LeetCode_4000_Problem_Reference.pdf",
+      "sha256": "76c3d016959864965612cca10512f133bcbed2b4fac8acd6a8891467d7e4d5de",
+      "size_bytes": 5235811,
+      "pdf_pages": 2002,
+      "page_numbering": "one_based_physical_pdf_page",
+      "printed_page_offset_for_benchmark_evidence": 0,
+      "pdf_metadata_title": null
+    },
+    {
+      "source": "Probabilistic Machine Learning.pdf",
+      "relative_path": "documents/Probabilistic Machine Learning.pdf",
+      "sha256": "54d6bfa8cc4a367bb553bea1c5127ca63696a9655b2ca1f6137a8584dccfdbaf",
+      "size_bytes": 151421194,
+      "pdf_pages": 1370,
+      "page_numbering": "one_based_physical_pdf_page",
+      "printed_page_offset_for_benchmark_evidence": -34,
+      "pdf_metadata_title": null
+    },
+    {
+      "source": "Speech and Language Processing.pdf",
+      "relative_path": "documents/Speech and Language Processing.pdf",
+      "sha256": "88d0362c3bcb62a0cd09403fb80fd15e778dd53566943912ab1047cda3ff5c79",
+      "size_bytes": 26506144,
+      "pdf_pages": 646,
+      "page_numbering": "one_based_physical_pdf_page",
+      "printed_page_offset_for_benchmark_evidence": -8,
+      "pdf_metadata_title": null
+    }
+  ],
+  "questions": 40,
+  "topics": 20,
+  "ordinary_questions": 36,
+  "controls": 4,
+  "reviewed_pairs": 360,
+  "data_sha256": {
+    "leetcode_benchmark_v2.jsonl": "7c0fc7ffd65cbda4661a295f28540c32eac9f7b8be70d3ce38c447880c507a96",
+    "references_v2.json": "43b3b190300273e35f9c6e081dfc155694df19525dfdb03198ec46292b454a6d"
+  },
+  "promoted_positive_pair_ids": [],
+  "annotation_provenance": "Fresh-topic offline source audit; full-statement screening and semantic judgments are recorded separately. No paid inference or production evaluation.",
+  "source_audit_method": "codex_source_audit",
+  "human_reviewed": false,
+  "review_model": "Codex; exact serving identifier unavailable",
+  "preparation_artifact_sha256": {
+    "question_freeze_v2.json": "5314ef9e06b8e38f5c7a40d787b071a885c5e9ebb3f917ff811ede937a325128",
+    "problem_catalogue_v2.jsonl": "195609f03dc890d65f0d40cebdb1af365576a6f2f7fff705d11030d6409dc946",
+    "scan_ledger_v2.jsonl": "6f8848c7253d9296ce5924d1e06dc494ec5c1bd04893dbe0cbe7e0382ee15b9a",
+    "verify_dataset.py": "e468a3312398376720e65ba59f1c5f20113e45bca6159db988ea3713e399702f",
+    "NOVELTY_AUDIT_v2.json": "f6f7494981ad524c72fc304891d26dfc625c9046e7de5cb99eea35aed4eafb75",
+    "README.md": "1e1efeeb801f3d37419c6326358409bf487f70b91a69bd0c36681a36f0a5ed84",
+    "SCHEMA.md": "369bea2726bd92ce449aac5d0b132bd4f7a4732cb08680bf54488c9e55d0f6af",
+    "REVIEW.md": "f70815b8cfad1c1a21e807fac477095af09161603237ca98cb8a1d83aad2bade",
+    "COVERAGE.md": "efe0515969dc518520e8073cacf04ed4c44dd18fcf7ec19c8f4d9f4e249611ad"
+  },
+  "preparation_status": "source_verified_dataset_not_evaluated",
+  "semantic_coverage": "nonexhaustive_individually_audited_references_with_complete_text_screen",
+  "external_api_calls": 0,
+  "production_runs": 0,
+  "layout_migration": {
+    "date": "2026-10-26",
+    "reason": "Versioned data/results directories; path/documentation updates only. Questions, references and original PDF hashes unchanged.",
+    "modified_artifacts": {
+      "README.md": {
+        "previous_sha256": "422efc629b6e5b505eb060c8d629bdc60eec1ac23b6b17e3e95f22c3a45823fd",
+        "current_sha256": "1e1efeeb801f3d37419c6326358409bf487f70b91a69bd0c36681a36f0a5ed84"
+      },
+      "COVERAGE.md": {
+        "previous_sha256": "357ac6c2a5f050de1f0b60a45864e8749321c305e7b9100af485579c685d8fb0",
+        "current_sha256": "efe0515969dc518520e8073cacf04ed4c44dd18fcf7ec19c8f4d9f4e249611ad"
+      }
+    }
+  }
+}

@@ -1,0 +1,1321 @@
+run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error
+imported-azure-gpt51-v1,related-diag-001-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what is the Hough transform?",ordinary,completed,1828;3009;149,stretch_connection;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,139.83229570300318,69,"1828. Queries on Number of Points Inside a Circle (Medium)
+Connection: Related practice
+Related practice pattern: accumulator-based voting to detect parameterized structures
+What transfers: Technical component: accumulator-based voting to detect parameterized structures. Problem component: For each query queries[j], compute the count of points inside the j^th circle.. Shared component: aggregating many primitive observations into counts over parameterized queries.
+Important difference: technical voting is in abstract line-parameter space; problem counts points in circles
+Technical quote: The Hough transform, named after its original inventor (Hough 1962), is a well-known
+technique for having edges “vote” for plausible line locations (Duda and Hart 1972; Ballard
+1981; Illingworth and Kittler 1988).
+Problem quote: For each query
+queries[j], compute the count of points inside the j^th circle.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 915
+
+3009. Maximum Number of Intersections on the Chart (Hard)
+Connection: Related practice
+Related practice pattern: accumulator-based voting to detect parameterized structures
+What transfers: Technical component: accumulator-based voting to detect parameterized structures. Problem component: Required result: the largest count of points of intersection of the line with the chart.. Shared component: counting how many data elements support a particular candidate line.
+Important difference: technical pattern uses parameter-space voting; problem counts intersections in data-space
+Technical quote: The Hough transform, named after its original inventor (Hough 1962), is a well-known
+technique for having edges “vote” for plausible line locations (Duda and Hart 1972; Ballard
+1981; Illingworth and Kittler 1988).
+Problem quote: Required result: the largest count of points of intersection of the line
+with the chart.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 1505
+
+149. Max Points on a Line (Hard)
+Connection: Related practice
+Related practice pattern: accumulator-based voting to detect parameterized structures
+What transfers: Technical component: accumulator-based voting to detect parameterized structures. Problem component: return the greatest number lying on one straight line.. Shared component: aggregating local point evidence to estimate how many align on one line.
+Important difference: technical method prescribes Hough voting; problem leaves algorithm unspecified
+Technical quote: The Hough transform, named after its original inventor (Hough 1962), is a well-known
+technique for having edges “vote” for plausible line locations (Duda and Hart 1972; Ballard
+1981; Illingworth and Kittler 1988).
+Problem quote: Given distinct planar points, return the greatest number lying on one straight line.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 75",
+imported-azure-gpt51-v1,related-diag-001-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how does the Hough transform use edge points to vote for possible lines?",ordinary,completed,149;2280;1610,related_practice;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,135.5158354700543,64,"149. Max Points on a Line (Hard)
+Connection: Related practice
+Related practice pattern: parameter-space voting with accumulators
+What transfers: Technical component: parameter-space voting with accumulators. Problem component: return the greatest number lying on one straight line. Shared component: aggregating evidence from many points to detect a maximally supported straight line.
+Important difference: technical method uses parameter-space accumulators; problem does not specify any implementation
+Technical quote: In its original formulation (Figure 7.46), each edge point
+votes for all possible lines passing through it, and lines corresponding to highaccumulator or
+bin values are examined for potential line ﬁts.15 Unless the points on a line are truly punctate,
+a better approach is to use the local orientation information at each edgel to vote for a single
+Problem quote: Given distinct planar points, return the greatest number lying on one straight line.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 75
+
+2280. Minimum Lines to Represent a Line Chart (Medium)
+Connection: Related practice
+Related practice pattern: parameter-space voting with accumulators
+What transfers: Technical component: parameter-space voting with accumulators. Problem component: Return the fewest straight lines needed to represent that exact connected chart, merging adjacent segments only when collinear.. Shared component: detect and merge collinear line segments into longer lines.
+Important difference: technical uses voting in parameter space; coding minimizes segments explicitly
+Technical quote: In many cases, it is desirable to group such collinear segments into
+extended lines.
+Problem quote: Return the fewest straight lines needed to represent that exact
+connected chart, merging adjacent segments only when collinear.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 1141
+
+1610. Maximum Number of Visible Points (Hard)
+Connection: Related practice
+Related practice pattern: parameter-space voting with accumulators
+What transfers: Technical component: parameter-space voting with accumulators. Problem component: Return the greatest visible count over all orientations.. Shared component: select maximum vote count in parameter space as best-supported hypothesis.
+Important difference: technical votes are line parameters; problem counts generic orientations, not explicit lines
+Technical quote: In its original formulation (Figure 7.46), each edge point
+votes for all possible lines passing through it, and lines corresponding to highaccumulator or
+bin values are examined for potential line ﬁts.15 Unless the points on a line are truly punctate,
+a better approach is to use the local orientation information at each edgel to vote for a single
+Problem quote: Return
+the greatest visible count over all orientations.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 806",
+imported-azure-gpt51-v1,related-diag-002-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what is linear filtering?",ordinary,completed,3242;2428;3463,direct_match;related_practice;related_practice,3,3,1.0,0,0,0,False,,131.9670274599921,61,"3242. Design Neighbor Sum Service (Easy)
+Connection: Related practice
+Related practice pattern: Implement neighborhood operations as weighted sums over local inputs
+What transfers: Technical component: Implement neighborhood operations as weighted sums over local inputs. Problem component: adjacentSum(value) returns the sum of the existing cells immediately above, below, left, and right of that value's cell.. Shared component: computing an output as a sum over a local neighborhood of inputs.
+Important difference: technical filter uses arbitrary weights; operation uses equal weights and specific shape
+Technical quote: This is equivalent to saying that
+each output pixel is a weighted summation of some number of input pixels (3.19).
+Problem quote: NeighborSum(grid) receives a square matrix containing distinct values 0 through n^2-1.
+adjacentSum(value) returns the sum of the existing cells immediately above, below, left, and right
+of that value's cell. diagonalSum(value) returns the sum of its existing four corner-diagonal
+neighbors.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1622
+
+2428. Maximum Sum of an Hourglass (Medium)
+Connection: Related practice
+Related practice pattern: Implement neighborhood operations as weighted sums over local inputs
+What transfers: Technical component: Implement neighborhood operations as weighted sums over local inputs. Problem component: Return the largest sum of these seven cells over all window positions.. Shared component: computing sums over a sliding local window of input cells.
+Important difference: technical pattern uses fixed weights per window; problem scans and selects max sum
+Technical quote: This is equivalent to saying that
+each output pixel is a weighted summation of some number of input pixels (3.19).
+Problem quote: Return the largest sum of these seven cells over all window positions.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1215
+
+3463. Check If Digits Are Equal in String After Operations II (Hard)
+Connection: Related practice
+Related practice pattern: Implement neighborhood operations as weighted sums over local inputs
+What transfers: Technical component: Implement neighborhood operations as weighted sums over local inputs. Problem component: For each pair of successive digits in s, beginning at the first digit, calculate a new digit as the total of the two digits modulo 10. Shared component: compute each output element from a fixed-weighted combination of neighboring inputs.
+Important difference: technical filter uses real-valued weights; problem uses integer sum with modulo
+Technical quote: This is equivalent to saying that
+each output pixel is a weighted summation of some number of input pixels (3.19).
+Problem quote: Perform this operation repeatedly until the string has
+exactly two digits: For each pair of successive digits in s, beginning at the first digit, calculate a
+new digit as the total of the two digits modulo 10.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1733",
+imported-azure-gpt51-v1,related-diag-002-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how does a linear image filter combine neighboring pixel values to produce an output pixel?",ordinary,completed,3242;2428;3070,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,146.8266762350686,65,"3242. Design Neighbor Sum Service (Easy)
+Connection: Related practice
+Related practice pattern: Sliding-window weighted sum over local neighborhoods
+What transfers: Technical component: Sliding-window weighted sum over local neighborhoods. Problem component: adjacentSum(value) returns the sum of the existing cells immediately above, below, left, and right of that value's cell.. Shared component: summing values of a cell’s grid neighbors to compute a new value.
+Important difference: technical filter uses general weights and full neighborhood; adjacentSum uses uniform cardinal neighbors
+Technical quote: The most widely used type of neighborhood operator is a linear ﬁlter, where an output
+pixel’s value is a weighted sum of pixel values within a small neighborhoodN (Figure 3.10),
+g(i,j ) =
+∑
+k,l
+f(i +k,j +l)h(k,l ). (3.12)
+The entries in the weight kernel or mask h(k,l ) are often called the ﬁlter coefﬁcients.
+Problem quote: NeighborSum(grid) receives a square matrix containing distinct values 0 through n^2-1.
+adjacentSum(value) returns the sum of the existing cells immediately above, below, left, and right
+of that value's cell. diagonalSum(value) returns the sum of its existing four corner-diagonal
+neighbors.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 146; LeetCode_4000_Problem_Reference.pdf, PAGE: 1622
+
+2428. Maximum Sum of an Hourglass (Medium)
+Connection: Related practice
+Related practice pattern: Sliding-window weighted sum over local neighborhoods
+What transfers: Technical component: Sliding-window weighted sum over local neighborhoods. Problem component: Return the largest sum of these seven cells over all window positions.. Shared component: Sliding a fixed-size window and summing its cells at each position..
+Important difference: Technical uses weighted sums; coding task uses unweighted sums and max selection.
+Technical quote: The most widely used type of neighborhood operator is a linear ﬁlter, where an output
+pixel’s value is a weighted sum of pixel values within a small neighborhoodN (Figure 3.10),
+g(i,j ) =
+∑
+k,l
+f(i +k,j +l)h(k,l ). (3.12)
+The entries in the weight kernel or mask h(k,l ) are often called the ﬁlter coefﬁcients.
+Problem quote: Return the largest sum of these seven cells over all window positions.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 146; LeetCode_4000_Problem_Reference.pdf, PAGE: 1215
+
+3070. Count Submatrices with Top-Left Element and Sum Less Than k (Medium)
+Connection: Related practice
+Related practice pattern: Sliding-window weighted sum over local neighborhoods
+What transfers: Technical component: Sliding-window weighted sum over local neighborhoods. Problem component: count submatrices that have a sum less than or equal to k. Shared component: aggregating values over a 2D neighborhood via summation.
+Important difference: filter outputs weighted sums; problem uses unweighted sums and counting constraint
+Technical quote: The most widely used type of neighborhood operator is a linear ﬁlter, where an output
+pixel’s value is a weighted sum of pixel values within a small neighborhoodN (Figure 3.10),
+g(i,j ) =
+∑
+k,l
+f(i +k,j +l)h(k,l ). (3.12)
+The entries in the weight kernel or mask h(k,l ) are often called the ﬁlter coefﬁcients.
+Problem quote: Required result: the count of
+submatrices that contain the top-left element of the grid, and have a sum less than or equal to k.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 146; LeetCode_4000_Problem_Reference.pdf, PAGE: 1536",
+imported-azure-gpt51-v1,related-diag-003-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what is a summed-area table?",ordinary,completed,363;1878;3027,related_practice;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,167.29936442687176,74,"363. Max Sum of Rectangle No Larger Than K (Hard)
+Connection: Related practice
+Related practice pattern: 2D prefix-sum table for O(1) rectangular range queries
+What transfers: Technical component: 2D prefix-sum table for O(1) rectangular range queries. Problem component: Return the largest sum of a nonempty axis-aligned rectangle in matrix that is at most k.. Shared component: computing axis-aligned sub-rectangle sums using a 2D prefix-sum structure.
+Important difference: technical pattern supports any rectangle; problem further constrains sum ≤ k and maximizes
+Technical quote: Summed area table (integral image)
+If an image is going to be repeatedly convolved with different box ﬁlters (and especially ﬁlters
+of different sizes at different locations), you can precompute the summed area table (Crow
+1984), which is just the running sum of all the pixel values from the origin,
+s(i,j ) =
+i∑
+k=0
+j∑
+l=0
+f(k,l ). (3.30)
+This can be efﬁciently computed using a recursive (raster-scan) algorithm,
+s(i,j ) =s(i− 1,j ) +s(i,j− 1)−s(i− 1,j− 1) +f(i,j ). (3.31)
+The images(i,j ) is also often called an integral image (see Figure 3.17) and can actually be
+computed using only two additions per pixel if separate row sums are used (Viola and Jones
+2004).
+Problem quote: Return the largest sum of a nonempty axis-aligned rectangle in matrix that is at most k.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 182
+
+1878. Get Biggest Three Rhombus Sums in a Grid (Medium)
+Connection: Related practice
+Related practice pattern: 2D prefix-sum table for O(1) rectangular range queries
+What transfers: Technical component: 2D prefix-sum table for O(1) rectangular range queries. Problem component: Its sum includes boundary cells only, counting each once; d=0 is a single cell.. Shared component: using precomputed cumulative sums to obtain sums over specified cell subsets.
+Important difference: technical table sums full rectangles; problem sums only perimeters, not interiors
+Technical quote: Summed area table (integral image)
+If an image is going to be repeatedly convolved with different box ﬁlters (and especially ﬁlters
+of different sizes at different locations), you can precompute the summed area table (Crow
+1984), which is just the running sum of all the pixel values from the origin,
+s(i,j ) =
+i∑
+k=0
+j∑
+l=0
+f(k,l ). (3.30)
+This can be efﬁciently computed using a recursive (raster-scan) algorithm,
+s(i,j ) =s(i− 1,j ) +s(i,j− 1)−s(i− 1,j− 1) +f(i,j ). (3.31)
+The images(i,j ) is also often called an integral image (see Figure 3.17) and can actually be
+computed using only two additions per pixel if separate row sums are used (Viola and Jones
+2004).
+Problem quote: Its sum includes boundary cells only, counting each once; d=0 is a
+single cell.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 940
+
+3027. Find the Number of Ways to Place People II (Hard)
+Connection: Related practice
+Related practice pattern: 2D prefix-sum table for O(1) rectangular range queries
+What transfers: Technical component: 2D prefix-sum table for O(1) rectangular range queries. Problem component: count ordered choices (Alice,Bob) for which Alice is the upper-left corner and Bob the lower-right corner of their axis-aligned closed rectangle: Alice.x<=Bob.x and Alice.y>=Bob.y.. Shared component: computing aggregate quantities over axis-aligned rectangles via precomputation.
+Important difference: technical table sums pixel values; problem counts specific point-rectangle choices
+Technical quote: To ﬁnd the summed area (integral) inside a rectangle [i0,i 1]× [j0,j 1], we simply
+Problem quote: Given distinct points, count ordered choices (Alice,Bob) for which Alice is the upper-left corner and
+Bob the lower-right corner of their axis-aligned closed rectangle: Alice.x<=Bob.x and
+Alice.y>=Bob.y.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 1514",
+imported-azure-gpt51-v1,related-diag-003-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how can an integral image support repeated rectangular pixel-sum queries?",ordinary,completed,304;221;363,direct_match;uncertain;related_practice,2,2,1.0,0,1,0,False,,167.1214584391564,72,"304. Range Sum Query 2D - Immutable (Medium)
+Connection: Direct match
+Related practice pattern: Precompute a 2D prefix-sum (integral image) using a raster-scan recurrence, then answer any axis-aligned rectangular sum query in O(1) time by combining the prefix values at the rectangle’s corners.
+What transfers: Technical component: Precompute a 2D prefix-sum (integral image) using a raster-scan recurrence, then answer any axis-aligned rectangular sum query in O(1) time by combining the prefix values at the rectangle’s corners.. Problem component: sumRegion(row1, col1, row2, col2) returns the sum of the inclusive rectangle between those corners.. Shared component: constant-time axis-aligned rectangular sum from precomputed 2D prefix sums.
+Important difference: technical text is image-focused; coding task is generic matrix interface
+Technical quote: To ﬁnd the summed area (integral) inside a rectangle [i0,i 1]× [j0,j 1], we simply
+Problem quote: Design NumMatrix(matrix). sumRegion(row1, col1, row2, col2) returns the sum of the inclusive
+rectangle between those corners.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 152
+
+221. Maximal Square (Medium)
+Connection: Related practice
+Related practice pattern: Precompute a 2D prefix-sum (integral image) using a raster-scan recurrence, then answer any axis-aligned rectangular sum query in O(1) time by combining the prefix values at the rectangle’s corners.
+What transfers: Technical component: Precompute a 2D prefix-sum (integral image) using a raster-scan recurrence, then answer any axis-aligned rectangular sum query in O(1) time by combining the prefix values at the rectangle’s corners.. Problem component: return the area of its largest axis-aligned square consisting entirely of ones. Shared component: using prefix-sum structures to test sums over axis-aligned submatrices.
+Important difference: technical pattern answers fixed rectangle sums; problem searches optimal all-ones square
+Technical quote: Summed area table (integral image)
+If an image is going to be repeatedly convolved with different box ﬁlters (and especially ﬁlters
+of different sizes at different locations), you can precompute the summed area table (Crow
+1984), which is just the running sum of all the pixel values from the origin,
+s(i,j ) =
+i∑
+k=0
+j∑
+l=0
+f(k,l ). (3.30)
+This can be efﬁciently computed using a recursive (raster-scan) algorithm,
+s(i,j ) =s(i− 1,j ) +s(i,j− 1)−s(i− 1,j− 1) +f(i,j ). (3.31)
+The images(i,j ) is also often called an integral image (see Figure 3.17) and can actually be
+computed using only two additions per pixel if separate row sums are used (Viola and Jones
+2004).
+Problem quote: Given a zero/one character matrix, return the area of its largest axis-aligned square consisting
+entirely of ones.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 111
+
+363. Max Sum of Rectangle No Larger Than K (Hard)
+Connection: Related practice
+Related practice pattern: Precompute a 2D prefix-sum (integral image) using a raster-scan recurrence, then answer any axis-aligned rectangular sum query in O(1) time by combining the prefix values at the rectangle’s corners.
+What transfers: Technical component: Precompute a 2D prefix-sum (integral image) using a raster-scan recurrence, then answer any axis-aligned rectangular sum query in O(1) time by combining the prefix values at the rectangle’s corners.. Problem component: Return the largest sum of a nonempty axis-aligned rectangle in matrix that is at most k.. Shared component: Using 2D prefix sums to get any axis-aligned rectangle sum in O(1)..
+Important difference: Technical pattern supports any sum; problem adds constraint sum ≤ k and maximization.
+Technical quote: Summed area table (integral image)
+If an image is going to be repeatedly convolved with different box ﬁlters (and especially ﬁlters
+of different sizes at different locations), you can precompute the summed area table (Crow
+1984), which is just the running sum of all the pixel values from the origin,
+s(i,j ) =
+i∑
+k=0
+j∑
+l=0
+f(k,l ). (3.30)
+This can be efﬁciently computed using a recursive (raster-scan) algorithm,
+s(i,j ) =s(i− 1,j ) +s(i,j− 1)−s(i− 1,j− 1) +f(i,j ). (3.31)
+The images(i,j ) is also often called an integral image (see Figure 3.17) and can actually be
+computed using only two additions per pixel if separate row sums are used (Viola and Jones
+2004).
+Problem quote: Return the largest sum of a nonempty axis-aligned rectangle in matrix that is at most k.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 182",
+imported-azure-gpt51-v1,related-diag-004-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what are connected components in an image?",ordinary,completed,3311;1559;85,stretch_connection;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,112.35245571192354,50,"3311. Construct 2D Grid Matching Graph Layout (Hard)
+Connection: Related practice
+Related practice pattern: Region-growing via connectivity labels
+What transfers: Technical component: Region-growing via connectivity labels. Problem component: Two nodes should be in adjacent grid cells (horizontally or vertically) exactly when there is an edge between them in edges.. Shared component: interpreting grid adjacency as 4-neighborhood connectivity relation.
+Important difference: technical pattern labels pixel regions; problem embeds arbitrary graph into grid
+Technical quote: Pixels are said
+to beN4 adjacent if they are immediately horizontally or vertically adjacent, andN8 if they
+can also be diagonally adjacent.
+Problem quote: Two nodes should be in adjacent grid cells (horizontally or vertically)
+exactly when there is an edge between them in edges.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 167; LeetCode_4000_Problem_Reference.pdf, PAGE: 1656
+
+1559. Detect Cycles in 2D Grid (Medium)
+Connection: Related practice
+Related practice pattern: Region-growing via connectivity labels
+What transfers: Technical component: Region-growing via connectivity labels. Problem component: move to one of the cells adjacent to it. Shared component: implementing 4-connected neighborhood traversal on a grid.
+Important difference: technical pattern labels regions; problem searches for same-valued cycles
+Technical quote: Pixels are said
+to beN4 adjacent if they are immediately horizontally or vertically adjacent, andN8 if they
+can also be diagonally adjacent.
+Problem quote: From a given cell, you can move to one of the cells adjacent to it - in
+one of the four directions (up, down, left, or right), if it has the same value of the current cell.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 167; LeetCode_4000_Problem_Reference.pdf, PAGE: 780
+
+85. Maximal Rectangle (Hard)
+Connection: Related practice
+Related practice pattern: Region-growing via connectivity labels
+What transfers: Technical component: Region-growing via connectivity labels. Problem component: find the largest axis-aligned rectangular region containing only ones.. Shared component: grouping maximal contiguous grid cells sharing the same binary value.
+Important difference: technical pattern ignores rectangular shape; problem restricts to rectangles only
+Technical quote: Connected components
+Another useful semi-global image operation is ﬁnding connected components, which are de-
+ﬁned as regions of adjacent pixels that have the same input value or label.
+Problem quote: Given a rectangular matrix of character entries zero and one, find the largest axis-aligned
+rectangular region containing only ones.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 167; LeetCode_4000_Problem_Reference.pdf, PAGE: 43",
+imported-azure-gpt51-v1,related-diag-004-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how do four-neighbor connectivity and equal pixel labels define separate image regions?",ordinary,completed,,,0,0,,0,0,0,True,,2.8233757570851594,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+imported-azure-gpt51-v1,related-diag-005-short,"According to ""Speech and Language Processing.pdf"", what is minimum edit distance?",ordinary,completed,72;3579;3213,direct_match;related_practice;related_practice,3,3,1.0,0,0,0,False,,147.69610332604498,65,"72. Edit Distance (Medium)
+Connection: Direct match
+Related practice pattern: Dynamic programming over a 2D table to compute a minimal-cost sequence of edit operations transforming one string into another
+What transfers: Technical component: Dynamic programming over a 2D table to compute a minimal-cost sequence of edit operations transforming one string into another. Problem component: return the minimum number of single-character edits needed to transform word1 into word2.. Shared component: Computing the minimal count of edits required to transform one string into another..
+Important difference: Technical text abstracts costed operations; problem fixes unit-cost single-character edits.
+Technical quote: The edit distance betweenXandYis thusD[n,m].
+Problem quote: Given strings word1 and word2, return the minimum number of single-character edits needed to
+transform word1 into word2.
+SOURCES: Speech and Language Processing.pdf, PAGE: 70; LeetCode_4000_Problem_Reference.pdf, PAGE: 36
+
+3579. Minimum Steps to Convert String with Operations (Hard)
+Connection: Direct match
+Related practice pattern: Dynamic programming over a 2D table to compute a minimal-cost sequence of edit operations transforming one string into another
+What transfers: Technical component: Dynamic programming over a 2D table to compute a minimal-cost sequence of edit operations transforming one string into another. Problem component: Required result: the smallest count of operations required to transform word1 into word2.. Shared component: computing minimal number of edit operations between two strings.
+Important difference: technical text allows weighted costs; problem states generic count only
+Technical quote: The edit distance betweenXandYis thusD[n,m].
+Problem quote: Required result: the smallest count of operations required
+to transform word1 into word2.
+SOURCES: Speech and Language Processing.pdf, PAGE: 70; LeetCode_4000_Problem_Reference.pdf, PAGE: 1791
+
+3213. Construct String with Minimum Cost (Hard)
+Connection: Direct match
+Related practice pattern: Dynamic programming over a 2D table to compute a minimal-cost sequence of edit operations transforming one string into another
+What transfers: Technical component: Dynamic programming over a 2D table to compute a minimal-cost sequence of edit operations transforming one string into another. Problem component: Required result: the smallest cost to make s equal to target.. Shared component: Computing a minimal total cost to transform one string into another..
+Important difference: Technical pattern uses DP, problem text doesn’t specify algorithm.
+Technical quote: The edit distance betweenXandYis thusD[n,m].
+Problem quote: Required result: the smallest cost to make s equal to target.
+SOURCES: Speech and Language Processing.pdf, PAGE: 70; LeetCode_4000_Problem_Reference.pdf, PAGE: 1607",
+imported-azure-gpt51-v1,related-diag-005-descriptive,"According to ""Speech and Language Processing.pdf"", how does edit distance compare two strings using insertions, deletions, and substitutions?",ordinary,completed,72;161;2976,direct_match;direct_match;related_practice,3,3,1.0,0,0,0,False,,140.53845761879347,69,"72. Edit Distance (Medium)
+Connection: Direct match
+Related practice pattern: Dynamic-programming alignment with weighted edit operations
+What transfers: Technical component: Dynamic-programming alignment with weighted edit operations. Problem component: return the minimum number of single-character edits needed to transform word1 into word2. Shared component: computing minimal count of single-character edit operations to transform one string into another.
+Important difference: technical text does not detail dynamic-programming procedure or cost variants here
+Technical quote: More formally, theminimum edit distancebetween two strings is defined as theminimum edit
+distance
+minimum number of editing operations (operations like insertion, deletion, substitu-
+tion) needed to transform one string into another.
+Problem quote: Given strings word1 and word2, return the minimum number of single-character edits needed to
+transform word1 into word2.
+SOURCES: Speech and Language Processing.pdf, PAGE: 68; LeetCode_4000_Problem_Reference.pdf, PAGE: 36
+
+161. One Edit Distance (Medium)
+Connection: Direct match
+Related practice pattern: Dynamic-programming alignment with weighted edit operations
+What transfers: Technical component: Dynamic-programming alignment with weighted edit operations. Problem component: return whether exactly one insertion, deletion, or replacement of a single character changes s into t.. Shared component: counting character-level insert/delete/substitute operations between two strings.
+Important difference: technical pattern minimizes total edits; problem checks distance equals exactly one
+Technical quote: More formally, theminimum edit distancebetween two strings is defined as theminimum edit
+distance
+minimum number of editing operations (operations like insertion, deletion, substitu-
+tion) needed to transform one string into another.
+Problem quote: Given strings s and t, return whether exactly one insertion, deletion, or replacement of a single
+character changes s into t.
+SOURCES: Speech and Language Processing.pdf, PAGE: 68; LeetCode_4000_Problem_Reference.pdf, PAGE: 81
+
+2976. Minimum Cost to Convert String I (Medium)
+Connection: Direct match
+Related practice pattern: Dynamic-programming alignment with weighted edit operations
+What transfers: Technical component: Dynamic-programming alignment with weighted edit operations. Problem component: pick a character x from the string and change it to the character y. Shared component: performing a single-character substitution with an explicit operation cost.
+Important difference: problem uses arbitrary cost table; pattern often assumes uniform costs
+Technical quote: More formally, theminimum edit distancebetween two strings is defined as theminimum edit
+distance
+minimum number of editing operations (operations like insertion, deletion, substitu-
+tion) needed to transform one string into another.
+Problem quote: In one operation, you can pick a
+character x from the string and change it to the character y at a cost of z if there exists any index j
+such that cost[j] == z, original[j] == x, and changed[j] == y.
+SOURCES: Speech and Language Processing.pdf, PAGE: 68; LeetCode_4000_Problem_Reference.pdf, PAGE: 1489",
+imported-azure-gpt51-v1,related-diag-006-short,"According to ""Grokking-the-system-design-interview-free.pdf"", how does a trie support autocomplete?",ordinary,completed,1804;501;3318,direct_match;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,158.96341691398993,73,"1804. Implement Trie II (Prefix Tree) (Medium)
+Connection: Related practice
+Related practice pattern: Maintain aggregated suggestion metadata at each trie node and query only the relevant subtrees to support fast autocomplete.
+What transfers: Technical component: Maintain aggregated suggestion metadata at each trie node and query only the relevant subtrees to support fast autocomplete.. Problem component: Returns the count of instances of the string word in the trie.. Shared component: maintain and query frequency/count metadata associated with trie paths.
+Important difference: system design uses per-node aggregates; coding op likely per-word counts only
+Technical quote: Since we are 
+storing frequencies of our typeahead suggestions with each node, we need to update 
+them too.
+Problem quote: Build Trie class: Trie() Initializes the trie object.
+void insert(String word) Inserts the string word into the trie. int countWordsEqualTo(String word)
+Returns the count of instances of the string word in the trie. int countWordsStartingWith(String
+prefix) Returns the count of strings in the trie that have the string prefix as a prefix. void
+erase(String word) Erases the string word from the trie.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 95; LeetCode_4000_Problem_Reference.pdf, PAGE: 903
+
+501. Find Mode in Binary Search Tree (Easy)
+Connection: Related practice
+Related practice pattern: Maintain aggregated suggestion metadata at each trie node and query only the relevant subtrees to support fast autocomplete.
+What transfers: Technical component: Maintain aggregated suggestion metadata at each trie node and query only the relevant subtrees to support fast autocomplete.. Problem component: Return every most-frequent value in a binary search tree that permits duplicates.. Shared component: computing and comparing frequency counts to determine most-frequent entries.
+Important difference: trie supports prefix autocomplete; BST task only finds global modes
+Technical quote: Since we are 
+storing frequencies of our typeahead suggestions with each node, we need to update 
+them too.
+Problem quote: Return every most-frequent value in a binary search tree that permits duplicates.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 95; LeetCode_4000_Problem_Reference.pdf, PAGE: 251
+
+3318. Find X-Sum of All K-Long Subarrays I (Easy)
+Connection: Related practice
+Related practice pattern: Maintain aggregated suggestion metadata at each trie node and query only the relevant subtrees to support fast autocomplete.
+What transfers: Technical component: Maintain aggregated suggestion metadata at each trie node and query only the relevant subtrees to support fast autocomplete.. Problem component: Count the occurrences of all elements in the array.. Shared component: computing and maintaining frequency counts for items to support later queries.
+Important difference: trie maintains per-prefix suggestion counts; array counts are flat and offline
+Technical quote: Since we are 
+storing frequencies of our typeahead suggestions with each node, we need to update 
+them too.
+Problem quote: The x-sum of an array is
+calculated by the following procedure: Count the occurrences of all elements in the array.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 95; LeetCode_4000_Problem_Reference.pdf, PAGE: 1660",
+imported-azure-gpt51-v1,related-diag-006-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", how can a character-by-character tree find stored phrases beginning with a typed prefix?",ordinary,completed,1804;28;527,direct_match;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,129.2779998080805,63,"1804. Implement Trie II (Prefix Tree) (Medium)
+Connection: Related practice
+Related practice pattern: Prefix-tree traversal from a prefix node to enumerate or rank all stored strings sharing that prefix
+What transfers: Technical component: Prefix-tree traversal from a prefix node to enumerate or rank all stored strings sharing that prefix. Problem component: int countWordsStartingWith(String prefix) Returns the count of strings in the trie that have the string prefix as a prefix.. Shared component: navigating from root along prefix characters to reach the prefix node.
+Important difference: technical pattern enumerates phrases; frozen operation only counts them
+Technical quote: For example, if 
+we need to store ‘cap, cat, caption, captain, capital’ in the trie, it would look like: 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Now if the user has typed ‘cap’, our service can traverse the trie to go to the node ‘P’ 
+to find all the terms that start with this prefix (e.g., cap-tion, cap-ital etc).
+Problem quote: Build Trie class: Trie() Initializes the trie object.
+void insert(String word) Inserts the string word into the trie. int countWordsEqualTo(String word)
+Returns the count of instances of the string word in the trie. int countWordsStartingWith(String
+prefix) Returns the count of strings in the trie that have the string prefix as a prefix. void
+erase(String word) Erases the string word from the trie.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 93; LeetCode_4000_Problem_Reference.pdf, PAGE: 903
+
+28. Find the Index of the First Occurrence in a String (Easy)
+Connection: Related practice
+Related practice pattern: Prefix-tree traversal from a prefix node to enumerate or rank all stored strings sharing that prefix
+What transfers: Technical component: Prefix-tree traversal from a prefix node to enumerate or rank all stored strings sharing that prefix. Problem component: locate the earliest contiguous occurrence of the entire needle within haystack.. Shared component: Sequential character-by-character matching of a query string against stored text..
+Important difference: Trie walks an index structure; haystack scan searches raw linear text.
+Technical quote: For example, if 
+we need to store ‘cap, cat, caption, captain, capital’ in the trie, it would look like: 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Now if the user has typed ‘cap’, our service can traverse the trie to go to the node ‘P’ 
+to find all the terms that start with this prefix (e.g., cap-tion, cap-ital etc).
+Problem quote: Given strings haystack and needle, locate the earliest contiguous occurrence of the entire needle
+within haystack.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 93; LeetCode_4000_Problem_Reference.pdf, PAGE: 14
+
+527. Word Abbreviation (Hard)
+Connection: Related practice
+Related practice pattern: Prefix-tree traversal from a prefix node to enumerate or rank all stored strings sharing that prefix
+What transfers: Technical component: Prefix-tree traversal from a prefix node to enumerate or rank all stored strings sharing that prefix. Problem component: When abbreviations conflict, lengthen the prefixes of all conflicting words until they differ.. Shared component: Adjust and compare string prefixes to distinguish among multiple candidate completions..
+Important difference: Trie uses stored tree nodes; abbreviation logic works on whole words only.
+Technical quote: For example, if 
+we need to store ‘cap, cat, caption, captain, capital’ in the trie, it would look like: 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Now if the user has typed ‘cap’, our service can traverse the trie to go to the node ‘P’ 
+to find all the terms that start with this prefix (e.g., cap-tion, cap-ital etc).
+Problem quote: When abbreviations conflict,
+lengthen the prefixes of all conflicting words until they differ.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 93; LeetCode_4000_Problem_Reference.pdf, PAGE: 264",
+imported-azure-gpt51-v1,related-diag-007-short,"According to ""Grokking-the-system-design-interview-free.pdf"", what does LRU cache eviction do?",ordinary,completed,146;460;641,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,130.87942894292064,66,"146. LRU Cache (Medium)
+Connection: Direct match
+Related practice pattern: Use recency-ordered storage to evict the least recently accessed item when cache capacity is reached.
+What transfers: Technical component: Use recency-ordered storage to evict the least recently accessed item when cache capacity is reached.. Problem component: Evict the least recently used key when a new insertion exceeds capacity.. Shared component: removing the least recently used cache entry on capacity overflow.
+Important difference: technical text omits explicit capacity-triggered insertion step
+Technical quote: Under this policy, we discard the 
+least recently viewed row first.
+Problem quote: Evict the least recently
+used key when a new insertion exceeds capacity.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 47; LeetCode_4000_Problem_Reference.pdf, PAGE: 73
+
+460. LFU Cache (Hard)
+Connection: Related practice
+Related practice pattern: Use recency-ordered storage to evict the least recently accessed item when cache capacity is reached.
+What transfers: Technical component: Use recency-ordered storage to evict the least recently accessed item when cache capacity is reached.. Problem component: When insertion exceeds capacity, evict the least-used key, breaking ties by least recent use.. Shared component: eviction prefers more recently used entries over less recently used ones.
+Important difference: problem uses usage counts plus recency; pattern uses pure recency only
+Technical quote: Under this policy, we discard the 
+least recently viewed row first.
+Problem quote: When insertion exceeds
+capacity, evict the least-used key, breaking ties by least recent use.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 47; LeetCode_4000_Problem_Reference.pdf, PAGE: 230
+
+641. Design Circular Deque (Medium)
+Connection: Related practice
+Related practice pattern: Use recency-ordered storage to evict the least recently accessed item when cache capacity is reached.
+What transfers: Technical component: Use recency-ordered storage to evict the least recently accessed item when cache capacity is reached.. Problem component: insertFront/insertLast and deleteFront/deleteLast report success. Shared component: implementing deletion of an item at a chosen end of an ordered structure.
+Important difference: deque deletions are explicit operations; LRU eviction is policy-driven and implicit
+Technical quote: Under this policy, we discard the 
+least recently viewed row first.
+Problem quote: Design MyCircularDeque(k) with fixed capacity. insertFront/insertLast and deleteFront/deleteLast
+report success. getFront/getRear return endpoint values or -1 if empty. isEmpty and isFull report
+status.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 47; LeetCode_4000_Problem_Reference.pdf, PAGE: 321",
+imported-azure-gpt51-v1,related-diag-007-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", when a cache is full, how can access recency determine which stored URL is discarded?",ordinary,completed,146;460;895,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,138.96997703192756,71,"146. LRU Cache (Medium)
+Connection: Direct match
+Related practice pattern: Use an access-ordered map (like a linked hash map) to track recency and evict the least recently accessed entry when capacity is reached.
+What transfers: Technical component: Use an access-ordered map (like a linked hash map) to track recency and evict the least recently accessed entry when capacity is reached.. Problem component: Evict the least recently used key when a new insertion exceeds capacity.. Shared component: Selecting and removing the globally least recently accessed entry upon overflow..
+Important difference: Technical text focuses on URLs, coding task on abstract keys/values.
+Technical quote: Under this policy, 
+we discard the least recently used URL first.
+Problem quote: Evict the least recently
+used key when a new insertion exceeds capacity.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 24; LeetCode_4000_Problem_Reference.pdf, PAGE: 73
+
+460. LFU Cache (Hard)
+Connection: Related practice
+Related practice pattern: Use an access-ordered map (like a linked hash map) to track recency and evict the least recently accessed entry when capacity is reached.
+What transfers: Technical component: Use an access-ordered map (like a linked hash map) to track recency and evict the least recently accessed entry when capacity is reached.. Problem component: When insertion exceeds capacity, evict the least-used key, breaking ties by least recent use.. Shared component: choosing an entry to evict based on least recent access among candidates.
+Important difference: problem also considers usage count frequency, not just recency
+Technical quote: Under this policy, 
+we discard the least recently used URL first.
+Problem quote: When insertion exceeds
+capacity, evict the least-used key, breaking ties by least recent use.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 24; LeetCode_4000_Problem_Reference.pdf, PAGE: 230
+
+895. Maximum Frequency Stack (Hard)
+Connection: Related practice
+Related practice pattern: Use an access-ordered map (like a linked hash map) to track recency and evict the least recently accessed entry when capacity is reached.
+What transfers: Technical component: Use an access-ordered map (like a linked hash map) to track recency and evict the least recently accessed entry when capacity is reached.. Problem component: Pop removes a value having the highest current occurrence count; frequency ties choose the occurrence most recently pushed among tied values.. Shared component: use recency to break ties among candidates for removal.
+Important difference: technical uses recency alone; problem uses frequency then recency
+Technical quote: Under this policy, 
+we discard the least recently used URL first.
+Problem quote: Pop removes a value having the highest current
+occurrence count; frequency ties choose the occurrence most recently pushed among tied values.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 24; LeetCode_4000_Problem_Reference.pdf, PAGE: 448",
+imported-azure-gpt51-v1,related-diag-008-short,"According to ""Probabilistic Machine Learning.pdf"", what is a topological ordering of a DAG?",ordinary,completed,3530;797;3967,related_practice;stretch_connection;uncertain,2,2,1.0,0,1,0,False,,112.99836795311421,57,"3530. Maximum Profit from Valid Topological Order in DAG (Hard)
+Connection: Direct match
+Related practice pattern: Process graph nodes in an order where each node appears only after all its parent nodes have been processed
+What transfers: Technical component: Process graph nodes in an order where each node appears only after all its parent nodes have been processed. Problem component: Requirement: process the nodes in a valid topological order.. Shared component: constructing/using a dependency-respecting topological ordering on a DAG.
+Important difference: technical text defines ordering; problem focuses on subsequent processing use
+Technical quote: However, the probabilities used in these models are no more (and no less)
+subjective than in any other kind of probabilistic model.
+4.2.1 Representing the joint distribution
+The key property of a DAG is that the nodes can be ordered such that parents come before children.
+Problem quote: Requirement: process the nodes in a valid topological order.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 1767
+
+797. All Paths From Source to Target (Medium)
+Connection: Related practice
+Related practice pattern: Process graph nodes in an order where each node appears only after all its parent nodes have been processed
+What transfers: Technical component: Process graph nodes in an order where each node appears only after all its parent nodes have been processed. Problem component: return every path from zero to n - 1 as vertex lists. Shared component: processing DAG nodes respecting edge directions and acyclicity.
+Important difference: technical pattern orders all nodes once; problem enumerates multiple complete paths
+Technical quote: However, the probabilities used in these models are no more (and no less)
+subjective than in any other kind of probabilistic model.
+4.2.1 Representing the joint distribution
+The key property of a DAG is that the nodes can be ordered such that parents come before children.
+Problem quote: Given a directed acyclic graph with vertices zero through n - 1, return every path from zero to n - 1
+as vertex lists.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 399
+
+3967. Finish Time of Tasks II (Hard)
+Connection: Related practice
+Related practice pattern: Process graph nodes in an order where each node appears only after all its parent nodes have been processed
+What transfers: Technical component: Process graph nodes in an order where each node appears only after all its parent nodes have been processed. Problem component: Finish time of task i is latest + ownDuration.. Shared component: Respecting dependency order so a node’s computation uses all predecessor results.
+Important difference: Technical text defines ordering; problem uses it for scheduling-time computation
+Technical quote: However, the probabilities used in these models are no more (and no less)
+subjective than in any other kind of probabilistic model.
+4.2.1 Representing the joint distribution
+The key property of a DAG is that the nodes can be ordered such that parents come before children.
+Problem quote: Finish time of task i is latest + ownDuration.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 1985",
+imported-azure-gpt51-v1,related-diag-008-descriptive,"According to ""Probabilistic Machine Learning.pdf"", how can directed dependencies be ordered so that every parent comes before its children?",ordinary,completed,3530;797;1494,related_practice;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,123.06470169895329,64,"3530. Maximum Profit from Valid Topological Order in DAG (Hard)
+Connection: Direct match
+Related practice pattern: Topological ordering via DAG traversal
+What transfers: Technical component: Topological ordering via DAG traversal. Problem component: Requirement: process the nodes in a valid topological order.. Shared component: constructing/using a topological ordering of a DAG.
+Important difference: technical text defines the order; problem assumes it as a requirement
+Technical quote: However, the probabilities used in these models are no more (and no less)
+subjective than in any other kind of probabilistic model.
+4.2.1 Representing the joint distribution
+The key property of a DAG is that the nodes can be ordered such that parents come before children.
+Problem quote: Requirement: process the nodes in a valid topological order.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 1767
+
+797. All Paths From Source to Target (Medium)
+Connection: Related practice
+Related practice pattern: Topological ordering via DAG traversal
+What transfers: Technical component: Topological ordering via DAG traversal. Problem component: return every path from zero to n - 1 as vertex lists. Shared component: systematic traversal of a DAG respecting edge directions and acyclicity..
+Important difference: technical pattern orders all nodes; problem enumerates specific source-target paths.
+Technical quote: However, the probabilities used in these models are no more (and no less)
+subjective than in any other kind of probabilistic model.
+4.2.1 Representing the joint distribution
+The key property of a DAG is that the nodes can be ordered such that parents come before children.
+Problem quote: Given a directed acyclic graph with vertices zero through n - 1, return every path from zero to n - 1
+as vertex lists.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 399
+
+1494. Parallel Courses II (Hard)
+Connection: Related practice
+Related practice pattern: Topological ordering via DAG traversal
+What transfers: Technical component: Topological ordering via DAG traversal. Problem component: In one semester, you can take at most k courses. Shared component: scheduling nodes in a dependency graph so prerequisites precede dependents..
+Important difference: technical text defines order; problem also imposes per-semester course limit.
+Technical quote: However, the probabilities used in these models are no more (and no less)
+subjective than in any other kind of probabilistic model.
+4.2.1 Representing the joint distribution
+The key property of a DAG is that the nodes can be ordered such that parents come before children.
+Problem quote: In one semester, you can take
+at most k courses as long as you have taken all the prerequisites in the previous semesters for the
+courses you are taking.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 748",
+imported-azure-gpt51-v1,related-diag-009-short,"According to ""Designing Data-Intensive Applications.pdf"", when can binary search replace an SSTable's in-memory index?",ordinary,completed,704;173;1428,direct_match;unrelated;related_practice,2,3,0.6666666666666666,0,0,0,False,,114.35737860691734,67,"704. Binary Search (Easy)
+Connection: Direct match
+Related practice pattern: Use direct offset computation to binary-search fixed-size records without an in-memory index
+What transfers: Technical component: Use direct offset computation to binary-search fixed-size records without an in-memory index. Problem component: Search strictly increasing nums for target in O(log n) time.. Shared component: Perform binary search over an ordered sequence to locate a target in O(log n)..
+Important difference: Technical pattern requires fixed-size on-disk records; coding task uses generic in-memory array.
+Technical quote: If all keys and values had a fixed size, you could use binary search on a segment file and avoid the in-
+memory index entirely.
+Problem quote: Search strictly increasing nums for target in O(log n) time.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 352
+
+173. Binary Search Tree Iterator (Medium)
+Connection: Related practice
+Related practice pattern: Use direct offset computation to binary-search fixed-size records without an in-memory index
+What transfers: Technical component: Use direct offset computation to binary-search fixed-size records without an in-memory index. Problem component: next() returns the next smallest value in the binary search tree, beginning with its minimum. Shared component: ordered search over sorted keys to locate specific or successive items.
+Important difference: segment binary search is random-access; BST iterator is sequential traversal
+Technical quote: If all keys and values had a fixed size, you could use binary search on a segment file and avoid the in-
+memory index entirely.
+Problem quote: Design BSTIterator(root). next() returns the next smallest value in the binary search tree,
+beginning with its minimum, and hasNext() reports whether another value remains.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 87
+
+1428. Leftmost Column with at Least a One (Medium)
+Connection: Related practice
+Related practice pattern: Use direct offset computation to binary-search fixed-size records without an in-memory index
+What transfers: Technical component: Use direct offset computation to binary-search fixed-size records without an in-memory index. Problem component: produce the index (indexed from zero) of the leftmost column with a 1 in it. Shared component: performing binary search over an ordered structure to locate a target position.
+Important difference: technical pattern searches file offsets; problem searches matrix columns for first 1
+Technical quote: If all keys and values had a fixed size, you could use binary search on a segment file and avoid the in-
+memory index entirely.
+Problem quote: With a row-sorted binary matrix binaryMatrix, produce the index (indexed
+from zero) of the leftmost column with a 1 in it.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 715",
+imported-azure-gpt51-v1,related-diag-009-descriptive,"According to ""Designing Data-Intensive Applications.pdf"", why do fixed-size keys and values permit binary search directly in a sorted segment file?",ordinary,completed,81;450;34,related_practice;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,112.48162219277583,69,"81. Search in Rotated Sorted Array II (Medium)
+Connection: Direct match
+Related practice pattern: Use fixed-size records so positions can be computed by index rather than scanned or indexed in memory
+What transfers: Technical component: Use fixed-size records so positions can be computed by index rather than scanned or indexed in memory. Problem component: Given target, return whether target appears in the supplied array.. Shared component: Membership test implemented via binary search over a sorted, indexable collection..
+Important difference: Technical pattern uses file offsets; coding task abstracts in-memory arrays.
+Technical quote: If all keys and values had a fixed size, you could use binary search on a segment file and avoid the in-
+memory index entirely.
+Problem quote: Given target, return whether target appears in the supplied
+array.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 41
+
+450. Delete Node in a BST (Medium)
+Connection: Related practice
+Related practice pattern: Use fixed-size records so positions can be computed by index rather than scanned or indexed in memory
+What transfers: Technical component: Use fixed-size records so positions can be computed by index rather than scanned or indexed in memory. Problem component: Delete key from a binary search tree, preserving its strict ordering and all other values.. Shared component: Maintaining a globally sorted order of keys for efficient search operations.
+Important difference: File uses fixed-size positional access; tree uses pointer-based nodes and re-linking
+Technical quote: If all keys and values had a fixed size, you could use binary search on a segment file and avoid the in-
+memory index entirely.
+Problem quote: Delete key from a binary search tree, preserving its strict ordering and all other values.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 225
+
+34. Find First and Last Position of Element in Sorted Array (Medium)
+Connection: Related practice
+Related practice pattern: Use fixed-size records so positions can be computed by index rather than scanned or indexed in memory
+What transfers: Technical component: Use fixed-size records so positions can be computed by index rather than scanned or indexed in memory. Problem component: return a two-element array containing the zero-based positions of its first and last occurrences. Shared component: perform binary search over an ordered sequence using index-based random access.
+Important difference: segment file uses byte-offset math; array uses direct index addressing
+Technical quote: If all keys and values had a fixed size, you could use binary search on a segment file and avoid the in-
+memory index entirely.
+Problem quote: Given a nondecreasing integer array nums and integer target, return a two-element array
+containing the zero-based positions of its first and last occurrences.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 17",
+imported-azure-gpt51-v1,related-diag-010-short,"According to ""Grokking-the-system-design-interview-free.pdf"", how does a Bloom filter test whether a URL was already seen?",ordinary,completed,3597;715;2166,related_practice;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,117.23344200896099,65,"3597. Partition String (Medium)
+Connection: Related practice
+Related practice pattern: Probabilistic membership testing with multiple hashes over a shared bit vector
+What transfers: Technical component: Probabilistic membership testing with multiple hashes over a shared bit vector. Problem component: Continue extending the current segment character by character until the current segment has not been seen before.. Shared component: Membership test in a seen-set to decide novelty of an item..
+Important difference: Bloom filter is probabilistic bit-vector; coding operation assumes exact set storage.
+Technical quote: An element is deemed to be in the 
+set if the bits at all ‘n’ of the element’s hash locations are set.
+Problem quote: Continue extending the current segment character by
+character until the current segment has not been seen before.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 1800
+
+715. Range Module (Hard)
+Connection: Related practice
+Related practice pattern: Probabilistic membership testing with multiple hashes over a shared bit vector
+What transfers: Technical component: Probabilistic membership testing with multiple hashes over a shared bit vector. Problem component: queryRange reports whether every point in it is currently tracked. Shared component: verifying complete coverage of a queried range by previously recorded markers.
+Important difference: Bloom filter is probabilistic bit-vector; RangeModule is exact interval structure
+Technical quote: An element is deemed to be in the 
+set if the bits at all ‘n’ of the element’s hash locations are set.
+Problem quote: Design RangeModule over real half-open intervals. addRange(left, right) tracks the interval,
+removeRange removes its tracked portion, and queryRange reports whether every point in it is
+currently tracked.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 358
+
+2166. Design Bitset (Medium)
+Connection: Related practice
+Related practice pattern: Probabilistic membership testing with multiple hashes over a shared bit vector
+What transfers: Technical component: Probabilistic membership testing with multiple hashes over a shared bit vector. Problem component: Updates the value of the bit at the index idx to 1.. Shared component: writing a 1 into a chosen position of a bit vector.
+Important difference: Bloom filter uses multiple hash indices; Bitset fix uses direct provided index
+Technical quote: An element is added to the set by computing ‘n’ hash functions of 
+the element and setting the corresponding bits.
+Problem quote: Build Bitset class: Bitset(int size) Initializes
+the Bitset with size bits, all of which are 0. void fix(int idx) Updates the value of the bit at the index
+idx to 1.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 1084",
+imported-azure-gpt51-v1,related-diag-010-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", how do hash-selected bits provide approximate set membership with possible false positives but no false negatives?",ordinary,completed,1804;3597;2166,related_practice;related_practice;related_practice,3,3,1.0,0,0,0,False,,122.98238249192946,67,"1804. Implement Trie II (Prefix Tree) (Medium)
+Connection: Related practice
+Related practice pattern: Use multiple hash functions to set and test bits in a shared bit vector for approximate membership checks
+What transfers: Technical component: Use multiple hash functions to set and test bits in a shared bit vector for approximate membership checks. Problem component: Inserts the string word into the trie.. Shared component: inserting elements into a set-like data structure for later membership queries.
+Important difference: trie supports exact membership; bloom filter only approximate with false positives
+Technical quote: An element is added to the set by computing ‘n’ hash functions of 
+the element and setting the corresponding bits.
+Problem quote: Build Trie class: Trie() Initializes the trie object.
+void insert(String word) Inserts the string word into the trie. int countWordsEqualTo(String word)
+Returns the count of instances of the string word in the trie. int countWordsStartingWith(String
+prefix) Returns the count of strings in the trie that have the string prefix as a prefix. void
+erase(String word) Erases the string word from the trie.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 903
+
+3597. Partition String (Medium)
+Connection: Related practice
+Related practice pattern: Use multiple hash functions to set and test bits in a shared bit vector for approximate membership checks
+What transfers: Technical component: Use multiple hash functions to set and test bits in a shared bit vector for approximate membership checks. Problem component: Continue extending the current segment character by character until the current segment has not been seen before.. Shared component: Membership test in a remembered set to guide later processing..
+Important difference: Bloom filter is probabilistic; segment check is implicitly exact and unspecified.
+Technical quote: An element is deemed to be in the 
+set if the bits at all ‘n’ of the element’s hash locations are set.
+Problem quote: Continue extending the current segment character by
+character until the current segment has not been seen before.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 1800
+
+2166. Design Bitset (Medium)
+Connection: Related practice
+Related practice pattern: Use multiple hash functions to set and test bits in a shared bit vector for approximate membership checks
+What transfers: Technical component: Use multiple hash functions to set and test bits in a shared bit vector for approximate membership checks. Problem component: Updates the value of the bit at the index idx to 1.. Shared component: setting specific positions in a bit vector to 1.
+Important difference: technical side uses hash-derived indices and multiple bits; coding side uses direct single index
+Technical quote: An element is added to the set by computing ‘n’ hash functions of 
+the element and setting the corresponding bits.
+Problem quote: Build Bitset class: Bitset(int size) Initializes
+the Bitset with size bits, all of which are 0. void fix(int idx) Updates the value of the bit at the index
+idx to 1.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 1084",
+imported-azure-gpt51-v1,related-diag-011-short,"According to ""Grokking-the-system-design-interview-free.pdf"", how does consistent hashing choose a cache server?",ordinary,completed,555;514;918,stretch_connection;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,116.15379961207509,63,"555. Split Concatenated Strings (Medium)
+Connection: Related practice
+Related practice pattern: Ring-based hash routing: hash both servers and keys into a circular numeric space and route each key to the first server clockwise from its hash position on the ring.
+What transfers: Technical component: Ring-based hash routing: hash both servers and keys into a circular numeric space and route each key to the first server clockwise from its hash position on the ring.. Problem component: Cut that loop at any position to produce a linear string.. Shared component: reasoning over circular structures by linearizing via an arbitrary cut point.
+Important difference: ring models hash space, string loop models character sequence, not routing
+Technical quote: Imagine that the integers in 
+the range are placed on a ring such that the values are wrapped around.
+Problem quote: Cut that loop at any position to produce a linear string.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 190; LeetCode_4000_Problem_Reference.pdf, PAGE: 278
+
+514. Freedom Trail (Hard)
+Connection: Related practice
+Related practice pattern: Ring-based hash routing: hash both servers and keys into a circular numeric space and route each key to the first server clockwise from its hash position on the ring.
+What transfers: Technical component: Ring-based hash routing: hash both servers and keys into a circular numeric space and route each key to the first server clockwise from its hash position on the ring.. Problem component: Spell key in order by rotating in either direction to a matching character and pressing a button.. Shared component: navigating a circular ordering using rotation on a conceptual ring.
+Important difference: technical uses hashing for server selection; problem spells keys with costs
+Technical quote: Imagine that the integers in 
+the range are placed on a ring such that the values are wrapped around.
+Problem quote: Spell key in order by rotating in
+either direction to a matching character and pressing a button.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 190; LeetCode_4000_Problem_Reference.pdf, PAGE: 257
+
+918. Maximum Sum Circular Subarray (Medium)
+Connection: Related practice
+Related practice pattern: Ring-based hash routing: hash both servers and keys into a circular numeric space and route each key to the first server clockwise from its hash position on the ring.
+What transfers: Technical component: Ring-based hash routing: hash both servers and keys into a circular numeric space and route each key to the first server clockwise from its hash position on the ring.. Problem component: A segment may wrap from the final position to the first, but may use each array position at most once.. Shared component: reasoning about wrap-around traversal on a circular index space.
+Important difference: hash ring routes keys to servers; array wrap finds best-sum segment
+Technical quote: Imagine that the integers in 
+the range are placed on a ring such that the values are wrapped around.
+Problem quote: A segment may
+wrap from the final position to the first, but may use each array position at most once.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 190; LeetCode_4000_Problem_Reference.pdf, PAGE: 459",
+imported-azure-gpt51-v1,related-diag-011-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", after hashing a key onto a ring, how is its server found by moving clockwise?",ordinary,completed,34;503;708,stretch_connection;related_practice;related_practice,3,3,1.0,0,0,0,False,,103.77818804816343,62,"34. Find First and Last Position of Element in Sorted Array (Medium)
+Connection: Related practice
+Related practice pattern: Clockwise successor lookup on a circularly sorted list
+What transfers: Technical component: Clockwise successor lookup on a circularly sorted list. Problem component: return a two-element array containing the zero-based positions of its first and last occurrences.. Shared component: searching an ordered structure for the earliest position where a key occurs.
+Important difference: ring search is circular and single-position; array search is linear and two-ended
+Technical quote: 191 
+ 
+o Hash it to a single integer. 
+o Move clockwise on the ring until finding the first cache it encounters. 
+o That cache is the one that contains the key.
+Problem quote: Given a nondecreasing integer array nums and integer target, return a two-element array
+containing the zero-based positions of its first and last occurrences.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 191; LeetCode_4000_Problem_Reference.pdf, PAGE: 17
+
+503. Next Greater Element II (Medium)
+Connection: Related practice
+Related practice pattern: Clockwise successor lookup on a circularly sorted list
+What transfers: Technical component: Clockwise successor lookup on a circularly sorted list. Problem component: For each nums value in a circular array, return the first strictly greater value encountered moving right, wrapping once if needed.. Shared component: Successor search by scanning forward on a circularly ordered structure..
+Important difference: Technical finds any first cache; coding requires strictly greater numeric successor.
+Technical quote: 191 
+ 
+o Hash it to a single integer. 
+o Move clockwise on the ring until finding the first cache it encounters. 
+o That cache is the one that contains the key.
+Problem quote: For each nums value in a circular array, return the first strictly greater value encountered moving
+right, wrapping once if needed.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 191; LeetCode_4000_Problem_Reference.pdf, PAGE: 252
+
+708. Insert into a Sorted Circular Linked List (Medium)
+Connection: Related practice
+Related practice pattern: Clockwise successor lookup on a circularly sorted list
+What transfers: Technical component: Clockwise successor lookup on a circularly sorted list. Problem component: insert one new node while preserving the circular nondecreasing order. Shared component: reasoning about successor position in a circularly ordered structure.
+Important difference: technical text performs lookup only; coding operation performs structural insertion
+Technical quote: 191 
+ 
+o Hash it to a single integer. 
+o Move clockwise on the ring until finding the first cache it encounters. 
+o That cache is the one that contains the key.
+Problem quote: Given any node in a sorted circular singly linked list and insertVal, insert one new node while
+preserving the circular nondecreasing order, allowing its wrap from maximum to minimum.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 191; LeetCode_4000_Problem_Reference.pdf, PAGE: 354",
+imported-azure-gpt51-v1,related-diag-012-short,"According to ""Speech and Language Processing.pdf"", how does beam search work in machine translation?",ordinary,completed,2818;3742;1696,stretch_connection;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,99.1097040749155,60,"2818. Apply Operations to Maximize Score (Hard)
+Connection: Related practice
+Related practice pattern: Maintain a fixed-size set of top-k partial solutions at each step, expanding them in parallel and pruning back to k using a scoring function.
+What transfers: Technical component: Maintain a fixed-size set of top-k partial solutions at each step, expanding them in parallel and pruning back to k using a scoring function.. Problem component: Choose an element x of nums[l,..., r] with the highest prime score.. Shared component: argmax-style selection of top-scoring item(s) from scored options.
+Important difference: beam keeps top-k hypotheses; problem picks single element, different goals
+Technical quote: We then select thek-best options from
+this softmax output.
+Problem quote: Choose an element x of
+nums[l,..., r] with the highest prime score.
+SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 1410
+
+3742. Maximum Path Score in a Grid (Medium)
+Connection: Related practice
+Related practice pattern: Maintain a fixed-size set of top-k partial solutions at each step, expanding them in parallel and pruning back to k using a scoring function.
+What transfers: Technical component: Maintain a fixed-size set of top-k partial solutions at each step, expanding them in parallel and pruning back to k using a scoring function.. Problem component: Required result: the largest score achievable without exceeding a total cost of k, or -1 if no valid path exists.. Shared component: optimizing a score subject to an upper bound on allowed cost.
+Important difference: beam keeps multiple partial hypotheses; problem returns a single final score
+Technical quote: We then select thek-best options from
+this softmax output.
+Problem quote: Required result: the largest score achievable without
+exceeding a total cost of k, or -1 if no valid path exists.
+SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 1873
+
+1696. Jump Game VI (Medium)
+Connection: Related practice
+Related practice pattern: Maintain a fixed-size set of top-k partial solutions at each step, expanding them in parallel and pruning back to k using a scoring function.
+What transfers: Technical component: Maintain a fixed-size set of top-k partial solutions at each step, expanding them in parallel and pruning back to k using a scoring function.. Problem component: Your score is the total of all nums[j] for each index j you visited in the array.. Shared component: Aggregating a global score by summing contributions from each step/element..
+Important difference: Beam search uses probabilities over sequences; array task uses arbitrary nums[j] values.
+Technical quote: A hypothesis is an output sequence, a translation-so-
+far, together with its probability.
+Problem quote: Your score is the total of all nums[j]
+for each index j you visited in the array.
+SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 849",
+imported-azure-gpt51-v1,related-diag-012-descriptive,"According to ""Speech and Language Processing.pdf"", how are partial translations expanded and pruned to retain a bounded frontier during beam search?",ordinary,completed,1244;3278;1086,related_practice;related_practice;related_practice,3,3,1.0,0,0,0,False,,122.41099997307174,64,"1244. Design A Leaderboard (Medium)
+Connection: Related practice
+Related practice pattern: Generate all local successors for each state, score them cumulatively, then keep only the top-k states as the next frontier.
+What transfers: Technical component: Generate all local successors for each state, score them cumulatively, then keep only the top-k states as the next frontier.. Problem component: Required result: the score sum of the top K players.. Shared component: Selecting top-K items by score from a larger scored set..
+Important difference: Technical pattern maintains frontier over time; coding query just returns sum.
+Technical quote: We then prune
+thek×Vhypotheses down to thekbest hypotheses, so there are never more thank
+hypotheses at the frontier of the search, and never more thankdecoders.
+Problem quote: If there is no player with such id in the
+leaderboard, add him to the leaderboard with the given score. top(K): Required result: the score
+sum of the top K players. reset(playerId): Reset the score of the player with the given id to 0 (in
+other words erase it from the leaderboard).
+SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 622
+
+3278. Find Candidates for Data Scientist Position II (Medium)
+Connection: Related practice
+Related practice pattern: Generate all local successors for each state, score them cumulatively, then keep only the top-k states as the next frontier.
+What transfers: Technical component: Generate all local successors for each state, score them cumulatively, then keep only the top-k states as the next frontier.. Problem component: Calculate a score for each candidate-project pair as follows: Start with 100 points Add 10 points for each skill where proficiency > importance Subtract 5 points for each skill where proficiency < importance If the candidate's skill proficiency equal to the project's skill importance, the score remains unchanged Include only the top candidate (highest score) for each project.. Shared component: selecting highest-scoring items from a scored set to enforce a limit.
+Important difference: beam keeps top-k frontier; problem keeps exactly one candidate per project
+Technical quote: We then prune
+thek×Vhypotheses down to thekbest hypotheses, so there are never more thank
+hypotheses at the frontier of the search, and never more thankdecoders.
+Problem quote: Calculate
+a score for each candidate-project pair as follows: Start with 100 points Add 10 points for each skill
+where proficiency > importance Subtract 5 points for each skill where proficiency < importance If
+the candidate's skill proficiency equal to the project's skill importance, the score remains
+unchanged Include only the top candidate (highest score) for each project.
+SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 1640
+
+1086. High Five (Easy)
+Connection: Related practice
+Related practice pattern: Generate all local successors for each state, score them cumulatively, then keep only the top-k states as the next frontier.
+What transfers: Technical component: Generate all local successors for each state, score them cumulatively, then keep only the top-k states as the next frontier.. Problem component: calculate each student's top five average.. Shared component: keeping only the top-k scored candidates from a larger set.
+Important difference: beam uses probabilities over sequences; problem uses numeric score lists
+Technical quote: We then prune
+thek×Vhypotheses down to thekbest hypotheses, so there are never more thank
+hypotheses at the frontier of the search, and never more thankdecoders.
+Problem quote: With a list of the scores of different students, items, where items[i] = [ID_i, score_i] identifies one
+score from a student with ID_i, calculate each student's top five average.
+SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 543",
+imported-azure-gpt51-v1,related-fresh-001-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what is median filtering?",ordinary,completed,480;295;2428,related_practice;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,106.98088464699686,61,"480. Sliding Window Median (Hard)
+Connection: Direct match
+Related practice pattern: Neighborhood-based robust aggregation by median selection
+What transfers: Technical component: Neighborhood-based robust aggregation by median selection. Problem component: Return each window's median in starting-position order.. Shared component: computing and outputting the median of values in each sliding neighborhood/window.
+Important difference: technical filter overwrites pixel grid; coding returns numeric sequence over time.
+Technical quote: Median ﬁltering
+A better ﬁlter to use in this case is themedian ﬁlter, which selects the median value from each
+pixel’s neighborhood (Figure 3.19a).
+Problem quote: Return each window's median in
+starting-position order.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 240
+
+295. Find Median from Data Stream (Hard)
+Connection: Direct match
+Related practice pattern: Neighborhood-based robust aggregation by median selection
+What transfers: Technical component: Neighborhood-based robust aggregation by median selection. Problem component: Return the median of all inserted values. Shared component: computing the median element of a multiset of values.
+Important difference: technical uses local image windows; coding uses a global value stream
+Technical quote: Median ﬁltering
+A better ﬁlter to use in this case is themedian ﬁlter, which selects the median value from each
+pixel’s neighborhood (Figure 3.19a).
+Problem quote: Return the median of all inserted
+values: the middle sorted value for odd size, or the mean of the two middle values for even size.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 148
+
+2428. Maximum Sum of an Hourglass (Medium)
+Connection: Related practice
+Related practice pattern: Neighborhood-based robust aggregation by median selection
+What transfers: Technical component: Neighborhood-based robust aggregation by median selection. Problem component: Return the largest sum of these seven cells over all window positions.. Shared component: sliding window aggregation over local neighborhoods.
+Important difference: median per window vs maximizing summed value across windows
+Technical quote: Median ﬁltering
+A better ﬁlter to use in this case is themedian ﬁlter, which selects the median value from each
+pixel’s neighborhood (Figure 3.19a).
+Problem quote: Return the largest sum of these seven cells over all window positions.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1215",
+imported-azure-gpt51-v1,related-fresh-001-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how does median filtering replace a pixel using the median of its neighborhood rather than a weighted average?",ordinary,completed,4;2387;3122,related_practice;related_practice;unrelated,2,3,0.6666666666666666,0,0,0,False,,130.761898673838,62,"4. Median of Two Sorted Arrays (Hard)
+Connection: Direct match
+Related practice pattern: Neighborhood aggregation via rank (median) instead of weighted averaging
+What transfers: Technical component: Neighborhood aggregation via rank (median) instead of weighted averaging. Problem component: Return the median of the values from both arrays considered together.. Shared component: computing the median of a finite multiset of values.
+Important difference: image neighborhood pixels vs combined numeric arrays, no spatial context in coding
+Technical quote: Median ﬁltering
+A better ﬁlter to use in this case is themedian ﬁlter, which selects the median value from each
+pixel’s neighborhood (Figure 3.19a).
+Problem quote: Return the
+median of the values from both arrays considered together.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 2
+
+2387. Median of a Row Wise Sorted Matrix (Medium)
+Connection: Related practice
+Related practice pattern: Neighborhood aggregation via rank (median) instead of weighted averaging
+What transfers: Technical component: Neighborhood aggregation via rank (median) instead of weighted averaging. Problem component: compute the median of the matrix. Shared component: computing a median value from a multiset of ordered samples.
+Important difference: technical uses local neighborhood per-pixel; problem uses global matrix median
+Technical quote: Median ﬁltering
+A better ﬁlter to use in this case is themedian ﬁlter, which selects the median value from each
+pixel’s neighborhood (Figure 3.19a).
+Problem quote: For an m x n matrix grid containing an odd number of integers with each row is sorted in
+nondecreasing order, compute the median of the matrix.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1194
+
+3122. Minimum Number of Operations to Satisfy Conditions (Medium)
+Connection: Stretch connection
+Related practice pattern: Neighborhood aggregation via rank (median) instead of weighted averaging
+What transfers: Technical component: Neighborhood aggregation via rank (median) instead of weighted averaging. Problem component: In one operation, you can change the value of any cell to any nonnegative number.. Shared component: assigning a new scalar value to a cell based on a rule.
+Important difference: coding operation allows arbitrary values; median filter uses neighborhood median only
+Technical quote: Median ﬁltering
+A better ﬁlter to use in this case is themedian ﬁlter, which selects the median value from each
+pixel’s neighborhood (Figure 3.19a).
+Problem quote: In one operation, you can change the value of any cell to
+any nonnegative number.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1562",
+imported-azure-gpt51-v1,related-fresh-002-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", how does nearest-neighbor feature matching work?",ordinary,completed,3919;3488;3275,related_practice;related_practice;related_practice,3,3,1.0,0,0,0,False,,130.6725226577837,64,"3919. Minimum Cost to Move Between Indices (Medium)
+Connection: Related practice
+Related practice pattern: Nearest-neighbor search with distance-ratio validation
+What transfers: Technical component: Nearest-neighbor search with distance-ratio validation. Problem component: For each index x, let closest(x) be the adjacent index y such that abs(nums[x] - nums[y]) is minimized.. Shared component: argmin selection of neighbor based on a numeric distance between elements.
+Important difference: vision matches descriptors in feature space; coding uses array adjacency and indices
+Technical quote: If we pick the nearest neighbor,DA correctly matchesDB
+butDD incorrectly matchesDC.
+Problem quote: For each index x, let
+closest(x) be the adjacent index y such that abs(nums[x] - nums[y]) is minimized.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 471; LeetCode_4000_Problem_Reference.pdf, PAGE: 1961
+
+3488. Closest Equal Element Queries (Medium)
+Connection: Related practice
+Related practice pattern: Nearest-neighbor search with distance-ratio validation
+What transfers: Technical component: Nearest-neighbor search with distance-ratio validation. Problem component: For each query i, find the smallest distance to any index j with nums[j] == nums[queries[i]].. Shared component: Argmin search over candidate set based on a distance or difference measure..
+Important difference: Technical uses descriptor distance in vision; problem uses index distance in arrays.
+Technical quote: If we pick the nearest neighbor,DA correctly matchesDB
+butDD incorrectly matchesDC.
+Problem quote: For each query i, you have to find the
+following: The smallest distance between the element at index queries[i] and any other index j in
+the circular array, where nums[j] == nums[queries[i]].
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 471; LeetCode_4000_Problem_Reference.pdf, PAGE: 1746
+
+3275. K-th Nearest Obstacle Queries (Medium)
+Connection: Related practice
+Related practice pattern: Nearest-neighbor search with distance-ratio validation
+What transfers: Technical component: Nearest-neighbor search with distance-ratio validation. Problem component: After each query, you need to find the distance of the k^th nearest obstacle from the origin.. Shared component: computing and ordering distances to identify nearest neighbors.
+Important difference: technical uses feature descriptors and ratio tests; problem uses kth neighbor only
+Technical quote: The simplest way to ﬁnd all corresponding feature points is to compare all fea-
+tures against all other features in each pair of potentially matching images.
+Problem quote: After each query, you need to find the distance of the k^th nearest
+obstacle from the origin.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 471; LeetCode_4000_Problem_Reference.pdf, PAGE: 1638",
+imported-azure-gpt51-v1,related-fresh-002-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how are feature descriptors ranked by Euclidean distance to choose a nearby match?",ordinary,completed,3488;2736;3534,related_practice;unrelated;unrelated,1,3,0.3333333333333333,0,0,0,False,,119.32610119087622,66,"3488. Closest Equal Element Queries (Medium)
+Connection: Related practice
+Related practice pattern: Rank high-dimensional descriptors by Euclidean distance after optional axis rescaling/whitening, then select nearest neighbors under a distance threshold or nearest-neighbor distance ratio.
+What transfers: Technical component: Rank high-dimensional descriptors by Euclidean distance after optional axis rescaling/whitening, then select nearest neighbors under a distance threshold or nearest-neighbor distance ratio.. Problem component: find the smallest distance between queries[i] and any index j with nums[j] == nums[queries[i]]. Shared component: argmin over a set of distances to choose the nearest match.
+Important difference: technical uses Euclidean in descriptor space; problem uses circular index distance
+Technical quote: To begin with, we assume that the feature descriptors have been designed so that Eu-
+clidean (vector magnitude) distances in feature space can be directly used for ranking poten-
+tial matches.
+Problem quote: For each query i, you have to find the
+following: The smallest distance between the element at index queries[i] and any other index j in
+the circular array, where nums[j] == nums[queries[i]].
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 467; LeetCode_4000_Problem_Reference.pdf, PAGE: 1746
+
+2736. Maximum Sum Queries (Hard)
+Connection: Related practice
+Related practice pattern: Rank high-dimensional descriptors by Euclidean distance after optional axis rescaling/whitening, then select nearest neighbors under a distance threshold or nearest-neighbor distance ratio.
+What transfers: Technical component: Rank high-dimensional descriptors by Euclidean distance after optional axis rescaling/whitening, then select nearest neighbors under a distance threshold or nearest-neighbor distance ratio.. Problem component: For the i^th query, find the largest value of nums1[j] + nums2[j]. Shared component: argmax selection over a scalar score computed from candidates.
+Important difference: technical ranks by distance minimization; problem maximizes a linear sum
+Technical quote: To begin with, we assume that the feature descriptors have been designed so that Eu-
+clidean (vector magnitude) distances in feature space can be directly used for ranking poten-
+tial matches.
+Problem quote: For the i^th query, find the largest
+value of nums1[j] + nums2[j] among all indices j (0 <= j < n), where nums1[j] >= x_i and nums2[j]
+>= y_i, or -1 if there is no j satisfying the constraints.
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 467; LeetCode_4000_Problem_Reference.pdf, PAGE: 1369
+
+3534. Path Existence Queries in a Graph II (Hard)
+Connection: Related practice
+Related practice pattern: Rank high-dimensional descriptors by Euclidean distance after optional axis rescaling/whitening, then select nearest neighbors under a distance threshold or nearest-neighbor distance ratio.
+What transfers: Technical component: Rank high-dimensional descriptors by Euclidean distance after optional axis rescaling/whitening, then select nearest neighbors under a distance threshold or nearest-neighbor distance ratio.. Problem component: An undirected edge exists between nodes i and j if the absolute difference between nums[i] and nums[j] is at most maxDiff (i.e., |nums[i] - nums[j]| <= maxDiff).. Shared component: computing a real-valued distance and comparing it to a threshold.
+Important difference: technical ranks continuous descriptors; problem builds discrete graph edges
+Technical quote: To begin with, we assume that the feature descriptors have been designed so that Eu-
+clidean (vector magnitude) distances in feature space can be directly used for ranking poten-
+tial matches.
+Problem quote: An undirected edge exists
+between nodes i and j if the absolute difference between nums[i] and nums[j] is at most maxDiff
+(i.e., |nums[i] - nums[j]| <= maxDiff).
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 467; LeetCode_4000_Problem_Reference.pdf, PAGE: 1769",
+imported-azure-gpt51-v1,related-fresh-003-short,"According to ""Probabilistic Machine Learning.pdf"", how does Box-Muller Gaussian sampling start?",ordinary,completed,478;497;381,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,125.88535977201536,62,"478. Generate Random Point in a Circle (Medium)
+Connection: Direct match
+Related practice pattern: rejection-based transformation from simple uniform samples to structured target samples
+What transfers: Technical component: rejection-based transformation from simple uniform samples to structured target samples. Problem component: randPoint() returns a planar [x,y] uniformly distributed over the entire circular area, including its boundary.. Shared component: constructing a uniform distribution over all points in a circle.
+Important difference: technical pattern uses circle as intermediate for Gaussian transformation; coding stops there
+Technical quote: The idea is we sample uniformly
+from a unit radius circle, and then use the change of variables formula to derive samples from a
+spherical 2d Gaussian.
+Problem quote: Design Solution(radius, x_center, y_center). randPoint() returns a planar [x,y] uniformly distributed
+over the entire circular area, including its boundary.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 239
+
+497. Random Point in Non-overlapping Rectangles (Medium)
+Connection: Related practice
+Related practice pattern: rejection-based transformation from simple uniform samples to structured target samples
+What transfers: Technical component: rejection-based transformation from simple uniform samples to structured target samples. Problem component: design pick() to sample uniformly among all lattice points in their union. Shared component: constructing a uniform distribution over a specified geometric region.
+Important difference: technical uses continuous rejection in a circle; problem uses discrete rectangles
+Technical quote: In more detail, samplez1,z 2∈ (−1, 1)uniformly, and then discard pairs that do not satisfyz2
+1 +z2
+2≤
+1.
+Problem quote: Given nonoverlapping inclusive integer-coordinate rectangles, design pick() to sample uniformly
+among all lattice points in their union.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 249
+
+381. Insert Delete GetRandom O(1) - Duplicates allowed (Hard)
+Connection: Related practice
+Related practice pattern: rejection-based transformation from simple uniform samples to structured target samples
+What transfers: Technical component: rejection-based transformation from simple uniform samples to structured target samples. Problem component: getRandom() samples uniformly among stored occurrences. Shared component: implementing uniform sampling over a finite or constrained set of candidates.
+Important difference: technical samples continuous points with rejection; coding samples discrete collection elements
+Technical quote: In more detail, samplez1,z 2∈ (−1, 1)uniformly, and then discard pairs that do not satisfyz2
+1 +z2
+2≤
+1.
+Problem quote: Design RandomizedCollection, a multiset. insert(val) adds an occurrence and reports whether val
+was previously absent. remove(val) removes one occurrence if present and reports success.
+getRandom() samples uniformly among stored occurrences, so repeated values have proportional
+probability.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 191",
+imported-azure-gpt51-v1,related-fresh-003-descriptive,"According to ""Probabilistic Machine Learning.pdf"", what uniformly sampled geometric region is used before the Box-Muller transformation produces Gaussian samples?",ordinary,completed,478;497;381,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,104.88235054095276,57,"478. Generate Random Point in a Circle (Medium)
+Connection: Direct match
+Related practice pattern: rejection sampling to obtain uniform points in a constrained geometric region
+What transfers: Technical component: rejection sampling to obtain uniform points in a constrained geometric region. Problem component: randPoint() returns a planar [x,y] uniformly distributed over the entire circular area, including its boundary.. Shared component: computing a uniform distribution over a 2D circular region.
+Important difference: technical pattern specifies rejection mechanism; coding operation omits implementation details
+Technical quote: The result will be points uniformly distributed inside the unit circle, sop(z) = 1
+π I(zinside circle) .
+Problem quote: Design Solution(radius, x_center, y_center). randPoint() returns a planar [x,y] uniformly distributed
+over the entire circular area, including its boundary.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 239
+
+497. Random Point in Non-overlapping Rectangles (Medium)
+Connection: Related practice
+Related practice pattern: rejection sampling to obtain uniform points in a constrained geometric region
+What transfers: Technical component: rejection sampling to obtain uniform points in a constrained geometric region. Problem component: design pick() to sample uniformly among all lattice points in their union. Shared component: constructing a uniform distribution over a constrained region via rejection/selection.
+Important difference: technical uses continuous rejection in circle; problem is discrete over rectangles
+Technical quote: In more detail, samplez1,z 2∈ (−1, 1)uniformly, and then discard pairs that do not satisfyz2
+1 +z2
+2≤
+1.
+Problem quote: Given nonoverlapping inclusive integer-coordinate rectangles, design pick() to sample uniformly
+among all lattice points in their union.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 249
+
+381. Insert Delete GetRandom O(1) - Duplicates allowed (Hard)
+Connection: Related practice
+Related practice pattern: rejection sampling to obtain uniform points in a constrained geometric region
+What transfers: Technical component: rejection sampling to obtain uniform points in a constrained geometric region. Problem component: getRandom() samples uniformly among stored occurrences. Shared component: designing a procedure that yields a provably uniform distribution over a target set.
+Important difference: technical samples continuous geometric region; coding samples discrete multiset elements
+Technical quote: In more detail, samplez1,z 2∈ (−1, 1)uniformly, and then discard pairs that do not satisfyz2
+1 +z2
+2≤
+1.
+Problem quote: Design RandomizedCollection, a multiset. insert(val) adds an occurrence and reports whether val
+was previously absent. remove(val) removes one occurrence if present and reports success.
+getRandom() samples uniformly among stored occurrences, so repeated values have proportional
+probability.
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 191",
+imported-azure-gpt51-v1,related-fresh-004-short,"According to ""Designing Data-Intensive Applications.pdf"", how are sorted SSTable segments merged?",ordinary,completed,23;21;632,direct_match;direct_match;stretch_connection,3,3,1.0,0,0,0,False,,116.96188498917036,65,"23. Merge k Sorted Lists (Hard)
+Connection: Direct match
+Related practice pattern: k-way merge of multiple sorted streams into one sorted output
+What transfers: Technical component: k-way merge of multiple sorted streams into one sorted output. Problem component: Combine their contents into a single nondecreasing linked list and return its head.. Shared component: merging multiple sorted sequences into one globally sorted output sequence.
+Important difference: SSTable merge may discard older duplicate keys; list merge preserves all nodes
+Technical quote: The approach is like the one used in the mergesort algorithm
+and is illustrated in Figure 3-4: you start reading the input files side by side, look
+at the first key in each file, copy the lowest key (according to the sort order) to
+the output file, and repeat.
+Problem quote: Combine their
+contents into a single nondecreasing linked list and return its head.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 12
+
+21. Merge Two Sorted Lists (Easy)
+Connection: Direct match
+Related practice pattern: k-way merge of multiple sorted streams into one sorted output
+What transfers: Technical component: k-way merge of multiple sorted streams into one sorted output. Problem component: Combine them into one list with the same ordering and return its head.. Shared component: merging multiple already-sorted sequences into a single globally sorted sequence.
+Important difference: SSTable merge may discard older duplicates; coding operation keeps all elements
+Technical quote: The approach is like the one used in the mergesort algorithm
+and is illustrated in Figure 3-4: you start reading the input files side by side, look
+at the first key in each file, copy the lowest key (according to the sort order) to
+the output file, and repeat.
+Problem quote: Combine them into one
+list with the same ordering and return its head.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 11
+
+632. Smallest Range Covering Elements from K Lists (Hard)
+Connection: Related practice
+Related practice pattern: k-way merge of multiple sorted streams into one sorted output
+What transfers: Technical component: k-way merge of multiple sorted streams into one sorted output. Problem component: return a smallest inclusive value interval containing at least one member from every list.. Shared component: coordinated traversal of several sorted sequences using a smallest-current-element choice.
+Important difference: merging outputs versus selecting a minimal covering interval over lists
+Technical quote: The approach is like the one used in the mergesort algorithm
+and is illustrated in Figure 3-4: you start reading the input files side by side, look
+at the first key in each file, copy the lowest key (according to the sort order) to
+the output file, and repeat.
+Problem quote: Given sorted integer lists, return a smallest inclusive value interval containing at least one
+member from every list.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 316",
+imported-azure-gpt51-v1,related-fresh-004-descriptive,"According to ""Designing Data-Intensive Applications.pdf"", how does repeatedly taking the smallest remaining input key merge several sorted segment files into one sorted output?",ordinary,completed,23;88;3801,direct_match;direct_match;related_practice,3,3,1.0,0,0,0,False,,138.80223120492883,72,"23. Merge k Sorted Lists (Hard)
+Connection: Direct match
+Related practice pattern: K-way merge of multiple sorted streams using a smallest-key selection loop
+What transfers: Technical component: K-way merge of multiple sorted streams using a smallest-key selection loop. Problem component: Combine their contents into a single nondecreasing linked list and return its head.. Shared component: merging multiple sorted inputs into one globally sorted output sequence.
+Important difference: technical merge is file-based SSTables; problem merge is in-memory lists
+Technical quote: This produces a new merged segment file, also sorted
+by key.
+Problem quote: Combine their
+contents into a single nondecreasing linked list and return its head.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 12
+
+88. Merge Sorted Array (Easy)
+Connection: Direct match
+Related practice pattern: K-way merge of multiple sorted streams using a smallest-key selection loop
+What transfers: Technical component: K-way merge of multiple sorted streams using a smallest-key selection loop. Problem component: Merge both sequences into nondecreasing order inside nums1, preserving all occurrences.. Shared component: ordered merge by repeatedly choosing the smallest remaining element.
+Important difference: technical pattern is file-based k-way merge; problem is array-based two-way merge
+Technical quote: The approach is like the one used in the mergesort algorithm
+and is illustrated in Figure 3-4: you start reading the input files side by side, look
+at the first key in each file, copy the lowest key (according to the sort order) to
+the output file, and repeat.
+Problem quote: Merge both sequences into nondecreasing order inside
+nums1, preserving all occurrences.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 44
+
+3801. Minimum Cost to Merge Sorted Lists (Hard)
+Connection: Related practice
+Related practice pattern: K-way merge of multiple sorted streams using a smallest-key selection loop
+What transfers: Technical component: K-way merge of multiple sorted streams using a smallest-key selection loop. Problem component: Permitted: repeatedly choose two lists a = lists[i] and b = lists[j], where i != j, and merge them.. Shared component: merging pre-sorted sequences by repeatedly combining inputs into a single sorted output.
+Important difference: technical uses global k-way smallest-key selection; coding merges only two lists at once
+Technical quote: The approach is like the one used in the mergesort algorithm
+and is illustrated in Figure 3-4: you start reading the input files side by side, look
+at the first key in each file, copy the lowest key (according to the sort order) to
+the output file, and repeat.
+Problem quote: Permitted: repeatedly choose two lists a = lists[i] and b =
+lists[j], where i != j, and merge them.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 1902",
+imported-azure-gpt51-v1,related-fresh-005-short,"According to ""Grokking-the-system-design-interview-free.pdf"", how does the sliding-window rate limiter track recent requests?",ordinary,completed,3433;635;1939,stretch_connection;related_practice;related_practice,3,3,1.0,0,0,0,False,,100.21953827003017,49,"3433. Count Mentions Per User (Medium)
+Connection: Related practice
+Related practice pattern: Use a per-user sorted collection of timestamps to maintain a sliding window of recent events, inserting each new event time and expiring entries older than the window to enforce rate limits.
+What transfers: Technical component: Use a per-user sorted collection of timestamps to maintain a sliding window of recent events, inserting each new event time and expiring entries older than the window to enforce rate limits.. Problem component: Process timestamped events chronologically, applying status changes before messages at the same time.. Shared component: ordering operations based on event timestamps.
+Important difference: rate limiting with storage vs in-place chronological processing only
+Technical quote: We 
+can store the timestamp of each request in a Redis Sorted Set in our ‘value’ field of 
+hash-table.
+Problem quote: Process timestamped events chronologically, applying status
+changes before messages at the same time.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 1718
+
+635. Design Log Storage System (Medium)
+Connection: Related practice
+Related practice pattern: Use a per-user sorted collection of timestamps to maintain a sliding window of recent events, inserting each new event time and expiring entries older than the window to enforce rate limits.
+What transfers: Technical component: Use a per-user sorted collection of timestamps to maintain a sliding window of recent events, inserting each new event time and expiring entries older than the window to enforce rate limits.. Problem component: Design LogSystem with put(id, timestamp) and retrieve(start, end, granularity).. Shared component: Persisting timestamped events to support time-window-based retrieval..
+Important difference: Rate limiter enforces quotas; LogSystem only logs and retrieves events.
+Technical quote: We 
+can store the timestamp of each request in a Redis Sorted Set in our ‘value’ field of 
+hash-table.
+Problem quote: Design LogSystem with put(id, timestamp) and retrieve(start, end, granularity).
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 318
+
+1939. Users That Actively Request Confirmation Messages (Easy)
+Connection: Related practice
+Related practice pattern: Use a per-user sorted collection of timestamps to maintain a sliding window of recent events, inserting each new event time and expiring entries older than the window to enforce rate limits.
+What transfers: Technical component: Use a per-user sorted collection of timestamps to maintain a sliding window of recent events, inserting each new event time and expiring entries older than the window to enforce rate limits.. Problem component: Find the IDs of the users that requested a confirmation message twice within a 24-hour window.. Shared component: tracking per-user request timestamps to detect events within a time window.
+Important difference: technical pattern enforces generic rate limits; problem counts exactly two confirmations
+Technical quote: We 
+can store the timestamp of each request in a Redis Sorted Set in our ‘value’ field of 
+hash-table.
+Problem quote: Find the IDs of the users that requested a confirmation message twice
+within a 24-hour window.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 970",
+imported-azure-gpt51-v1,related-fresh-005-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", how does expiring old request timestamps let a rate limiter count requests in a moving time window?",ordinary,completed,1797;3433;362,related_practice;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,103.3408110961318,50,"1797. Design Authentication Manager (Medium)
+Connection: Related practice
+Related practice pattern: Sliding-window counter by pruning expired timestamps then counting remaining events
+What transfers: Technical component: Sliding-window counter by pruning expired timestamps then counting remaining events. Problem component: countUnexpiredTokens(int currentTime) returns the count of unexpired tokens at the given currentTime.. Shared component: maintain time-bounded set by expiring outdated timestamps before counting.
+Important difference: rate limiter uses request timestamps; auth manager uses token lifetimes
+Technical quote: Remove all the timestamps from the Sorted Set that are older than 
+“CurrentTime - 1 minute”.
+Problem quote: If there are no
+unexpired tokens with the given tokenId, the request is ignored, and nothing happens.
+countUnexpiredTokens(int currentTime) returns the count of unexpired tokens at the given
+currentTime.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 899
+
+3433. Count Mentions Per User (Medium)
+Connection: Related practice
+Related practice pattern: Sliding-window counter by pruning expired timestamps then counting remaining events
+What transfers: Technical component: Sliding-window counter by pruning expired timestamps then counting remaining events. Problem component: Process timestamped events chronologically, applying status changes before messages at the same time.. Shared component: time-ordered handling of timestamped events to reflect current system state.
+Important difference: rate limiting counts events in a window; problem orders statuses vs messages
+Technical quote: Remove all the timestamps from the Sorted Set that are older than 
+“CurrentTime - 1 minute”.
+Problem quote: Process timestamped events chronologically, applying status
+changes before messages at the same time.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 1718
+
+362. Design Hit Counter (Medium)
+Connection: Related practice
+Related practice pattern: Sliding-window counter by pruning expired timestamps then counting remaining events
+What transfers: Technical component: Sliding-window counter by pruning expired timestamps then counting remaining events. Problem component: A query returns the number with timestamps greater than timestamp - 300 and no greater than timestamp.. Shared component: Computing hits in a moving window by restricting timestamps to a recent interval.
+Important difference: Technical uses Redis pruning; problem uses conditional query, not explicit deletion
+Technical quote: Remove all the timestamps from the Sorted Set that are older than 
+“CurrentTime - 1 minute”.
+Problem quote: A query returns the number with timestamps greater than timestamp -
+300 and no greater than timestamp.
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 181",
+imported-azure-gpt51-v1,related-fresh-006-short,"According to ""Designing Data-Intensive Applications.pdf"", why does sorting a column help run-length compression?",ordinary,completed,987;83;3014,stretch_connection;related_practice;unrelated,2,3,0.6666666666666666,0,0,0,False,,109.09644138510339,71,"987. Vertical Order Traversal of a Binary Tree (Hard)
+Connection: Related practice
+Related practice pattern: Pre-sort data on a low-cardinality key before applying run-length encoding to maximize contiguous runs of identical values.
+What transfers: Technical component: Pre-sort data on a low-cardinality key before applying run-length encoding to maximize contiguous runs of identical values.. Problem component: Return values grouped by ascending column.. Shared component: Arranging data by a chosen key to make identical-key items contiguous..
+Important difference: Tree column grouping is for traversal output, not for compression.
+Technical quote: If
+the primary sort column does not have many distinct values, then after sorting, it will
+have long sequences where the same value is repeated many times in a row.
+Problem quote: Return values grouped by ascending column.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 494
+
+83. Remove Duplicates from Sorted List (Easy)
+Connection: Related practice
+Related practice pattern: Pre-sort data on a low-cardinality key before applying run-length encoding to maximize contiguous runs of identical values.
+What transfers: Technical component: Pre-sort data on a low-cardinality key before applying run-length encoding to maximize contiguous runs of identical values.. Problem component: reduce each repeated value to one retained node. Shared component: identify and collapse consecutive duplicate values into a single representative.
+Important difference: technical goal is compression; coding goal is deduplication, not encoding counts
+Technical quote: If
+the primary sort column does not have many distinct values, then after sorting, it will
+have long sequences where the same value is repeated many times in a row.
+Problem quote: Given the head of a nondecreasing singly linked list, reduce each repeated value to one retained
+node.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 42
+
+3014. Minimum Number of Pushes to Type Word I (Easy)
+Connection: Related practice
+Related practice pattern: Pre-sort data on a low-cardinality key before applying run-length encoding to maximize contiguous runs of identical values.
+What transfers: Technical component: Pre-sort data on a low-cardinality key before applying run-length encoding to maximize contiguous runs of identical values.. Problem component: Choose the assignment and order to minimize the presses for word.. Shared component: Optimizing an ordering to minimize a cost metric over a sequence..
+Important difference: Technical goal is compression size; problem goal is keypress effort.
+Technical quote: If
+the primary sort column does not have many distinct values, then after sorting, it will
+have long sequences where the same value is repeated many times in a row.
+Problem quote: Choose the assignment and order to minimize the presses for word.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 1508",
+imported-azure-gpt51-v1,related-fresh-006-descriptive,"According to ""Designing Data-Intensive Applications.pdf"", how do long consecutive runs of identical column values make run-length encoding compact?",ordinary,completed,1868;83;228,related_practice;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,117.02035585907288,75,"1868. Product of Two Run-Length Encoded Arrays (Medium)
+Connection: Direct match
+Related practice pattern: Replace long runs of identical values with (value, run_length) pairs to store columns compactly when data is sorted and has few distinct values.
+What transfers: Technical component: Replace long runs of identical values with (value, run_length) pairs to store columns compactly when data is sorted and has few distinct values.. Problem component: Compress prodNums into a run-length encoded array and produce it.. Shared component: Run-length compress by scanning and summarizing contiguous identical values as value-count pairs..
+Important difference: Technical text targets database columns; coding operation targets array of products.
+Technical quote: A simple
+run-length encoding, like we used for the bitmaps in Figure 3-11 , could compress
+that column down to a few kilobytes—even if the table has billions of rows.
+Problem quote: Compress
+prodNums into a run-length encoded array and produce it.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 935
+
+83. Remove Duplicates from Sorted List (Easy)
+Connection: Related practice
+Related practice pattern: Replace long runs of identical values with (value, run_length) pairs to store columns compactly when data is sorted and has few distinct values.
+What transfers: Technical component: Replace long runs of identical values with (value, run_length) pairs to store columns compactly when data is sorted and has few distinct values.. Problem component: reduce each repeated value to one retained node. Shared component: collapsing consecutive identical items into a single representative element.
+Important difference: technical pattern also tracks run length; coding operation discards multiplicity
+Technical quote: A simple
+run-length encoding, like we used for the bitmaps in Figure 3-11 , could compress
+that column down to a few kilobytes—even if the table has billions of rows.
+Problem quote: Given the head of a nondecreasing singly linked list, reduce each repeated value to one retained
+node.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 42
+
+228. Summary Ranges (Easy)
+Connection: Related practice
+Related practice pattern: Replace long runs of identical values with (value, run_length) pairs to store columns compactly when data is sorted and has few distinct values.
+What transfers: Technical component: Replace long runs of identical values with (value, run_length) pairs to store columns compactly when data is sorted and has few distinct values.. Problem component: Each range must be a maximal consecutive run.. Shared component: detect and delimit maximal contiguous runs in a sorted sequence.
+Important difference: technical runs are equal-value repetitions; problem runs are numeric consecutives
+Technical quote: If
+the primary sort column does not have many distinct values, then after sorting, it will
+have long sequences where the same value is repeated many times in a row.
+Problem quote: Each range must be a maximal consecutive run.
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 114",
+imported-azure-gpt51-v1,related-fresh-007-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", find a LeetCode problem whose statement explicitly requires a fundamental matrix for correspondences between camera images. If none names it, abstain.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,2.6110565699636936,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+imported-azure-gpt51-v1,related-fresh-007-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", which LeetCode specification explicitly names the fundamental matrix used for epipolar correspondences? If none does, do not substitute an ordinary matrix problem.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.1135672200471163,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+imported-azure-gpt51-v1,related-fresh-008-short,"According to ""Speech and Language Processing.pdf"", find a LeetCode problem whose statement explicitly requires an n-gram language model. If none names that model, abstain.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.0992175398860127,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+imported-azure-gpt51-v1,related-fresh-008-descriptive,"According to ""Speech and Language Processing.pdf"", which LeetCode specification explicitly requires an n-gram language model for next-word probabilities? Do not substitute word counting or bigram occurrence lookup.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,2.698226723819971,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,

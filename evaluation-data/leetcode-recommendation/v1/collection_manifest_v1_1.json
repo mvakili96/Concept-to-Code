@@ -1,0 +1,38 @@
+{
+  "collection_id": "output_independent_lexical_pool_v1_1",
+  "scanned_problems": 4000,
+  "candidate_pairs": 99,
+  "plan_sha256": "767e7aeb295fdaeb95704c4b1113c68975b30c90ffbd48bd84a11672eaaf5d13",
+  "source_sha256": "76c3d016959864965612cca10512f133bcbed2b4fac8acd6a8891467d7e4d5de",
+  "collector_sha256": "de5c2f794b3c09d7ba45597f5540265f1abd6430da698213796663d41a160654",
+  "packages": {
+    "pypdf": "6.16.2",
+    "rank-bm25": "0.2.2",
+    "numpy": "2.4.6",
+    "PyYAML": "6.0.3"
+  },
+  "problem_isolation": {
+    "page_range_pattern": "(?m)^Problems? (?P<first>[1-9][0-9]*)(?:-(?P<last>[1-9][0-9]*))?[ \\t]*$",
+    "header_pattern": "(?m)^(?P<number>[1-9][0-9]*)\\.[ \\t]+(?P<title>[^\\n]+(?:\\n(?![^\\n]*\\|[ \\t]+Open on LeetCode|[1-9][0-9]*\\.[ \\t]+)[^\\n]+)*)\\n(?P<difficulty>Easy|Medium|Hard)[ \\t]+\\|[ \\t]+Open on LeetCode[ \\t]*(?:\\n|$)",
+    "footer_pattern": "(?m)^Question specifications \\| No examples or solutions\\s*\\n[0-9]+ / [0-9]+\\s*$"
+  },
+  "controls": [
+    {
+      "topic_id": "related-fresh-007",
+      "required_literal": "fundamental matrix",
+      "scanned_problems": 4000,
+      "matching_problem_numbers": []
+    },
+    {
+      "topic_id": "related-fresh-008",
+      "required_literal": "n-gram language model",
+      "scanned_problems": 4000,
+      "matching_problem_numbers": []
+    }
+  ],
+  "candidate_pool_sha256": "db839b011bcf1f720d753e9da180a00555e720ca430b6e2990738d96fabdb164",
+  "existing_pairs_in_pool": 27,
+  "new_audited_pairs": 72,
+  "unreviewed_collected_pairs": 0,
+  "quarantined_pairs": 0
+}

@@ -1,6 +1,6 @@
 # Grounded Interview Prep RAG
 
-A local, source-grounded assistant that connects technical interview theory to targeted coding practice.
+A compact pipeline for progressively exploring production RAG concepts over PDF documents, with local retrieval and Azure-hosted or local generation.
 
 Technical interview preparation is fragmented: trusted explanations live in textbooks, while coding practice lives in a large problem bank that is difficult to prioritize. This project is being built to close that gap. It answers questions from a curated engineering library with page-level citations and is evolving toward recommending LeetCode coding problems that exercise the same transferable algorithmic patterns.
 
@@ -53,42 +53,19 @@ The first version continues to use the repository's ordinary LeetCode chunks. Pr
 
 | Component | Implementation |
 |---|---|
-| PDF ingestion | `pypdf` with one-based physical page metadata |
-| Chunking | LangChain recursive text splitting with stable chunk IDs |
-| Dense retrieval | MiniLM embeddings with FAISS IndexFlat or HNSW |
-| Sparse retrieval | BM25 with optional Qwen-based query expansion |
-| Candidate fusion | Chunk-ID deduplication across retrievers |
-| Reranking | MiniLM cross-encoder |
-| Generation | `Qwen2.5-7B-Instruct` with source and page citations |
-| Conversation | Follow-up rewriting, in-memory history, and active-source state |
-| Persistence | Reusable corpus, BM25, IndexFlat, and HNSW artifacts |
-| Evaluation | Deterministic evidence-overlap measurement on a fixed benchmark |
-
-IndexFlat performs exact nearest-neighbor search over every vector. HNSW navigates an approximate graph and trades a small amount of recall for faster search on larger indexes. Both modes return the configured top-k results.
-
-A normal question written as `According to "<exact PDF filename>", ...` restricts retrieval to that source; otherwise, the full corpus is searched. On the feature branch, the `/related` workflow overrides this behavior and searches only the configured LeetCode source.
-
-## Getting started
-
-Create an environment and install the dependencies:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-Place the source PDFs in `documents/`. The directory is intentionally git-ignored. The benchmark's expected filenames, hashes, and page counts are recorded in [`evaluation-data/corpus_manifest_v1.json`](evaluation-data/corpus_manifest_v1.json).
-
-On the first run, set `indexing.mode` in [`config.yml`](config.yml) to `build`, then run:
-
-```bash
-python main.py
-```
-
-Build mode parses and chunks the corpus, constructs BM25 plus both FAISS indexes, saves them under the git-ignored `index-data/` directory, and then enters the configured interaction mode. After that initial build, change `indexing.mode` to `load` to reuse the saved artifacts. Changes to chunking, embeddings, BM25 construction, or HNSW construction require a rebuild. Query-time retrieval settings do not.
-
-With `conversation.enabled: true`, all input is interactive. Use ordinary questions for grounded document QA and `exit` or `quit` to stop. The active feature branch additionally accepts `/related <topic>` for its related-problem baseline. With conversation mode disabled, `query` in `config.yml` is run once.
+| **PDF ingestion** | `pypdf` |
+| **Chunking** | LangChain recursive text splitting |
+| **Text normalization** | Model-facing Unicode ligature, line-break-hyphen, and whitespace normalization; raw citation offsets preserved |
+| **Dense retrieval** | MiniLM embeddings + `FAISS` IndexFlat (exact k-NN) or HNSW (ANN) |
+| **Sparse retrieval** | `BM25` with optional LLM query expansion |
+| **Candidate fusion** | Chunk-ID deduplication |
+| **Reranking** | MiniLM cross-encoder |
+| **Generation** | Azure OpenAI `gpt-5.1` or local `Qwen2.5-7B-Instruct`, with source and page citations |
+| **Conversation** | LLM follow-up rewriting, in-memory history, and active-source state |
+| **Related-problem workflow** | Grounded QA answer → all-title shortlist → full-statement verification → cited LeetCode practice through `/related` |
+| **Persistence** | Reusable corpus, BM25, IndexFlat, and HNSW artifacts |
+| **Ablations** | Independent dense retrieval, BM25, and query-expansion toggles |
+| **Evaluation** | Separate 50-question RAG and 40-question LeetCode benchmarks; evidence overlap and frozen-label recommendation scoring |
 
 ## Curated source library
 
@@ -101,45 +78,65 @@ With `conversation.enabled: true`, all input is interactive. Use ordinary questi
 
 ## Evaluation
 
-The fixed benchmark in [`evaluation-data/rag_benchmark_v1.jsonl`](evaluation-data/rag_benchmark_v1.jsonl) contains 47 answerable questions and three controlled-unanswerable questions. It records reference answers, atomic facts, exact PDF evidence with physical page numbers, allowed sources, terminology variants, distractors, and audit metadata. Benchmark v1.2 pins the expanded LeetCode reference and reverifies its seven affected examples.
+The default `llm.provider: azure_openai` uses the configured Azure v1 endpoint and deployment for every LLM pass, including expansion, rewriting, pattern extraction, judging, and answers. Copy [.env.example](.env.example) to a local `.env` file and set `AZURE_OPENAI_API_KEY`, or export that environment variable; never commit the key. `.env` is git-ignored, and existing environment values take precedence. Azure calls incur charges and send the supplied questions, history, and selected PDF passages to Azure. Embeddings, FAISS, BM25, and the cross-encoder remain local; switching LLMs does not require rebuilding indexes. For local Qwen, set `llm.provider: local` and `llm.model_id: Qwen/Qwen2.5-7B-Instruct`. Qwen-specific descriptions below apply to the same workflow under either provider.
+
+Azure preserves each stage's `max_new_tokens` setting as `max_completion_tokens`; no local tokenizer or Qwen weights are loaded for generation. Reasoning defaults to `none` to retain the small output budgets. Increasing reasoning effort requires allowing room for reasoning tokens as well as visible output. Local sampling settings are not sent to Azure. Evaluation reports record the provider and non-secret Azure settings alongside the deployment name.
+
+Use indexing mode `build` once to parse and chunk the complete corpus, build BM25 plus both Flat and HNSW indexes, persist them under the git-ignored `index-data/`, and answer the configured query. Then switch to `load` to skip ingestion and index construction. `dense_index_type` selects the persisted Flat or HNSW index without rebuilding.
 
 Run the full benchmark or a small execution check with:
 
-```bash
-python evaluate.py
-python evaluate.py --limit 1
-```
+`text_normalization.enabled` normalizes embedding, BM25, reranking, and context inputs without changing stored PDF text, chunks, IDs, or citation offsets; changing it requires an index rebuild. The same query-expansion pass optionally supplies a focused dense/reranking query (`query_expansion.use_focused_query`), while BM25 uses the original question plus conservative wording variations. Source restrictions and the answering question remain based on the original query. Focused queries are available only when BM25 and query expansion are enabled; disabling the option retains the original dense/reranking query. Candidate limits default to 50 per retriever before the final four reranked chunks; expansion and top-k settings can change without rebuilding.
 
-The evaluator imports the same `RAGPipeline` used by `main.py`. For answerable questions, evidence precision and recall compare the final reranked chunks supplied to Qwen with annotated evidence using normalized PDF word positions. The unanswerable outputs are retained for manual inspection.
+`reranking.include_source_name` supplies the existing source label alongside each chunk's normalized body, retaining document/domain context for chunks without headings. This query-time setting does not require rebuilding indexes.
+
+With `conversation.enabled`, every turn—including the first—is entered interactively in the terminal; the configured query is used only in single-turn mode. Later turns are rewritten into standalone retrieval queries using recent user and assistant messages. An explicitly named source is inherited only for a follow-up and cleared for a new topic. History resolves references but is not treated as document evidence; session state lasts only for the current process.
+
+Use `/related <technical topic or request>` in conversation mode. The default `related_problem.method: titles` generates a grounded technical answer through the existing QA pipeline, then makes two LeetCode selection calls: all 4,000 numbers/titles (39,390 tokens) propose up to 20 candidates, and their full statements are checked against the original technical evidence to select up to three recommendations. Titles are hints, not proof of relevance. Python validates IDs and selected evidence spans and supplies exact quotes, filenames, and physical pages. The answer and recommendations are displayed together. Settings and prompts are under `related_problem.title_selection`; these calls are additional to QA, with bounded retries only when needed. The current PDF is parsed once and cached; no LeetCode index rebuild or vector/BM25 search is needed. Document QA and learning comments are retained. Obscure titles may still cause relevant problems to be missed.
+
+`related_problem.method: batched` retains the full-statement scan: three token-budgeted calls carry a small verified shortlist forward, with final selection in the last call. Its settings and shared tokenizer/technical-answer prompt are under `related_problem.batched_selection`. Neither selection mode uses conversation memory; semantic connections remain model judgments, and missing/ambiguous source boundaries or oversized inputs fail explicitly.
+
+Selection calls share a request slot across evaluator workers and honor Azure's retry delay after token-rate errors. The optional full-statement batch mode needs quota for roughly 230,000-token requests; the title-first mode avoids those large requests. A context-window limit and a token-per-minute quota are different limits.
+
+The following details apply to the previous workflow, selectable with `related_problem.method: retrieval` (also the option for local Qwen).
+
+It first retrieves and reranks technical evidence from an exactly named technical PDF, or from every non-LeetCode source when none is named. Qwen assesses evidence sufficiency and extracts literal source terms, inferred coding patterns, topic connections, quotes, and coding tasks. Each pattern selects a Python-assigned passage ID; quotes must match that passage after Unicode, whitespace, and line-break-hyphen normalization. Invalid quotes get one focused retry using only the selected passage, selecting literal excerpt IDs when available so Python copies the quote; other extraction errors retain one targeted retry. A separate Qwen pass translates accepted patterns into concise coding-problem queries. Each query independently searches the LeetCode PDF using enabled dense/BM25 components; candidates are deduplicated by chunk ID before the existing reranker scores them against the combined task queries. Per-query retrieval limits remain in `retrieval`; query-construction settings are in `related_problem.candidate_retrieval`. Invalid query plans reuse the previous coding-task bridge; insufficient technical evidence falls back to the original request. Returned results retain the query plan, candidate counts, chunk IDs, and retrieval provenance without printing diagnostic JSON in the terminal. Qwen compares technical passages with individual problem statements. Topic connections are model inferences, not guaranteed relevance checks. The workflow does not yet use or update conversation memory.
+
+For `/related` only, `related_problem.conceptual_reranking` configures a cross-encoder chunk shortlist. Numbered headings identify problems whose bodies overlap those chunks; Python fetches each complete statement from saved PDF text, bounded by its heading and the next heading/footer, before judging. Original parent chunk IDs and `retrieved_problem_spans` remain separate from full-body `problem_spans`; `problem_expanded` records added coverage. Qwen first extracts each problem's explicit operations without seeing the question or technical topic, then compares one frozen operation with one source-backed technical pattern. Useful suggestions are labeled **direct match**, **related practice**, or **stretch connection**; partial computational connections are welcome, but shared vocabulary alone is not. Python validates the evidence selections; user constraints are supplied only to the comparison call. The independent check sets the final level and explains what transfers and what does not. The existing cross-encoder rescores complete accepted statements against the coding-search queries; closer practice levels rank first, with cross-encoder scores ordering problems within each level, before applying `reranking.final_top_k`. Original chunk scores and new problem scores are retained separately. Python then selects the top approved problems in that order, deduplicated and capped by `related_problem.recommendation_validation.max_recommendations` (default three). No final LLM selection call is made: numbers, titles, and difficulty come directly from verified source headings, while explanations, differences, quotes, and source/page citations come from the existing checked assessments. No passing candidates means abstention, not proof that no related problem exists in the corpus. Missing/ambiguous boundaries or failed source mappings are flagged, not guessed. `recommendation_validation` records the deterministic method, selected IDs, and any rejected records; its LLM attempts list is empty. No catalog or index rebuild is needed. Ordinary QA and benchmark evaluation are unchanged.
+
+Judging is anchored to the accepted patterns actually used for search: Python retains their original technical quotes and source links, with no separate LLM-selected relationship. Each supported match names one existing pattern index, and the independent check uses that same pattern and its original passage. The first call sees only the statement and numbered problem spans, extracting up to `related_problem.conceptual_reranking.max_problem_operations` atomic operations (default three). Python assigns operation IDs; the second call selects one existing operation ID and one technical pattern, then explains an evidence-linked component on each side and its limitations. It cannot rewrite the coding operation or replace its selected quote. They select numbered prose spans instead of reproducing quotes; Python copies the original text and records body-relative character offsets. Problem constraint lines are not selectable mechanism evidence. The independent check separately grounds each operation in its own source, then judges shared-component support: different operations can both be grounded without being equivalent or even related. All three support decisions must pass for a recommendation. Empty extractions abstain; invalid extraction or comparison responses are individually unscored after their bounded retry. More candidates can now reach the comparison call, increasing latency; no additional cache or index is introduced. The earlier combined operation-support field is retained only as a derived diagnostic value. Invalid responses retain one corrective retry. Mechanism-level related practice can differ in implementation or objective; those differences are reported explicitly. Span selection verifies provenance, while semantic support remains a model judgment. The configurable cross-encoder shortlist now admits 30 chunks before individual-problem judging; final context remains capped at four passing problems. This query-time change needs no index rebuild and increases judging cost, not the final context limit.
+
+Overlong `/related` coding tasks get one focused repair per source-linked pattern. Only the task sentence can change; the existing pattern, checked quote, and Python-owned citation remain fixed. Failed repairs retain the existing extraction retry/fallback. Retry prompts and token limits are in `related_problem.pattern_extraction`; returned `coding_task_repairs` records retain the original task, response, length, and outcome for diagnostics.
+
+## Retrieval Sources
 
 These metrics evaluate retrieval and context coverage—not answer correctness, faithfulness, or semantic equivalence—and valid alternative evidence may not receive credit. The latest checked-in run and its exact configuration are in [`evaluation-results/summary.md`](evaluation-results/summary.md). Detailed records and per-question metrics are stored alongside it.
 
-Additional benchmark documentation:
+## Evaluation
 
-- [`evaluation-data/SCHEMA.md`](evaluation-data/SCHEMA.md) — record structure and field semantics
-- [`evaluation-data/COVERAGE.md`](evaluation-data/COVERAGE.md) — source, category, and difficulty coverage
-- [`evaluation-data/REVIEW.md`](evaluation-data/REVIEW.md) — human-readable question and evidence review
-- [`evaluation-data/CHANGELOG.md`](evaluation-data/CHANGELOG.md) — dataset revisions and audits
+| Workflow | Dataset | Command | Results |
+|---|---|---|---|
+| Document QA | [50 questions](evaluation-data/document-qa/) | `python evaluate_document_qa.py` | [Document QA report](evaluation-results/document-qa/summary.md) |
+| LeetCode recommendation | [40 fresh-topic v2 questions](evaluation-data/leetcode-recommendation/v2/) | `python evaluate_leetcode_recommendation.py` | [Latest title-first report](evaluation-results/leetcode-recommendation/v2/experiments/title-selection-full-source-fixed/source_fix.md), [previous retrieval-mode report](evaluation-results/leetcode-recommendation/v2/experiments/shortlist-30/summary.md), [reverted experiment](evaluation-results/leetcode-recommendation/v2/experiments/operation-queries/comparison.md), [v1 baseline](evaluation-results/leetcode-recommendation/v1/summary.md) |
 
-## Repository layout
+Both workflows use RAG and import the production `RAGPipeline`; `--limit 1` selects one question. Dataset and result paths are configured separately under `document_qa_evaluation` and `leetcode_recommendation_evaluation`. These fixed benchmarks support component comparisons and ablations, not held-out generalization.
 
-```text
-.
-├── main.py                 # RAG pipeline and conversation loop
-├── evaluate.py             # Retrieval-focused benchmark runner
-├── config.yml              # Models, prompts, indexing, retrieval, and ablations
-├── requirements.txt
-├── evaluation-data/        # Versioned benchmark and supporting documentation
-├── evaluation-results/     # Latest checked-in reports
-├── documents/              # Local source PDFs; git-ignored
-└── index-data/              # Persisted local indexes; git-ignored
-```
+The latest title-first report covers all 40 v2 questions by combining saved results with targeted deduplication and source-restriction reruns; per-question provenance identifies each execution segment. The full-statement batch mode has not had a full benchmark run. Both selection modes use the same frozen-label metrics and record presentation/shortlist stages, token estimates, and retries. Presenting all titles is not semantic retrieval recall. Dense/BM25 and cross-encoder stage diagnostics do not apply to these selection modes.
+
+The [fresh-topic LeetCode v2 dataset](evaluation-data/leetcode-recommendation/v2/) contains 40 questions on 20 new primary topics with full-corpus screening and source-audited references. Configuration selects v2 and writes its results separately. [Earlier datasets](evaluation-data/leetcode-recommendation/v1/) and [reports](evaluation-results/leetcode-recommendation/v1/) remain under v1. Corpus scanning and semantic annotation coverage are documented separately.
+
+The document-QA benchmark includes reference answers, atomic facts, exact physical-page evidence, source restrictions, variants, and distractors. Evidence text precision/recall measure annotated passage overlap in the final context, not semantic correctness. Final answers are retained without correctness/faithfulness scoring, including the three unanswerable examples. Existing QA records and scores are unchanged; historical run metadata retains its original paths.
+
+The current LeetCode v2 benchmark covers 20 topics with short/descriptive wordings and four explicit-naming controls. Its 360 source-audited judgments include direct, related, stretch, unrelated and uncertain connections. [Coverage and limitations](evaluation-data/leetcode-recommendation/v2/COVERAGE.md) distinguish full-corpus screening from individual semantic judgments. The evaluator reports assessed precision, hit rate, annotated-positive recall and label coverage; unseen pairs stay unassessed and are exported for later review. Recall uses all positively annotated v2 references and remains incomplete semantic recall. Abstentions, controls, failures, stage overlap, latency, LLM calls and available token usage remain supporting diagnostics. It does not add a judging LLM. The v1 directory retains the historical 180-pair baseline references and 252-pair expansion without replacing its published results.
+
+LeetCode runs checkpoint each finished question: use `--resume` after interruption or `--restart` to explicitly abandon an unfinished run. Resume requires compatible code, data, configuration and indexes and never rebuilds them. Azure uses up to two isolated workers; local Qwen uses one. Build mode builds the corpus once before additional workers load it. A full run can make thousands of paid API calls; progress includes active IDs and call counts. Saved failed questions remain failed on resume.
+
+Each completed run replaces its configured directory's `summary.md`, `per_question.csv` and `details.json`; LeetCode also writes `pending_review.jsonl`. Previous reports remain in place until replacements are ready. The v1 LeetCode report is the completed GPT-5.1 baseline imported without new inference; v2 reports come from a separate production run on the fresh topics. Different benchmark versions are not a controlled model-only comparison. Runtime checkpoints and bulky historical diagnostics stay local and git-ignored.
 
 ## Current limitations
 
-- PDF extraction ignores figures, table structure, page layout, and scanned text without an OCR layer.
-- `rank_bm25` scores every eligible chunk rather than using a scalable inverted index.
-- Conversation state exists only for the current process and has no dedicated benchmark.
-- There is no serving API or graphical interface; interaction is through the terminal.
-- The related-problem baseline uses direct lexical/semantic retrieval and a generic cross-encoder, so it may miss indirect conceptual relationships.
-- Recommendation quality is not yet measured by a dedicated benchmark.
+- Figures, table structure, page layout, and scanned text are not parsed.
+- `rank_bm25` scores every chunk rather than using a scalable inverted index.
+- Qwen query rewrites and wording variations can still lose meaning or drift; numeric/primary-term checks are safeguards, not semantic guarantees.
+- Conversation sessions are not persisted, and there is no conversational benchmark or serving API yet.
+- Related-problem judgments and explanations remain model inferences, not guaranteed semantic validation. Identity parsing depends on the PDF heading/page-range format; recommendation labels are incomplete and weak practice connections are not full algorithm implementations.

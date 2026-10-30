@@ -489,7 +489,7 @@ def write_outputs_safely(results_dir, details, summary_text, question_results):
 
 def build_summary(run, dataset_counts, metric_summaries, question_results):
     lines = [
-        "# RAG Evaluation Summary",
+        "# Document QA Evaluation Summary",
         "",
         "Evidence text precision and recall are deterministic normalized word-position overlap "
         "against annotated passages. This project evaluates RAG retrieval and reranking rather "
@@ -504,6 +504,7 @@ def build_summary(run, dataset_counts, metric_summaries, question_results):
         f"- Excluded questions: {dataset_counts['excluded']} "
         f"({dataset_counts['quarantined']} quarantined, {dataset_counts['unresolved']} unresolved)",
         f"- Answer model: `{run['model_id']}`",
+        f"- LLM provider: `{run.get('llm_provider', 'local')}`",
         f"- Dataset: `{run['dataset_path']}`",
         f"- Config: `{run['config_path']}`",
         "",
@@ -530,17 +531,26 @@ def build_summary(run, dataset_counts, metric_summaries, question_results):
         "",
         "## Pipeline configuration",
         "",
+        f"- Azure settings (no API key): `{run.get('azure_settings')}`",
         f"- Indexing mode: `{run['indexing_mode']}`",
         f"- Persisted index directory: `{run['persist_directory']}`",
         f"- Dense retrieval enabled: `{run['ablation']['use_dense_retrieval']}`",
         f"- BM25 retrieval enabled: `{run['ablation']['use_bm25_retrieval']}`",
         f"- Query expansion enabled: `{run['ablation']['use_query_expansion']}`",
+        f"- Model-text normalization: `{run['text_normalization']}`",
+        f"- Focused dense/reranking query: `{run['query_expansion_settings']['use_focused_query']}` "
+        "(applies only when BM25 and query expansion are enabled)",
+        f"- Query-expansion limits (key terms / acronyms / variations): "
+        f"{run['query_expansion_settings']['max_key_terms']} / "
+        f"{run['query_expansion_settings']['max_acronyms']} / "
+        f"{run['query_expansion_settings']['max_variations']}",
         f"- Chunk size/overlap: {run['chunk_size']} / {run['chunk_overlap']} characters",
         f"- Dense FAISS index: `{run['dense_index_type']}`",
         f"- Dense top-k / BM25 top-k: {run['dense_top_k']} / {run['bm25_top_k']}",
         f"- Final reranked top-k: {run['final_top_k']}",
         f"- Embedding model: `{run['embedding_model']}`",
         f"- Reranker model: `{run['reranker_model']}`",
+        f"- Source name included in reranker input: `{run['reranker_include_source_name']}`",
         "",
     ])
 
@@ -592,7 +602,7 @@ def main():
     with CONFIG_PATH.open(encoding="utf-8") as file:
         config = yaml.safe_load(file)
 
-    evaluation_config = config["evaluation"]
+    evaluation_config = config["document_qa_evaluation"]
     dataset_path = Path(evaluation_config["dataset_path"])
     results_dir = Path(evaluation_config["results_dir"])
     all_records = load_dataset(dataset_path)
@@ -680,6 +690,13 @@ def main():
         "requested_limit": args.limit,
         "evaluated_questions": len(selected_records),
         "model_id": config["llm"]["model_id"],
+        "llm_provider": config["llm"].get("provider", "local"),
+        "azure_settings": (
+            {key: config["llm"]["azure"][key] for key in (
+                "base_url", "reasoning_effort", "timeout_seconds", "max_retries"
+            )}
+            if config["llm"].get("provider", "local") == "azure_openai" else None
+        ),
         "dataset_path": str(dataset_path),
         "config_path": str(CONFIG_PATH),
         "indexing_mode": config["indexing"]["mode"],
@@ -691,6 +708,9 @@ def main():
         },
         "embedding_model": config["embedding"]["model_name"],
         "reranker_model": config["reranking"]["model_name"],
+        "reranker_include_source_name": config["reranking"]["include_source_name"],
+        "text_normalization": pipeline.persisted_index_settings()["text_normalization"],
+        "query_expansion_settings": config["query_expansion"],
         "chunk_size": config["chunking"]["chunk_size"],
         "chunk_overlap": config["chunking"]["chunk_overlap"],
         "dense_index_type": config["retrieval"]["dense_index_type"],

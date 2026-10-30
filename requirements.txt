@@ -10,3 +10,6 @@ rank-bm25
 transformers
 accelerate
 torch
+openai
+python-dotenv
+tiktoken
