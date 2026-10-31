@@ -1,5 +1,5 @@
-run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error
-378629f00d9044e4b0225d5a7751bb68,lcrec-v2-001-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", recommend a related LeetCode problem for Dijkstra shortest-path contour tracing.",ordinary,completed,,,0,0,,0,0,0,True,,5.167546650860459,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error,capped_recall_cutoff,capped_recall_status,capped_recall,capped_recall_matched_targets,capped_recall_denominator,capped_recall_total_targets
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-001-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", recommend a related LeetCode problem for Dijkstra shortest-path contour tracing.",ordinary,completed,,,0,0,,0,0,0,True,,5.167546650860459,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,,3,scored,0.0,0,3,63
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-001-descriptive,"Using ""Computer Vision: Algorithms and Applications.pdf"", suggest LeetCode practice for finding the lowest-cost path between a seed point and a moving endpoint. Explain the computational connection and its limitations.",ordinary,completed,1810;3651;3596,related_practice;related_practice;related_practice,3,3,1.0,0,0,0,False,,160.3721058338415,65,"1810. Minimum Path Cost in a Hidden Grid (Medium)
 Connection: Direct match
 Related practice pattern: Graph shortest-path search (Dijkstra) over grid neighbors
@@ -31,7 +31,7 @@ Technical quote: Next, as the user traces a rough curve, the system continuously
 cost path between the starting seed point and the current mouse location using Dijkstra’s al-
 Problem quote: Required result: the smallest
 total cost required to reach (m - 1, n - 1).
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 499; LeetCode_4000_Problem_Reference.pdf, PAGE: 1800",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 499; LeetCode_4000_Problem_Reference.pdf, PAGE: 1800",,3,scored,1.0,3,3,63
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-002-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", recommend a related LeetCode problem for graph-cut energy minimization.",ordinary,completed,2493;3789;1547,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,142.81618185597472,60,"2493. Divide Nodes Into the Maximum Number of Groups (Hard)
 Connection: Related practice
 Related practice pattern: model a discrete optimization problem as a flow network and solve it via max-flow/min-cut to obtain a binary labeling
@@ -63,7 +63,7 @@ Technical quote: munity by Boykov, Veksler, and Zabih (2001) is to re-formulate 
 a max-ﬂow/min-cut graph optimization problem (Greig, Porteous, and Seheult 1989).
 Problem quote: Return the smallest
 total cost over all cut orders.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 242; LeetCode_4000_Problem_Reference.pdf, PAGE: 774",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 242; LeetCode_4000_Problem_Reference.pdf, PAGE: 774",,3,scored,0.0,0,3,5
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-002-descriptive,"Using ""Computer Vision: Algorithms and Applications.pdf"", suggest LeetCode practice for separating a graph through a minimum cut rather than local pixel flips. Explain the computational connection and its limitations.",ordinary,completed,3547;2642;3924,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,122.84323432692327,50,"3547. Maximum Sum of Edge Values in a Graph (Hard)
 Connection: Related practice
 Related practice pattern: Model segmentation as a weighted graph and use global minimum-cut/maximum-flow instead of local node updates to partition nodes into two labeled sets.
@@ -102,7 +102,7 @@ using a polynomial time algorithm (Goldberg and Tarjan 1988; Boykov and Kolmogor
 which they remain connected.
 Problem quote: Required result: the smallest integer threshold such that one or more valid path exists from source
 to target.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 254; LeetCode_4000_Problem_Reference.pdf, PAGE: 1964",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 254; LeetCode_4000_Problem_Reference.pdf, PAGE: 1964",,3,scored,0.0,0,3,5
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-003-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", recommend a related LeetCode problem for histogram equalization.",ordinary,completed,3555;3422;2470,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,154.25471141701564,65,"3555. Smallest Subarray to Sort in Every Sliding Window (Medium)
 Connection: Related practice
 Related practice pattern: sliding-window cumulative counts with incremental updates
@@ -137,7 +137,7 @@ Technical quote: This process can be quite slow
 corresponding to the pixels entering and leaving the block (in a raster scan across the image)
 Problem quote: For an array of integers nums and an integer k, compute the count of subarrays of nums where the
 least common multiple of the subarray's elements is k.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 1236",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 1236",,3,scored,0.0,0,3,15
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-003-descriptive,"Using ""Computer Vision: Algorithms and Applications.pdf"", suggest LeetCode practice for mapping intensity frequencies to cumulative ranks or percentiles. Explain the computational connection and its limitations.",ordinary,completed,2080;506;3945,unassessed;related_practice;unassessed,1,1,1.0,2,0,0,False,,164.37485170387663,62,"2080. Range Frequency Queries (Medium)
 Connection: Related practice
 Related practice pattern: Build a prefix-sum cumulative distribution to map discrete frequencies to percentiles or ranks.
@@ -188,7 +188,7 @@ Nh(I), (3.9)
 whereN is the number of pixels in the image or students in the class.
 Problem quote: The score of n means the total of d * freq(d) over all different digits d,
 where freq(d) specifies the count of times the digit d appears in n.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 1974",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 143; LeetCode_4000_Problem_Reference.pdf, PAGE: 1974",,3,scored,0.3333333333333333,1,3,15
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-004-short,"According to ""Probabilistic Machine Learning.pdf"", recommend a related LeetCode problem for frequency-sensitive lossless code assignment.",ordinary,completed,3663;3005;2641,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,185.10132534592412,72,"3663. Find The Least Frequent Digit (Easy)
 Connection: Stretch connection
 Related practice pattern: Greedy frequency-based assignment of shorter codes to more probable symbols
@@ -219,7 +219,7 @@ Technical quote: Common techniques for realizing lossless codes include Huffman 
 asymmetric numeral systems [Dud13].
 Problem quote: With the root of a binary tree, replace the value of each node in the tree with the total of all its
 cousins' values.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1321",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1321",,3,scored,0.0,0,3,5
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-004-descriptive,"Using ""Probabilistic Machine Learning.pdf"", suggest LeetCode practice for assigning shorter representations to frequent symbols and longer ones to rare symbols. Explain the computational connection and its limitations.",ordinary,completed,3663;3318;3541,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,171.632384755183,66,"3663. Find The Least Frequent Digit (Easy)
 Connection: Related practice
 Related practice pattern: Greedy frequency-aware encoding where symbols are counted, mapped to probabilities, and then assigned shorter bit-strings for higher-probability symbols and longer bit-strings for lower-probability symbols.
@@ -253,7 +253,7 @@ the probability of different kinds of data samples, then we can assign shortcode
 most frequently occuring ones, reserving longer encodings for the less frequent ones.
 Problem quote: Your task is to: Find the vowel (one of
 'a', 'e', 'i', 'o', or 'u') with the largest frequency.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1772",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 281; LeetCode_4000_Problem_Reference.pdf, PAGE: 1772",,3,scored,0.0,0,3,5
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-005-short,"According to ""Probabilistic Machine Learning.pdf"", recommend a related LeetCode problem for maximum-weight bipartite data association.",ordinary,completed,2323;1057;3693,unassessed;related_practice;unassessed,1,1,1.0,2,0,0,False,,141.80456106201746,59,"2323. Find Minimum Time to Finish All Jobs II (Medium)
 Connection: Related practice
 Related practice pattern: Model bipartite data association as a cost/weight matrix and solve an optimal matching using the Hungarian algorithm
@@ -283,7 +283,7 @@ Important difference: bipartite assignment vs sequential path with constrained t
 Technical quote: We can then compute the maximal weight bipartite matching using theHungarian algorithm,
 which takesO(max(N,M) 3)time (see e.g., [BDM09]).
 Problem quote: Required result: the smallest total cost to reach step n.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1848",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1848",,3,scored,0.3333333333333333,1,3,9
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-005-descriptive,"Using ""Probabilistic Machine Learning.pdf"", suggest LeetCode practice for assigning measurements to tracked objects using a compatibility matrix and one-to-one matching. Explain the computational connection and its limitations.",ordinary,completed,3476;1947;2323,unassessed;direct_match;unassessed,1,1,1.0,2,0,0,False,,137.87437019310892,56,"3476. Maximize Profit from Task Assignment (Medium)
 Connection: Direct match
 Related practice pattern: Model measurement-to-track assignment as a maximal weight bipartite matching over a compatibility matrix, padding with dummy nodes to enforce one-to-one matches and handle false alarms or missed detections.
@@ -315,7 +315,7 @@ Technical quote: We can then compute the maximal weight bipartite matching using
 which takesO(max(N,M) 3)time (see e.g., [BDM09]).
 Problem quote: Each job should be assigned to exactly one worker, such that each
 worker completes exactly one job.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1162",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1162",,3,scored,0.3333333333333333,1,3,9
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-006-short,"According to ""Probabilistic Machine Learning.pdf"", recommend a related LeetCode problem for inverse-CDF random sampling.",ordinary,completed,398;2191;2699,related_practice;unassessed;unassessed,1,1,1.0,2,0,0,False,,145.5888967269566,58,"398. Random Pick Index (Medium)
 Connection: Related practice
 Related practice pattern: Map uniform [0,1] samples through a monotone inverse-CDF-like function to generate values matching a target distribution
@@ -351,7 +351,7 @@ e.g., [Pre+88] for details).
 Problem quote: Goal: modify all edges with a weight of -1 by assigning
 them integer greater than zero values in the range [1, 2 * 10^9] so that the shortest distance
 between the nodes source and destination becomes equal to an integer target.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 520; LeetCode_4000_Problem_Reference.pdf, PAGE: 1350",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 520; LeetCode_4000_Problem_Reference.pdf, PAGE: 1350",,3,scored,0.3333333333333333,1,3,10
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-006-descriptive,"Using ""Probabilistic Machine Learning.pdf"", suggest LeetCode practice for mapping a uniform random draw through a cumulative distribution to select an outcome. Explain the computational connection and its limitations.",ordinary,completed,528;381;497,direct_match;related_practice;related_practice,3,3,1.0,0,0,0,False,,141.8684096429497,55,"528. Random Pick with Weight (Medium)
 Connection: Direct match
 Related practice pattern: map a uniform random draw through an inverse CDF (inverse transform sampling) to generate samples from a target distribution
@@ -388,7 +388,7 @@ variables from a uniform distribution and transforms them using the inverse cumu
 function (cdf) to generate samples from the desired density.
 Problem quote: Rectangles with more lattice
 points must have proportionally greater selection probability.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 864; LeetCode_4000_Problem_Reference.pdf, PAGE: 249",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 864; LeetCode_4000_Problem_Reference.pdf, PAGE: 249",,3,scored,1.0,3,3,10
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-007-short,"According to ""Grokking-the-system-design-interview-free.pdf"", recommend a related LeetCode problem for round-robin request dispatch.",ordinary,completed,1606;2747;1656,related_practice;unassessed;unassessed,1,1,1.0,2,0,0,False,,127.15373668982647,53,"1606. Find Servers That Handled Most Number of Requests (Hard)
 Connection: Direct match
 Related practice pattern: Use a circular index over a server list to dispatch each new request to the next available server, skipping any marked as dead
@@ -424,7 +424,7 @@ among servers.
 Problem quote: Design a stream
 that returns the values in increasing order of their IDs by returning a chunk (list) of values after
 each insertion.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 80; LeetCode_4000_Problem_Reference.pdf, PAGE: 829",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 80; LeetCode_4000_Problem_Reference.pdf, PAGE: 829",,3,scored,0.3333333333333333,1,3,10
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-007-descriptive,"Using ""Grokking-the-system-design-interview-free.pdf"", suggest LeetCode practice for cycling through servers in order and restarting at the beginning after the last server. Explain the computational connection and its limitations.",ordinary,completed,2757;2515;3354,stretch_connection;unassessed;unassessed,1,1,1.0,2,0,0,False,,161.39367065392435,60,"2757. Generate Circular Array Values (Medium)
 Connection: Direct match
 Related practice pattern: circular index iteration over a fixed array
@@ -457,7 +457,7 @@ it starts over at the beginning.
 Problem quote: If nums[curr] == 0,
 move in the current direction by incrementing curr if you are moving right, or decrementing curr if
 you are moving left.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 175; LeetCode_4000_Problem_Reference.pdf, PAGE: 1678",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 175; LeetCode_4000_Problem_Reference.pdf, PAGE: 1678",,3,scored,0.3333333333333333,1,3,10
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-008-short,"According to ""Grokking-the-system-design-interview-free.pdf"", recommend a related LeetCode problem for quadtree spatial subdivision.",ordinary,completed,1828;2013;3624,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,145.04538836493157,61,"1828. Queries on Number of Points Inside a Circle (Medium)
 Connection: Related practice
 Related practice pattern: Spatial index with dynamic point updates and region queries
@@ -494,7 +494,7 @@ Problem quote: Input data: a
 two-dimensional array of integers queries, with each queries[i] is either: [1, l, r, k] - Determine the
 count of indices j such that l <= j <= r and the popcount-depth of nums[j] is equal to k. [2, idx, val]
 - Update nums[idx] to val.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 149; LeetCode_4000_Problem_Reference.pdf, PAGE: 1814",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 149; LeetCode_4000_Problem_Reference.pdf, PAGE: 1814",,3,scored,0.0,0,2,2
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-008-descriptive,"Using ""Grokking-the-system-design-interview-free.pdf"", suggest LeetCode practice for recursively splitting a spatial region into four child regions until each satisfies a capacity bound. Explain the computational connection and its limitations.",ordinary,completed,3271;3710;3195,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,186.8319381030742,73,"3271. Hash Divided String (Medium)
 Connection: Related practice
 Related practice pattern: recursive spatial partitioning based on capacity limits (quadtree-style)
@@ -525,7 +525,7 @@ Technical quote: Sharding based on regions: We can divide our places into region
 codes), such that all places belonging to a region will be stored on a fixed node.
 Problem quote: Find a rectangle with horizontal and vertical sides with the
 smallest area, such that all the 1's in grid lie inside this rectangle.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 144; LeetCode_4000_Problem_Reference.pdf, PAGE: 1598",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 144; LeetCode_4000_Problem_Reference.pdf, PAGE: 1598",,3,scored,0.0,0,2,2
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-009-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for continuation-bit variable-length integer encoding.",ordinary,completed,2526;385;3023,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,163.09321109601296,68,"2526. Find Consecutive Integers from a Data Stream (Medium)
 Connection: Stretch connection
 Related practice pattern: Bit-flag–driven loop for variable-length integer parsing
@@ -560,7 +560,7 @@ encoded in two bytes, with the top bit of each byte used to indicate whether the
 still more bytes to come.
 Problem quote: The class InfiniteStream contains the following function:
 int next(): Reads a single bit (which is either 0 or 1) from the stream and returns it.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 1512",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 1512",,3,scored,0.0,0,3,4
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-009-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for using the high bit of each byte to indicate whether more bytes belong to the same encoded integer. Explain the computational connection and its limitations.",ordinary,completed,67;369;1734,unrelated;unassessed;unassessed,0,1,0.0,2,0,0,False,,168.89850391307846,72,"67. Add Binary (Easy)
 Connection: Related practice
 Related practice pattern: Variable-length integer encoding using the high bit as a continuation flag
@@ -594,7 +594,7 @@ Technical quote: Rather than using a full eight bytes for the number 1337, it is
 encoded in two bytes, with the top bit of each byte used to indicate whether there are
 still more bytes to come.
 Problem quote: With the encoded array, produce the original array perm.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 868",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 141; LeetCode_4000_Problem_Reference.pdf, PAGE: 868",,3,scored,0.0,0,3,4
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-010-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for broadcast hash joins.",ordinary,completed,1817;1500;1892,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,121.75431013898924,51,"1817. Finding the Users Active Minutes (Medium)
 Connection: Related practice
 Related practice pattern: Preload a small lookup table into an in-memory hash map to join it efficiently with a larger streaming dataset.
@@ -628,7 +628,7 @@ Important difference: SQL-style recommendation logic differs from map-side broad
 Technical quote: In this case, when a mapper starts up, it can first read the
 user database from the distributed filesystem into an in-memory hash table.
 Problem quote: Find all the possible page recommendations for every user.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 431; LeetCode_4000_Problem_Reference.pdf, PAGE: 947",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 431; LeetCode_4000_Problem_Reference.pdf, PAGE: 947",,3,scored,0.0,0,3,11
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-010-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for loading a small input into a key-indexed hash table and matching records from another input. Explain the computational connection and its limitations.",ordinary,completed,3063;2227;1948,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,146.81477873283438,59,"3063. Linked List Frequency (Easy)
 Connection: Related practice
 Related practice pattern: Load the small input into an in-memory hash map keyed by the join field, then stream the larger input once, probing the map for each record to emit matched pairs (and potentially multiple matches per key).
@@ -669,7 +669,7 @@ each record.
 Problem quote: Mark every member of every duplicate group
 and all their descendants using the original structure, then delete all marked folders
 simultaneously.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 452; LeetCode_4000_Problem_Reference.pdf, PAGE: 975",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 452; LeetCode_4000_Problem_Reference.pdf, PAGE: 975",,3,scored,0.0,0,3,11
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-011-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for keyed grouping and aggregation.",ordinary,completed,1113;1934;3808,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,218.77467744704336,62,"1113. Reported Posts (Easy)
 Connection: Direct match
 Related practice pattern: Keyed grouping followed by per-key aggregation
@@ -722,7 +722,7 @@ set up the mappers so that the key-value pairs they produce use the desired grou
 key.
 Problem quote: Report identify emotionally consistent users based on the following requirements: For
 each user, count the total number of reactions they have given.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 1906",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 1906",,3,scored,0.0,0,3,71
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-011-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for grouping records by equal keys and counting or summing values within each group. Explain the computational connection and its limitations.",ordinary,completed,1336;3808;3521,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,152.17400977597572,58,"1336. Number of Transactions per Visit (Hard)
 Connection: Direct match
 Related practice pattern: Key-based grouping followed by per-group aggregation (count/sum) using a two-phase reduce pattern
@@ -777,7 +777,7 @@ Problem quote: Report : Identify different product pairs frequently purchased to
 (where product1_id < product2_id) For each product pair, determine how many customers
 purchased both products A product pair qualifies as for recommendation if at least 3 different
 customers have purchased both products.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 1762",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 429; LeetCode_4000_Problem_Reference.pdf, PAGE: 1762",,3,scored,0.0,0,3,71
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-012-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for bitmap predicate intersection.",ordinary,completed,2275;2823;3653,related_practice;unassessed;unassessed,1,1,1.0,2,0,0,False,,172.73735704901628,61,"2275. Largest Combination With Bitwise AND Greater Than Zero (Medium)
 Connection: Related practice
 Related practice pattern: bitset-based predicate combination
@@ -819,7 +819,7 @@ Load the three bitmaps for product_sk = 30, product_sk = 68, and product_sk
 efficiently.
 98 | Chapter 3: Storage and Retrieval
 Problem quote: Required result: the bitwise XOR of all elements in nums after processing all queries.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 120; LeetCode_4000_Problem_Reference.pdf, PAGE: 1828",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 120; LeetCode_4000_Problem_Reference.pdf, PAGE: 1828",,3,scored,0.3333333333333333,1,3,38
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-012-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for combining aligned row-membership bitmaps with bitwise AND to apply multiple predicates. Explain the computational connection and its limitations.",ordinary,completed,2901;3117;2411,unassessed;stretch_connection;stretch_connection,2,2,1.0,1,0,0,False,,183.3460061121732,70,"2901. Longest Unequal Adjacent Groups Subsequence II (Medium)
 Connection: Related practice
 Related practice pattern: Use aligned bit arrays to represent row sets and apply bitwise AND across columns to enforce multiple predicates efficiently.
@@ -862,7 +862,7 @@ Problem quote: For
 each index i from 0 to n - 1, you must determine the size of the smallest sized nonempty subarray
 of nums starting at i (inclusive) that has the largest attainable bitwise OR. let B_ij be the bitwise OR
 of the subarray nums[i...j].
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 121; LeetCode_4000_Problem_Reference.pdf, PAGE: 1206",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 121; LeetCode_4000_Problem_Reference.pdf, PAGE: 1206",,3,scored,0.6666666666666666,2,3,38
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-013-short,"According to ""Speech and Language Processing.pdf"", recommend a related LeetCode problem for CKY chart recognition.",ordinary,completed,1593;1520;3298,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,151.28652772586793,66,"1593. Split a String Into the Max Number of Unique Substrings (Medium)
 Connection: Related practice
 Related practice pattern: 2D dynamic programming over spans (i, j) with table reuse
@@ -894,7 +894,7 @@ Important difference: CKY builds parse structures; problem only counts valid sub
 Technical quote: This provides both time and storage efficiencies since subtrees
 can be looked up in a table, not reanalyzed.
 Problem quote: Required result: the total number of valid substrings of word1.
-SOURCES: Speech and Language Processing.pdf, PAGE: 443; LeetCode_4000_Problem_Reference.pdf, PAGE: 1650",
+SOURCES: Speech and Language Processing.pdf, PAGE: 443; LeetCode_4000_Problem_Reference.pdf, PAGE: 1650",,3,scored,0.0,0,3,31
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-013-descriptive,"Using ""Speech and Language Processing.pdf"", suggest LeetCode practice for combining two adjacent substring constituents only when a grammar rule permits their combination. Explain the computational connection and its limitations.",ordinary,completed,2311;2914;97,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,178.97153801913373,72,"2311. Longest Binary Subsequence Less Than or Equal to K (Medium)
 Connection: Related practice
 Related practice pattern: Dynamic-programming over spans that only combines adjacent substrings when a grammar rule licenses the resulting constituent.
@@ -956,7 +956,7 @@ to each constituent, and then use a modified version of CKY to combine these
 constituent scores to find the best-scoring parse tree.
 Problem quote: Given strings s1, s2, and s3, return whether s3 can be formed by interleaving all characters of s1
 and s2.
-SOURCES: Speech and Language Processing.pdf, PAGE: 454; LeetCode_4000_Problem_Reference.pdf, PAGE: 49",
+SOURCES: Speech and Language Processing.pdf, PAGE: 454; LeetCode_4000_Problem_Reference.pdf, PAGE: 49",,3,scored,0.0,0,3,31
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-014-short,"According to ""Speech and Language Processing.pdf"", recommend a related LeetCode problem for maximum-spanning-tree dependency parsing.",ordinary,completed,3600;685;2374,stretch_connection;unassessed;unassessed,1,1,1.0,2,0,0,False,,138.98238590196706,64,"3600. Maximize Spanning Tree Stability with Upgrades (Hard)
 Connection: Direct match
 Related practice pattern: Model the problem as finding a maximum-weight spanning tree over a fully-connected directed graph with a ROOT node and edge scores, then apply a generic MST algorithm to select the best-scoring tree.
@@ -992,7 +992,7 @@ relation assigned by some scoring algorithm.
 Problem quote: The
 edge score of a node i means the total of the labels of all the nodes that have an edge pointing to
 i.
-SOURCES: Speech and Language Processing.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 1188",
+SOURCES: Speech and Language Processing.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 1188",,3,scored,0.3333333333333333,1,3,7
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-014-descriptive,"Using ""Speech and Language Processing.pdf"", suggest LeetCode practice for selecting high-scoring dependency edges while requiring a spanning tree without cycles. Explain the computational connection and its limitations.",ordinary,completed,685;2378;2360,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,126.89000929309987,54,"685. Redundant Connection II (Hard)
 Connection: Related practice
 Related practice pattern: Greedy edge selection followed by maximum spanning tree constraint
@@ -1026,7 +1026,7 @@ Important difference: parsing forbids cycles; the LeetCode task measures and ret
 Technical quote: Unfortunately, this approach doesn’t always lead to a tree since the set of edges
 selected may contain cycles.
 Problem quote: Required result: the length of the longest cycle in the graph.
-SOURCES: Speech and Language Processing.pdf, PAGE: 473; LeetCode_4000_Problem_Reference.pdf, PAGE: 1181",
+SOURCES: Speech and Language Processing.pdf, PAGE: 473; LeetCode_4000_Problem_Reference.pdf, PAGE: 1181",,3,scored,0.0,0,3,7
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-015-short,"According to ""Speech and Language Processing.pdf"", recommend a related LeetCode problem for shift-reduce dependency parsing.",ordinary,completed,1441;1597;32,stretch_connection;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,138.17010970809497,62,"1441. Build an Array With Stack Operations (Medium)
 Connection: Direct match
 Related practice pattern: Model parsing as stack-buffer transitions with shift and reduce operations
@@ -1061,7 +1061,7 @@ Technical quote: 20.2 • TRANSITION-BASEDDEPENDENCYPARSING455
 the stack.
 Problem quote: For a string s containing only round parentheses, return the length of its longest contiguous
 segment that forms a properly balanced parentheses sequence.
-SOURCES: Speech and Language Processing.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 16",
+SOURCES: Speech and Language Processing.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 16",,3,scored,1.0,3,3,38
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-015-descriptive,"Using ""Speech and Language Processing.pdf"", suggest LeetCode practice for shifting incoming tokens onto a stack and reducing entries subject to stack preconditions. Explain the computational connection and its limitations.",ordinary,completed,1441;946;1381,stretch_connection;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,146.04104479006492,60,"1441. Build an Array With Stack Operations (Medium)
 Connection: Related practice
 Related practice pattern: Stack-based shift and reduce with explicit operator preconditions
@@ -1102,7 +1102,7 @@ CustomStack(int maxSize) Initializes the object with maxSize which is the larges
 elements in the stack. void push(int x) Adds x to the top of the stack if the stack has not reached
 the maxSize. int pop() Pops and returns the top of the stack or -1 if the stack is empty. void inc(int
 k, int val) Increments the bottom k elements of the stack by val.
-SOURCES: Speech and Language Processing.pdf, PAGE: 479; LeetCode_4000_Problem_Reference.pdf, PAGE: 691",
+SOURCES: Speech and Language Processing.pdf, PAGE: 479; LeetCode_4000_Problem_Reference.pdf, PAGE: 691",,3,scored,1.0,3,3,38
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-016-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for B-tree page splitting.",ordinary,completed,708;147;109,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,203.90381951699965,72,"708. Insert into a Sorted Circular Linked List (Medium)
 Connection: Related practice
 Related practice pattern: balanced node split and merge operations on ordered containers
@@ -1130,7 +1130,7 @@ What transfers: Technical component: balanced node split and merge operations on
 Important difference: technical split maintains fixed-size pages; coding task builds balanced tree without page constraints
 Technical quote: of the data ends up on each side of the split [ 26].
 Problem quote: Convert a sorted singly linked list into a binary search tree retaining every value.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 234; LeetCode_4000_Problem_Reference.pdf, PAGE: 55",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 234; LeetCode_4000_Problem_Reference.pdf, PAGE: 55",,3,scored,0.0,0,3,5
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-016-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for splitting an overflowing ordered page into two pages and updating its parent key ranges. Explain the computational connection and its limitations.",ordinary,completed,295;1902;26,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,191.78617906104773,66,"295. Find Median from Data Stream (Hard)
 Connection: Related practice
 Related practice pattern: Balanced node-splitting with parent range updates
@@ -1166,7 +1166,7 @@ vision of key ranges—see Figure 3-7.ii
 Figure 3-7.
 Problem quote: Modify it in place so that its initial k
 positions contain exactly one occurrence of each distinct input value, still sorted.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 103; LeetCode_4000_Problem_Reference.pdf, PAGE: 13",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 103; LeetCode_4000_Problem_Reference.pdf, PAGE: 13",,3,scored,0.0,0,3,5
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-017-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for bounded-buffer backpressure.",ordinary,completed,1188;1670;622,direct_match;unassessed;related_practice,2,2,1.0,1,0,0,False,,134.80339450691827,56,"1188. Design Bounded Blocking Queue (Medium)
 Connection: Related practice
 Related practice pattern: Implement a bounded circular buffer that enforces backpressure by blocking or rejecting producers when the buffer is full and potentially discarding oldest items, modeling a ring buffer with flow control.
@@ -1198,7 +1198,7 @@ Technical quote: Effectively, the log implements a bounded-size buffer that dis�
 cards old messages when it gets full, also known as a circular buffer  or ring buffer .
 Problem quote: Design MyCircularQueue(k) with fixed capacity. enQueue(value) and deQueue() report whether
 insertion at the rear or removal at the front succeeds.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 311",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 472; LeetCode_4000_Problem_Reference.pdf, PAGE: 311",,3,scored,0.6666666666666666,2,3,3
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-017-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for blocking a producer when its fixed-capacity buffer is full until a consumer removes data. Explain the computational connection and its limitations.",ordinary,completed,1188;1670;641,direct_match;unassessed;related_practice,2,2,1.0,1,0,0,False,,159.94902838091366,63,"1188. Design Bounded Blocking Queue (Medium)
 Connection: Direct match
 Related practice pattern: Bounded blocking queue with producer backpressure
@@ -1234,7 +1234,7 @@ Transmitting Event Streams | 441
 Problem quote: Design MyCircularDeque(k) with fixed capacity. insertFront/insertLast and deleteFront/deleteLast
 report success. getFront/getRear return endpoint values or -1 if empty. isEmpty and isFull report
 status.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 321",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 463; LeetCode_4000_Problem_Reference.pdf, PAGE: 321",,3,scored,0.6666666666666666,2,3,3
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-018-short,"According to ""Speech and Language Processing.pdf"", recommend a related LeetCode problem for k-means centroid updates.",ordinary,completed,1515;1828;780,uncertain;unassessed;unassessed,0,0,,2,1,0,False,,148.39732124307193,59,"1515. Best Position for a Service Centre (Hard)
 Connection: Related practice
 Related practice pattern: Iteratively update cluster centroids by recomputing mean vectors from assigned points until convergence
@@ -1266,7 +1266,7 @@ Important difference: no grouping or mean-based aggregation; updates are determi
 Technical quote: Recall from Section 16.4.3 that k-means
 is a two-step algorithm based on iteratively updating a set ofkcentroidvectors.
 Problem quote: Starting at (sx,sy), repeatedly replace coordinates by (x+y,y) or (x,x+y).
-SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 390",
+SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 390",,3,scored,0.0,0,3,8
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-018-descriptive,"Using ""Speech and Language Processing.pdf"", suggest LeetCode practice for repeatedly updating cluster centers from the samples assigned to each center. Explain the computational connection and its limitations.",ordinary,completed,3923;2090;25,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,173.11336444085464,63,"3923. Minimum Generations to Target Point (Medium)
 Connection: Related practice
 Related practice pattern: Iterative centroid recomputation from assigned samples
@@ -1300,10 +1300,10 @@ by the designer as a parameter to the algorithm as the number of discrete symbol
 we want, generally withk<<N.
 Problem quote: Given a singly linked list head and positive integer k, divide the list from the front into consecutive
 groups of k nodes.
-SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 13",
-378629f00d9044e4b0225d5a7751bb68,lcrec-v2-019-short,"According to ""Probabilistic Machine Learning.pdf"", recommend a LeetCode problem only if its statement explicitly names Sinkhorn algorithm. Otherwise say no such problem was found.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,4.539358081063256,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
-378629f00d9044e4b0225d5a7751bb68,lcrec-v2-019-descriptive,"Find coding practice for Sinkhorn algorithm in ""Probabilistic Machine Learning.pdf"". Require the literal phrase ""Sinkhorn algorithm"" in the LeetCode statement; do not offer analogies instead.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.637310686055571,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
-378629f00d9044e4b0225d5a7751bb68,lcrec-v2-020-short,"According to ""Speech and Language Processing.pdf"", recommend a LeetCode problem only if its statement explicitly names coreference resolution. Otherwise say no such problem was found.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.9372015870176256,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 13",,3,scored,0.0,0,3,8
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-019-short,"According to ""Probabilistic Machine Learning.pdf"", recommend a LeetCode problem only if its statement explicitly names Sinkhorn algorithm. Otherwise say no such problem was found.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,4.539358081063256,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,,3,not_applicable,,,,
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-019-descriptive,"Find coding practice for Sinkhorn algorithm in ""Probabilistic Machine Learning.pdf"". Require the literal phrase ""Sinkhorn algorithm"" in the LeetCode statement; do not offer analogies instead.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.637310686055571,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,,3,not_applicable,,,,
+378629f00d9044e4b0225d5a7751bb68,lcrec-v2-020-short,"According to ""Speech and Language Processing.pdf"", recommend a LeetCode problem only if its statement explicitly names coreference resolution. Otherwise say no such problem was found.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.9372015870176256,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,,3,not_applicable,,,,
 378629f00d9044e4b0225d5a7751bb68,lcrec-v2-020-descriptive,"Find coding practice for coreference resolution in ""Speech and Language Processing.pdf"". Require the literal phrase ""coreference resolution"" in the LeetCode statement; do not offer analogies instead.",explicit_naming_control,completed,734;1583;49,unassessed;unassessed;unassessed,0,0,,3,0,0,False,False,150.16316631087102,60,"734. Sentence Similarity (Easy)
 Connection: Related practice
 Related practice pattern: Two-stage pipeline: first classify mention pairs as coreferent or not, then cluster mentions into coreference chains based on pairwise decisions.
@@ -1337,4 +1337,4 @@ Technical quote: A separate clustering mechanism then coordinates the possibly
 contradictory pairwise classiﬁcations and constructs a partition on the set of NPs.
 Problem quote: Given an array strs of strings, collect strings into groups so that two strings are in the same group
 exactly when they have the same characters with the same occurrence counts.
-SOURCES: Speech and Language Processing.pdf, PAGE: 589; LeetCode_4000_Problem_Reference.pdf, PAGE: 25",
+SOURCES: Speech and Language Processing.pdf, PAGE: 589; LeetCode_4000_Problem_Reference.pdf, PAGE: 25",,3,not_applicable,,,,

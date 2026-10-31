@@ -1,12 +1,15 @@
 # Full title-first LeetCode benchmark comparison
 
+**Offline metric update:** Capped Recall@3 averages each eligible question's target hits divided by `min(3, positive target count)`. Match, Relevant, and Stretch count when in the annotated target set. Saved predictions and original inference metadata are unchanged. The original recall discussion below refers to full annotated-target recall, now a secondary diagnostic. Eligible question counts: 35 / 29.
+
 All 40 frozen v2 questions were attempted independently: 36 ordinary requests and four explicit-naming controls. The current production workflow used Azure GPT-5.1, all 4,000 numbers/titles, a shortlist of up to 20 full statements, and up to three recommendations. Two isolated workers loaded existing indexes. Only the results directory was overridden in memory; production code, configuration, questions and labels were unchanged during execution.
 
 | Metric | Previous retrieval (shortlist 30) | Title-first |
 |---|---:|---:|
 | Assessed precision | 35/35 (100.0%) | 46/46 (100.0%) |
 | Hit rate | 18/36 (50.0%) | 24/30 (80.0%) |
-| Annotated-target recall (micro) | 35/668 (5.2%) | 46/589 (7.8%) |
+| Capped recall@3 (macro) | 33.3% | 54.0% |
+| Full annotated-target recall (secondary) (micro) | 35/668 (5.2%) | 46/589 (7.8%) |
 | Label coverage | 37/108 (34.3%) | 46/79 (58.2%) |
 | Recommendations | 108 | 79 |
 | Ordinary abstentions | 1/36 (2.8%) | 0/30 (0.0%) |

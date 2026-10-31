@@ -1,12 +1,15 @@
 # Source-restriction fix: updated collective results
 
+**Offline metric update:** Capped Recall@3 averages each eligible question's target hits divided by `min(3, positive target count)`. Match, Relevant, and Stretch count when in the annotated target set. Saved predictions and original inference metadata are unchanged. The original recall discussion below refers to full annotated-target recall, now a secondary diagnostic. Eligible question counts: 34 / 36.
+
 **Only two questions were rerun; the other 38 result records are unchanged.** All 40 evaluations now complete, and all selected recommendation evidence satisfies its question's source restriction. The previous collective report is preserved.
 
 | Metric | Before source fix | Updated collective results |
 |---|---:|---:|
 | Assessed precision | 55/55 (100.0%) | 57/57 (100.0%) |
 | Confirmed ordinary-question hit rate | 28/36 (77.8%) | 29/36 (80.6%) |
-| Annotated-target recall (micro) | 55/660 (8.3%) | 57/670 (8.5%) |
+| Capped recall@3 (macro) | 54.9% | 54.6% |
+| Full annotated-target recall (secondary) (micro) | 55/660 (8.3%) | 57/670 (8.5%) |
 | Label coverage | 55/96 (57.3%) | 57/96 (59.4%) |
 | Source/mapping-unscored recommendations | 4 | 0 |
 | Execution failures | 0 | 0 |

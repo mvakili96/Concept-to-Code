@@ -322,6 +322,16 @@
       "completion_tokens": 58733,
       "total_tokens": 1980927
     },
+    "capped_recall": {
+      "cutoff": 3,
+      "averaging": "macro",
+      "score": 0.5402298850574713,
+      "scored_questions": 29,
+      "not_applicable_questions": 4,
+      "unscored_questions": 7,
+      "matched_targets": 46,
+      "capped_target_slots": 86
+    },
     "pattern_fallbacks": 0,
     "unscored_candidate_judgments": 0
   },
@@ -152456,5 +152466,349 @@
         }
       }
     }
-  ]
+  ],
+  "capped_recall_by_question": {
+    "lcrec-v2-001-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 63
+    },
+    "lcrec-v2-001-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 63
+    },
+    "lcrec-v2-002-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.0,
+      "matched_targets": 0,
+      "denominator": 3,
+      "total_targets": 5
+    },
+    "lcrec-v2-002-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.0,
+      "matched_targets": 0,
+      "denominator": 3,
+      "total_targets": 5
+    },
+    "lcrec-v2-003-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.0,
+      "matched_targets": 0,
+      "denominator": 3,
+      "total_targets": 15
+    },
+    "lcrec-v2-003-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 15
+    },
+    "lcrec-v2-004-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.0,
+      "matched_targets": 0,
+      "denominator": 3,
+      "total_targets": 5
+    },
+    "lcrec-v2-004-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.6666666666666666,
+      "matched_targets": 2,
+      "denominator": 3,
+      "total_targets": 5
+    },
+    "lcrec-v2-005-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 9
+    },
+    "lcrec-v2-005-descriptive": {
+      "cutoff": 3,
+      "status": "unscored",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Question execution failed."
+    },
+    "lcrec-v2-006-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 10
+    },
+    "lcrec-v2-006-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 10
+    },
+    "lcrec-v2-007-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 10
+    },
+    "lcrec-v2-007-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 10
+    },
+    "lcrec-v2-008-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 2,
+      "denominator": 2,
+      "total_targets": 2
+    },
+    "lcrec-v2-008-descriptive": {
+      "cutoff": 3,
+      "status": "unscored",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Question execution failed."
+    },
+    "lcrec-v2-009-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 4
+    },
+    "lcrec-v2-009-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 4
+    },
+    "lcrec-v2-010-short": {
+      "cutoff": 3,
+      "status": "unscored",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Question execution failed."
+    },
+    "lcrec-v2-010-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 11
+    },
+    "lcrec-v2-011-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 71
+    },
+    "lcrec-v2-011-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 71
+    },
+    "lcrec-v2-012-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.6666666666666666,
+      "matched_targets": 2,
+      "denominator": 3,
+      "total_targets": 38
+    },
+    "lcrec-v2-012-descriptive": {
+      "cutoff": 3,
+      "status": "unscored",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Question execution failed."
+    },
+    "lcrec-v2-013-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 31
+    },
+    "lcrec-v2-013-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 31
+    },
+    "lcrec-v2-014-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 7
+    },
+    "lcrec-v2-014-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.6666666666666666,
+      "matched_targets": 2,
+      "denominator": 3,
+      "total_targets": 7
+    },
+    "lcrec-v2-015-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 38
+    },
+    "lcrec-v2-015-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 38
+    },
+    "lcrec-v2-016-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.0,
+      "matched_targets": 0,
+      "denominator": 3,
+      "total_targets": 5
+    },
+    "lcrec-v2-016-descriptive": {
+      "cutoff": 3,
+      "status": "unscored",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Question execution failed."
+    },
+    "lcrec-v2-017-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 3
+    },
+    "lcrec-v2-017-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 3
+    },
+    "lcrec-v2-018-short": {
+      "cutoff": 3,
+      "status": "unscored",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Question execution failed."
+    },
+    "lcrec-v2-018-descriptive": {
+      "cutoff": 3,
+      "status": "unscored",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": 8,
+      "reason": "Recommendation mapping or verification failed."
+    },
+    "lcrec-v2-019-short": {
+      "cutoff": 3,
+      "status": "not_applicable",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Naming controls are scored separately."
+    },
+    "lcrec-v2-019-descriptive": {
+      "cutoff": 3,
+      "status": "not_applicable",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Naming controls are scored separately."
+    },
+    "lcrec-v2-020-short": {
+      "cutoff": 3,
+      "status": "not_applicable",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Naming controls are scored separately."
+    },
+    "lcrec-v2-020-descriptive": {
+      "cutoff": 3,
+      "status": "not_applicable",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": null,
+      "reason": "Naming controls are scored separately."
+    }
+  },
+  "metric_reporting": {
+    "method": "offline_capped_recall_update",
+    "metric_version": "1.0.0",
+    "averaging": "macro",
+    "cutoff": 3,
+    "timestamp_utc": "2026-10-31T00:27:22.303072+00:00",
+    "evaluator_sha256": "455688d79d9c9ff6cf5911b87705c0c2de6508cecdeb6f829cf90cfe45d90256",
+    "previous_details_sha256": "ac4ccc61710c4058be67ac51ed8c465628b8d9c28168d661b243937247028b9d",
+    "new_inference": false,
+    "note": "Only reporting was updated. Original inference records, run metadata, labels and other metric values are preserved."
+  }
 }

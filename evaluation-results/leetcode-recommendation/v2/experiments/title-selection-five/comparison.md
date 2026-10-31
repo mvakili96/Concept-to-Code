@@ -1,12 +1,15 @@
 # Title-first selection: five-question comparison
 
+**Offline metric update:** Capped Recall@3 averages each eligible question's target hits divided by `min(3, positive target count)`. Match, Relevant, and Stretch count when in the annotated target set. Saved predictions and original inference metadata are unchanged. The original recall discussion below refers to full annotated-target recall, now a secondary diagnostic. Eligible question counts: 5 / 5.
+
 Five v2 benchmark questions were selected before inference: the first ordinary short-wording question for each distinct technical PDF, in benchmark order. Production settings were retained; only the results directory was overridden in memory. The saved retrieval-mode comparison uses exactly these same question texts, reference-file hashes and PDF hashes.
 
 | Metric | Previous retrieval (shortlist 30) | Title-first (shortlist up to 20) |
 |---|---:|---:|
 | Assessed precision | 5/5 (100.0%) | 4/4 (100.0%) |
 | Hit rate | 2/5 (40.0%) | 3/5 (60.0%) |
-| Annotated-target recall (micro) | 5/113 (4.4%) | 4/113 (3.5%) |
+| Capped recall@3 (macro) | 33.3% | 26.7% |
+| Full annotated-target recall (secondary) (micro) | 5/113 (4.4%) | 4/113 (3.5%) |
 | Label coverage | 5/12 (41.7%) | 4/7 (57.1%) |
 | Recommendations | 12 | 7 |
 | Abstentions | 1 | 1 |

@@ -1,5 +1,7 @@
 # LeetCode recommendation evaluation
 
+**Offline metric update:** Macro Capped Recall@3 was calculated from saved predictions. No new inference was run. Original inference metadata is retained. Full annotated-target recall remains a secondary diagnostic.
+
 Fixed source-grounded development benchmark; labels are incomplete and include useful stretch practice. This is not held-out generalization or a score of answer correctness/faithfulness.
 
 - Run ID: `92a04d2025ff4fde9a57263c1dfa92d8`; origin: `live_production_workflow_targeted_failure_recovery`
@@ -15,17 +17,20 @@ Fixed source-grounded development benchmark; labels are incomplete and include u
 |---|---:|
 | Assessed precision | 9/9 (100.0%) |
 | Hit rate | 4/6 (66.7%) |
-| Annotated-target recall (micro) | 9/71 (12.7%) |
+| Capped recall@3 (macro) | 60.0% |
 | Label coverage | 9/17 (52.9%) |
 
 Relevant means a frozen reference label of direct match, related practice, or stretch connection. Assessed precision excludes uncertain, unassessed and invalidly mapped recommendations. Hit rate is the fraction of completed ordinary questions with at least one relevant recommendation. Label coverage includes uncertain labels and does not mean every recommendation has a definitive relevance judgment.
 
-Annotated-target recall counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. Scored target-bearing ordinary questions: 5/6; mapping-unscored: 1. Questions without annotated targets are excluded.
+Capped recall@3 divides each eligible ordinary question's annotated target hits in its top 3 recommendations by min(3, its positive target count), then averages question scores equally. Direct match, related practice and stretch connection all receive positive credit when in the annotated target set. Unassessed returns receive no annotated hit credit and are not automatically unrelated. Cutoff: 3, from the saved run's max_recommendations setting. Scored questions: 5, N/A: 0, unscored: 1.
+
+Full annotated-target recall is retained below as a secondary coverage diagnostic. It counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. Scored target-bearing ordinary questions: 5/6; mapping-unscored: 1. Questions without annotated targets are excluded.
 
 ## Supporting diagnostics
 
 | Diagnostic | Result |
 |---|---:|
+| Full annotated-target recall (micro) | 9/71 (12.7%) |
 | Hit-rate upper bound, including unresolved outputs | 6/6 (100.0%) |
 | All unique returned recommendations | 17 |
 | Direct / related / stretch | 2 / 4 / 3 |
@@ -617,14 +622,14 @@ Title selection presents every number/title, then only shortlisted full statemen
 
 D=direct, R=related, S=stretch, X=unrelated, ?=uncertain, U=unassessed, !=mapping-unscored.
 
-| Question ID | Status | Recommended problems (reference labels) | Seconds |
-|---|---|---|---:|
-| lcrec-v2-005-descriptive | completed | 1947 (D), 1057 (R), 2410 (D) | 27.3 |
-| lcrec-v2-008-descriptive | completed | LeetCode_4000_Problem_Reference.pdf::page=214::problem=427 (!), LeetCode_4000_Problem_Reference.pdf::page=279::problem=558 (!), LeetCode_4000_Problem_Reference.pdf::page=637::problem=1274 (!) | 23.7 |
-| lcrec-v2-010-short | completed | 350 (S), 706 (U), 349 (S) | 11.9 |
-| lcrec-v2-012-descriptive | completed | 3204 (R), 2275 (R), 201 (S) | 19.1 |
-| lcrec-v2-016-descriptive | completed | 776 (R), 108 (U), 352 (U) | 21.8 |
-| lcrec-v2-018-short | completed | 346 (U), 973 (U) | 14.4 |
+| Question ID | Status | Recommended problems (reference labels) | Capped recall@3 | Seconds |
+|---|---|---|---:|---:|
+| lcrec-v2-005-descriptive | completed | 1947 (D), 1057 (R), 2410 (D) | 100.0% | 27.3 |
+| lcrec-v2-008-descriptive | completed | LeetCode_4000_Problem_Reference.pdf::page=214::problem=427 (!), LeetCode_4000_Problem_Reference.pdf::page=279::problem=558 (!), LeetCode_4000_Problem_Reference.pdf::page=637::problem=1274 (!) | unscored | 23.7 |
+| lcrec-v2-010-short | completed | 350 (S), 706 (U), 349 (S) | 66.7% | 11.9 |
+| lcrec-v2-012-descriptive | completed | 3204 (R), 2275 (R), 201 (S) | 100.0% | 19.1 |
+| lcrec-v2-016-descriptive | completed | 776 (R), 108 (U), 352 (U) | 33.3% | 21.8 |
+| lcrec-v2-018-short | completed | 346 (U), 973 (U) | 0.0% | 14.4 |
 
 Uncertain, unseen and invalidly mapped items are never automatically wrong. Failed questions are excluded from completed-question denominators and remain visible above. Predictions are scored by verified identity and frozen labels, not by the production judge's own grade. Source occurrence does not guarantee a generated explanation is supported. PDFs and indexes are not distributed.
 

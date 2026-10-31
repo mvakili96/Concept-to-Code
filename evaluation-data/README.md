@@ -7,7 +7,7 @@ The repository has two source-grounded benchmarks for comparing pipeline changes
 | [Document QA](document-qa/) | 50, including 47 answerable and three controlled unanswerable questions | Specific PDF passages linked to an answer's required facts | Final reranked context supplied to the answering LLM |
 | [LeetCode v2](leetcode-recommendation/v2/) | 40, covering 20 topics with two wordings each | Source-audited relevance labels for topic/problem pairs | Problems actually recommended to the user |
 
-See [METRICS.md](METRICS.md) for formulas, denominators, relevance labels, worked examples, and why LeetCode recall is low. The two benchmarks use different units, so their precision and recall percentages are not directly comparable.
+See [METRICS.md](METRICS.md) for formulas, denominators, relevance labels, and worked examples. LeetCode reports macro **Capped Recall@k**, with `k` taken from the configured recommendation limit. Full annotated-target recall remains a secondary coverage diagnostic. The two benchmarks use different units, so their precision and recall percentages are not directly comparable.
 
 ## Document QA: what one sample contains
 
@@ -61,4 +61,4 @@ Use `python evaluate_document_qa.py` or `python evaluate_leetcode_recommendation
 
 [Document-QA report](../evaluation-results/document-qa/summary.md) · [Latest LeetCode collective report](../evaluation-results/leetcode-recommendation/v2/experiments/title-selection-full-source-fixed/source_fix.md) · [All results](../evaluation-results/README.md).
 
-The latest LeetCode report combines saved results with targeted reruns. Its provenance records the execution segments rather than claiming a fresh homogeneous full-benchmark run. Versioned manifests, frozen preparation documents, and historical results retain their original contents.
+The latest LeetCode report combines saved results with targeted reruns. Its provenance records the execution segments rather than claiming a fresh homogeneous full-benchmark run. Capped recall was added to saved reports offline, preserving their inference records and settings. Versioned manifests and frozen preparation documents retain their original contents.

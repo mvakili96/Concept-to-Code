@@ -1,5 +1,7 @@
 # LeetCode recommendation evaluation
 
+**Offline metric update:** Macro Capped Recall@3 was calculated from saved predictions. No new inference was run. Original inference metadata is retained. Full annotated-target recall remains a secondary diagnostic.
+
 Fixed source-grounded development benchmark; labels are incomplete and include useful stretch practice. This is not held-out generalization or a score of answer correctness/faithfulness.
 
 - Run ID: `378629f00d9044e4b0225d5a7751bb68`; origin: `live_production_workflow`
@@ -15,17 +17,20 @@ Fixed source-grounded development benchmark; labels are incomplete and include u
 |---|---:|
 | Assessed precision | 26/27 (96.3%) |
 | Hit rate | 15/36 (41.7%) |
-| Annotated-target recall (micro) | 26/670 (3.9%) |
+| Capped recall@3 (macro) | 24.1% |
 | Label coverage | 28/108 (25.9%) |
 
 Relevant means a frozen reference label of direct match, related practice, or stretch connection. Assessed precision excludes uncertain, unassessed and invalidly mapped recommendations. Hit rate is the fraction of completed ordinary questions with at least one relevant recommendation. Label coverage includes uncertain labels and does not mean every recommendation has a definitive relevance judgment.
 
-Annotated-target recall counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. Scored target-bearing ordinary questions: 36/36; mapping-unscored: 0. Questions without annotated targets are excluded.
+Capped recall@3 divides each eligible ordinary question's annotated target hits in its top 3 recommendations by min(3, its positive target count), then averages question scores equally. Direct match, related practice and stretch connection all receive positive credit when in the annotated target set. Unassessed returns receive no annotated hit credit and are not automatically unrelated. Cutoff: 3, from the saved run's max_recommendations setting. Scored questions: 36, N/A: 4, unscored: 0.
+
+Full annotated-target recall is retained below as a secondary coverage diagnostic. It counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. Scored target-bearing ordinary questions: 36/36; mapping-unscored: 0. Questions without annotated targets are excluded.
 
 ## Supporting diagnostics
 
 | Diagnostic | Result |
 |---|---:|
+| Full annotated-target recall (micro) | 26/670 (3.9%) |
 | Hit-rate upper bound, including unresolved outputs | 35/36 (97.2%) |
 | All unique returned recommendations | 108 |
 | Direct / related / stretch | 4 / 13 / 9 |
@@ -457,48 +462,48 @@ Secondary diagnostics use the original positive targets, not an exhaustive relev
 
 D=direct, R=related, S=stretch, X=unrelated, ?=uncertain, U=unassessed, !=mapping-unscored.
 
-| Question ID | Status | Recommended problems (reference labels) | Seconds |
-|---|---|---|---:|
-| lcrec-v2-001-short | completed | abstain | 5.2 |
-| lcrec-v2-001-descriptive | completed | 1810 (R), 3651 (R), 3596 (R) | 160.4 |
-| lcrec-v2-002-short | completed | 2493 (U), 3789 (U), 1547 (U) | 142.8 |
-| lcrec-v2-002-descriptive | completed | 3547 (U), 2642 (U), 3924 (U) | 122.8 |
-| lcrec-v2-003-short | completed | 3555 (U), 3422 (U), 2470 (U) | 154.3 |
-| lcrec-v2-003-descriptive | completed | 2080 (U), 506 (R), 3945 (U) | 164.4 |
-| lcrec-v2-004-short | completed | 3663 (U), 3005 (U), 2641 (U) | 185.1 |
-| lcrec-v2-004-descriptive | completed | 3663 (U), 3318 (U), 3541 (U) | 171.6 |
-| lcrec-v2-005-short | completed | 2323 (U), 1057 (R), 3693 (U) | 141.8 |
-| lcrec-v2-005-descriptive | completed | 3476 (U), 1947 (D), 2323 (U) | 137.9 |
-| lcrec-v2-006-short | completed | 398 (R), 2191 (U), 2699 (U) | 145.6 |
-| lcrec-v2-006-descriptive | completed | 528 (D), 381 (R), 497 (R) | 141.9 |
-| lcrec-v2-007-short | completed | 1606 (R), 2747 (U), 1656 (U) | 127.2 |
-| lcrec-v2-007-descriptive | completed | 2757 (S), 2515 (U), 3354 (U) | 161.4 |
-| lcrec-v2-008-short | completed | 1828 (U), 2013 (U), 3624 (U) | 145.0 |
-| lcrec-v2-008-descriptive | completed | 3271 (U), 3710 (U), 3195 (U) | 186.8 |
-| lcrec-v2-009-short | completed | 2526 (U), 385 (U), 3023 (U) | 163.1 |
-| lcrec-v2-009-descriptive | completed | 67 (X), 369 (U), 1734 (U) | 168.9 |
-| lcrec-v2-010-short | completed | 1817 (U), 1500 (U), 1892 (U) | 121.8 |
-| lcrec-v2-010-descriptive | completed | 3063 (U), 2227 (U), 1948 (U) | 146.8 |
-| lcrec-v2-011-short | completed | 1113 (U), 1934 (U), 3808 (U) | 218.8 |
-| lcrec-v2-011-descriptive | completed | 1336 (U), 3808 (U), 3521 (U) | 152.2 |
-| lcrec-v2-012-short | completed | 2275 (R), 2823 (U), 3653 (U) | 172.7 |
-| lcrec-v2-012-descriptive | completed | 2901 (U), 3117 (S), 2411 (S) | 183.3 |
-| lcrec-v2-013-short | completed | 1593 (U), 1520 (U), 3298 (U) | 151.3 |
-| lcrec-v2-013-descriptive | completed | 2311 (U), 2914 (U), 97 (U) | 179.0 |
-| lcrec-v2-014-short | completed | 3600 (S), 685 (U), 2374 (U) | 139.0 |
-| lcrec-v2-014-descriptive | completed | 685 (U), 2378 (U), 2360 (U) | 126.9 |
-| lcrec-v2-015-short | completed | 1441 (S), 1597 (R), 32 (S) | 138.2 |
-| lcrec-v2-015-descriptive | completed | 1441 (S), 946 (S), 1381 (S) | 146.0 |
-| lcrec-v2-016-short | completed | 708 (U), 147 (U), 109 (U) | 203.9 |
-| lcrec-v2-016-descriptive | completed | 295 (U), 1902 (U), 26 (U) | 191.8 |
-| lcrec-v2-017-short | completed | 1188 (D), 1670 (U), 622 (R) | 134.8 |
-| lcrec-v2-017-descriptive | completed | 1188 (D), 1670 (U), 641 (R) | 159.9 |
-| lcrec-v2-018-short | completed | 1515 (?), 1828 (U), 780 (U) | 148.4 |
-| lcrec-v2-018-descriptive | completed | 3923 (U), 2090 (U), 25 (U) | 173.1 |
-| lcrec-v2-019-short | completed | abstain | 4.5 |
-| lcrec-v2-019-descriptive | completed | abstain | 3.6 |
-| lcrec-v2-020-short | completed | abstain | 3.9 |
-| lcrec-v2-020-descriptive | completed | 734 (U), 1583 (U), 49 (U) | 150.2 |
+| Question ID | Status | Recommended problems (reference labels) | Capped recall@3 | Seconds |
+|---|---|---|---:|---:|
+| lcrec-v2-001-short | completed | abstain | 0.0% | 5.2 |
+| lcrec-v2-001-descriptive | completed | 1810 (R), 3651 (R), 3596 (R) | 100.0% | 160.4 |
+| lcrec-v2-002-short | completed | 2493 (U), 3789 (U), 1547 (U) | 0.0% | 142.8 |
+| lcrec-v2-002-descriptive | completed | 3547 (U), 2642 (U), 3924 (U) | 0.0% | 122.8 |
+| lcrec-v2-003-short | completed | 3555 (U), 3422 (U), 2470 (U) | 0.0% | 154.3 |
+| lcrec-v2-003-descriptive | completed | 2080 (U), 506 (R), 3945 (U) | 33.3% | 164.4 |
+| lcrec-v2-004-short | completed | 3663 (U), 3005 (U), 2641 (U) | 0.0% | 185.1 |
+| lcrec-v2-004-descriptive | completed | 3663 (U), 3318 (U), 3541 (U) | 0.0% | 171.6 |
+| lcrec-v2-005-short | completed | 2323 (U), 1057 (R), 3693 (U) | 33.3% | 141.8 |
+| lcrec-v2-005-descriptive | completed | 3476 (U), 1947 (D), 2323 (U) | 33.3% | 137.9 |
+| lcrec-v2-006-short | completed | 398 (R), 2191 (U), 2699 (U) | 33.3% | 145.6 |
+| lcrec-v2-006-descriptive | completed | 528 (D), 381 (R), 497 (R) | 100.0% | 141.9 |
+| lcrec-v2-007-short | completed | 1606 (R), 2747 (U), 1656 (U) | 33.3% | 127.2 |
+| lcrec-v2-007-descriptive | completed | 2757 (S), 2515 (U), 3354 (U) | 33.3% | 161.4 |
+| lcrec-v2-008-short | completed | 1828 (U), 2013 (U), 3624 (U) | 0.0% | 145.0 |
+| lcrec-v2-008-descriptive | completed | 3271 (U), 3710 (U), 3195 (U) | 0.0% | 186.8 |
+| lcrec-v2-009-short | completed | 2526 (U), 385 (U), 3023 (U) | 0.0% | 163.1 |
+| lcrec-v2-009-descriptive | completed | 67 (X), 369 (U), 1734 (U) | 0.0% | 168.9 |
+| lcrec-v2-010-short | completed | 1817 (U), 1500 (U), 1892 (U) | 0.0% | 121.8 |
+| lcrec-v2-010-descriptive | completed | 3063 (U), 2227 (U), 1948 (U) | 0.0% | 146.8 |
+| lcrec-v2-011-short | completed | 1113 (U), 1934 (U), 3808 (U) | 0.0% | 218.8 |
+| lcrec-v2-011-descriptive | completed | 1336 (U), 3808 (U), 3521 (U) | 0.0% | 152.2 |
+| lcrec-v2-012-short | completed | 2275 (R), 2823 (U), 3653 (U) | 33.3% | 172.7 |
+| lcrec-v2-012-descriptive | completed | 2901 (U), 3117 (S), 2411 (S) | 66.7% | 183.3 |
+| lcrec-v2-013-short | completed | 1593 (U), 1520 (U), 3298 (U) | 0.0% | 151.3 |
+| lcrec-v2-013-descriptive | completed | 2311 (U), 2914 (U), 97 (U) | 0.0% | 179.0 |
+| lcrec-v2-014-short | completed | 3600 (S), 685 (U), 2374 (U) | 33.3% | 139.0 |
+| lcrec-v2-014-descriptive | completed | 685 (U), 2378 (U), 2360 (U) | 0.0% | 126.9 |
+| lcrec-v2-015-short | completed | 1441 (S), 1597 (R), 32 (S) | 100.0% | 138.2 |
+| lcrec-v2-015-descriptive | completed | 1441 (S), 946 (S), 1381 (S) | 100.0% | 146.0 |
+| lcrec-v2-016-short | completed | 708 (U), 147 (U), 109 (U) | 0.0% | 203.9 |
+| lcrec-v2-016-descriptive | completed | 295 (U), 1902 (U), 26 (U) | 0.0% | 191.8 |
+| lcrec-v2-017-short | completed | 1188 (D), 1670 (U), 622 (R) | 66.7% | 134.8 |
+| lcrec-v2-017-descriptive | completed | 1188 (D), 1670 (U), 641 (R) | 66.7% | 159.9 |
+| lcrec-v2-018-short | completed | 1515 (?), 1828 (U), 780 (U) | 0.0% | 148.4 |
+| lcrec-v2-018-descriptive | completed | 3923 (U), 2090 (U), 25 (U) | 0.0% | 173.1 |
+| lcrec-v2-019-short | completed | abstain | N/A | 4.5 |
+| lcrec-v2-019-descriptive | completed | abstain | N/A | 3.6 |
+| lcrec-v2-020-short | completed | abstain | N/A | 3.9 |
+| lcrec-v2-020-descriptive | completed | 734 (U), 1583 (U), 49 (U) | N/A | 150.2 |
 
 Uncertain, unseen and invalidly mapped items are never automatically wrong. Failed questions are excluded from completed-question denominators and remain visible above. Predictions are scored by verified identity and frozen labels, not by the production judge's own grade. Source occurrence does not guarantee a generated explanation is supported. PDFs and indexes are not distributed.
 

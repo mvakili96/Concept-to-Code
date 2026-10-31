@@ -1,4 +1,4 @@
-run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error
+run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error,capped_recall_cutoff,capped_recall_status,capped_recall,capped_recall_matched_targets,capped_recall_denominator,capped_recall_total_targets
 92a04d2025ff4fde9a57263c1dfa92d8,lcrec-v2-005-descriptive,"Using ""Probabilistic Machine Learning.pdf"", suggest LeetCode practice for assigning measurements to tracked objects using a compatibility matrix and one-to-one matching. Explain the computational connection and its limitations.",ordinary,completed,1947;1057;2410,direct_match;related_practice;direct_match,3,3,1.0,0,0,0,False,,27.27037278795615,4,"The mechanism you’re asking about is **data association for multi-target tracking** using a **compatibility matrix** and **one-to-one matching**, which is formulated as a **maximal weight bipartite matching** problem.
 
 ### Core technical concept
@@ -115,7 +115,7 @@ Technical quote: We can make this into a square matrix by adding dummy backgroun
 all the false alarms, and adding dummy observations, which can explain all the missed detections.
 Problem quote: The i^th player can match with the j^th trainer if the player's
 ability is less than or equal to the trainer's training capacity.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1206",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 1052; LeetCode_4000_Problem_Reference.pdf, PAGE: 1206",,3,scored,1.0,3,3,9
 92a04d2025ff4fde9a57263c1dfa92d8,lcrec-v2-008-descriptive,"Using ""Grokking-the-system-design-interview-free.pdf"", suggest LeetCode practice for recursively splitting a spatial region into four child regions until each satisfies a capacity bound. Explain the computational connection and its limitations.",ordinary,completed,LeetCode_4000_Problem_Reference.pdf::page=214::problem=427;LeetCode_4000_Problem_Reference.pdf::page=279::problem=558;LeetCode_4000_Problem_Reference.pdf::page=637::problem=1274,unscored;unscored;unscored,0,0,,0,0,3,False,,23.69815306784585,4,"The document context does **not** describe a quadtree that “recursively splits a spatial region into four child regions until each satisfies a capacity bound,” but it does present **closely related recursive spatial/region-splitting mechanisms**. The computational connection to your request can be grounded in those.
 
 ---
@@ -237,7 +237,7 @@ Important difference: T1.1–T1.4 discuss building and then querying a structure
 Technical quote: This process is repeated until
 Problem quote: (This problem is an interactive problem.) Each ship is located at an integer point on the sea
 represented by a cartesian plane, and each integer point may contain at most 1 ship.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 510; LeetCode_4000_Problem_Reference.pdf, PAGE: 637",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 510; LeetCode_4000_Problem_Reference.pdf, PAGE: 637",,3,unscored,,,,2
 92a04d2025ff4fde9a57263c1dfa92d8,lcrec-v2-010-short,"According to ""Designing Data-Intensive Applications.pdf"", recommend a related LeetCode problem for broadcast hash joins.",ordinary,completed,350;706;349,stretch_connection;unassessed;stretch_connection,2,2,1.0,1,0,0,False,,11.90487588616088,4,"Broadcast hash joins, as described in the context, are a *map-side join* strategy used when joining a large dataset with a comparatively small one:
 
 - The **key assumption** is that one side of the join (the “small dataset”) is *small enough to fit entirely in memory* on each worker node (each mapper) [SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 431].
@@ -290,7 +290,7 @@ Technical quote: Broadcast hash joins
 The simplest way of performing a map-side join applies in the case where a large
 dataset is joined with a small dataset.
 Problem quote: Return values occurring in both arrays, each once.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 431; LeetCode_4000_Problem_Reference.pdf, PAGE: 175",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 431; LeetCode_4000_Problem_Reference.pdf, PAGE: 175",,3,scored,0.6666666666666666,2,3,11
 92a04d2025ff4fde9a57263c1dfa92d8,lcrec-v2-012-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for combining aligned row-membership bitmaps with bitwise AND to apply multiple predicates. Explain the computational connection and its limitations.",ordinary,completed,3204;2275;201,related_practice;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,19.100749983917922,4,"Aligned row-membership bitmaps implement predicate filtering by encoding, for each column and value, a bit vector whose positions correspond to table rows in a fixed, shared order. For a query with multiple predicates, such as
 
 > `WHERE product_sk = 31 AND store_sk = 3`
@@ -415,7 +415,7 @@ Technical quote: This works because the columns contain the rows in the same ord
 so the kth bit in one column’s bitmap corresponds to the same row as the kth bit
 in another column’s bitmap.
 Problem quote: Given nonnegative left and right, return the bitwise AND of every integer in their inclusive interval.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 121; LeetCode_4000_Problem_Reference.pdf, PAGE: 101",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 121; LeetCode_4000_Problem_Reference.pdf, PAGE: 101",,3,scored,1.0,3,3,38
 92a04d2025ff4fde9a57263c1dfa92d8,lcrec-v2-016-descriptive,"Using ""Designing Data-Intensive Applications.pdf"", suggest LeetCode practice for splitting an overflowing ordered page into two pages and updating its parent key ranges. Explain the computational connection and its limitations.",ordinary,completed,776;108;352,related_practice;unassessed;unassessed,1,1,1.0,2,0,0,False,,21.841807072982192,4,"The mechanism you’re asking about is the B‑tree page split on insertion, and how that relates to algorithmic practice problems.
 
 ### Technical mechanism: splitting an overflowing ordered page
@@ -532,7 +532,7 @@ write the two pages that were split, and also overwrite their parent page to upd
 references to the two child pages.
 Problem quote: Maintain all distinct inserted integers
 and return their maximal consecutive closed ranges in ascending order.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 104; LeetCode_4000_Problem_Reference.pdf, PAGE: 176",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 104; LeetCode_4000_Problem_Reference.pdf, PAGE: 176",,3,scored,0.3333333333333333,1,3,5
 92a04d2025ff4fde9a57263c1dfa92d8,lcrec-v2-018-short,"According to ""Speech and Language Processing.pdf"", recommend a related LeetCode problem for k-means centroid updates.",ordinary,completed,346;973,unassessed;unassessed,0,0,,2,0,0,False,,14.372255756985396,4,"From the provided context, k-means centroid updates are described as part of vector quantization (VQ) for speech representation.
 
 The mechanism is:
@@ -611,4 +611,4 @@ Important difference: k-means alternates between an assignment step and centroid
 Technical quote: In theassignmentstep, given a set of
 kcurrent centroids and the entire dataset of vectors, each vector is assigned to the
 Problem quote: Return k supplied planar points closest to the origin by Euclidean distance.
-SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 487",
+SOURCES: Speech and Language Processing.pdf, PAGE: 395; LeetCode_4000_Problem_Reference.pdf, PAGE: 487",,3,scored,0.0,0,3,8

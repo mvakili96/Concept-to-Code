@@ -1,4 +1,4 @@
-run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error
+run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error,capped_recall_cutoff,capped_recall_status,capped_recall,capped_recall_matched_targets,capped_recall_denominator,capped_recall_total_targets
 61e58b7f85cf42f2981d281e99ad16af,lcrec-v2-008-descriptive,"Using ""Grokking-the-system-design-interview-free.pdf"", suggest LeetCode practice for recursively splitting a spatial region into four child regions until each satisfies a capacity bound. Explain the computational connection and its limitations.",ordinary,completed,427;558;1274,direct_match;related_practice;unassessed,2,2,1.0,1,0,0,False,,29.853983665816486,5,"The mechanism you’re describing—“recursively splitting a spatial region into four child regions until each satisfies a capacity bound”—is exactly the QuadTree construction described in the document.
 
 ### Core computational concept: QuadTree with capacity bound
@@ -118,7 +118,7 @@ this process with each child node until there are no nodes left with more than 5
 locations.
 Problem quote: With two points: the top right and bottom left corners of a rectangle, produce the count
 of ships present in that rectangle.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 142; LeetCode_4000_Problem_Reference.pdf, PAGE: 637",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 142; LeetCode_4000_Problem_Reference.pdf, PAGE: 637",,3,scored,1.0,2,2,2
 61e58b7f85cf42f2981d281e99ad16af,lcrec-v2-018-descriptive,"Using ""Speech and Language Processing.pdf"", suggest LeetCode practice for repeatedly updating cluster centers from the samples assigned to each center. Explain the computational connection and its limitations.",ordinary,completed,973;658;295,unassessed;unassessed;unassessed,0,0,,3,0,0,False,,18.14204995892942,4,"The mechanism in your request—“repeatedly updating cluster centers from the samples assigned to each center”—corresponds directly to the **k-means clustering** procedure described in the document.
 
 ### Technical mechanism
@@ -229,4 +229,4 @@ Technical quote: In the re-estimation step, it recom-
 putes the codeword for each cluster by recomputing the mean vector.
 Problem quote: Return the median of all inserted
 values: the middle sorted value for odd size, or the mean of the two middle values for even size.
-SOURCES: Speech and Language Processing.pdf, PAGE: 380; LeetCode_4000_Problem_Reference.pdf, PAGE: 148",
+SOURCES: Speech and Language Processing.pdf, PAGE: 380; LeetCode_4000_Problem_Reference.pdf, PAGE: 148",,3,scored,0.0,0,3,8

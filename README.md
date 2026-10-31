@@ -51,7 +51,7 @@ Both scripts use the production pipeline. Optional command-line arguments:
 
 For example, `python evaluate_leetcode_recommendation.py --limit 5` evaluates five questions. Add `--resume` to continue that same run after an interruption. Completed reports replace files in their configured results directories.
 
-QA measures annotated-passage overlap. LeetCode uses frozen relevance labels for assessed precision, hit rate, annotated-target recall, and label coverage. Labels are incomplete. The linked LeetCode report combines saved results with targeted reruns. These fixed development comparisons do not establish held-out generalization.
+QA measures annotated-passage overlap. LeetCode uses frozen relevance labels for assessed precision, hit rate, macro Capped Recall@k, and label coverage. Here `k` is the configured recommendation limit. [Metric definitions](evaluation-data/METRICS.md) explain the calculations and secondary full target recall. Labels are incomplete. The linked LeetCode report combines saved results with targeted reruns. These fixed development comparisons do not establish held-out generalization.
 
 ## Limitations
 

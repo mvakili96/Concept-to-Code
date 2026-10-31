@@ -295,6 +295,16 @@
       "completion_tokens": 10780,
       "total_tokens": 297306
     },
+    "capped_recall": {
+      "cutoff": 3,
+      "averaging": "macro",
+      "score": 0.6,
+      "scored_questions": 5,
+      "not_applicable_questions": 0,
+      "unscored_questions": 1,
+      "matched_targets": 9,
+      "capped_target_slots": 15
+    },
     "pattern_fallbacks": 0,
     "unscored_candidate_judgments": 0
   },
@@ -27383,5 +27393,67 @@
         }
       }
     }
-  ]
+  ],
+  "capped_recall_by_question": {
+    "lcrec-v2-005-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 9
+    },
+    "lcrec-v2-008-descriptive": {
+      "cutoff": 3,
+      "status": "unscored",
+      "score": null,
+      "matched_targets": null,
+      "denominator": null,
+      "total_targets": 2,
+      "reason": "Recommendation mapping or verification failed."
+    },
+    "lcrec-v2-010-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.6666666666666666,
+      "matched_targets": 2,
+      "denominator": 3,
+      "total_targets": 11
+    },
+    "lcrec-v2-012-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 1.0,
+      "matched_targets": 3,
+      "denominator": 3,
+      "total_targets": 38
+    },
+    "lcrec-v2-016-descriptive": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.3333333333333333,
+      "matched_targets": 1,
+      "denominator": 3,
+      "total_targets": 5
+    },
+    "lcrec-v2-018-short": {
+      "cutoff": 3,
+      "status": "scored",
+      "score": 0.0,
+      "matched_targets": 0,
+      "denominator": 3,
+      "total_targets": 8
+    }
+  },
+  "metric_reporting": {
+    "method": "offline_capped_recall_update",
+    "metric_version": "1.0.0",
+    "averaging": "macro",
+    "cutoff": 3,
+    "timestamp_utc": "2026-10-31T00:27:22.303072+00:00",
+    "evaluator_sha256": "455688d79d9c9ff6cf5911b87705c0c2de6508cecdeb6f829cf90cfe45d90256",
+    "previous_details_sha256": "c76a1bb1f6ab0221b758a877bbeef8e3c5cac5c4b83eccf4967b6e2e04219eac",
+    "new_inference": false,
+    "note": "Only reporting was updated. Original inference records, run metadata, labels and other metric values are preserved."
+  }
 }

@@ -1,5 +1,7 @@
 # LeetCode recommendation evaluation
 
+**Offline metric update:** Macro Capped Recall@3 was calculated from saved predictions. No new inference was run. Original inference metadata is retained. Full annotated-target recall remains a secondary diagnostic.
+
 Fixed source-grounded development benchmark; labels are incomplete and include useful stretch practice. This is not held-out generalization or a score of answer correctness/faithfulness.
 
 - Run ID: `61e58b7f85cf42f2981d281e99ad16af`; origin: `live_production_workflow_targeted_source_fix`
@@ -15,17 +17,20 @@ Fixed source-grounded development benchmark; labels are incomplete and include u
 |---|---:|
 | Assessed precision | 2/2 (100.0%) |
 | Hit rate | 1/2 (50.0%) |
-| Annotated-target recall (micro) | 2/10 (20.0%) |
+| Capped recall@3 (macro) | 50.0% |
 | Label coverage | 2/6 (33.3%) |
 
 Relevant means a frozen reference label of direct match, related practice, or stretch connection. Assessed precision excludes uncertain, unassessed and invalidly mapped recommendations. Hit rate is the fraction of completed ordinary questions with at least one relevant recommendation. Label coverage includes uncertain labels and does not mean every recommendation has a definitive relevance judgment.
 
-Annotated-target recall counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. Scored target-bearing ordinary questions: 2/2; mapping-unscored: 0. Questions without annotated targets are excluded.
+Capped recall@3 divides each eligible ordinary question's annotated target hits in its top 3 recommendations by min(3, its positive target count), then averages question scores equally. Direct match, related practice and stretch connection all receive positive credit when in the annotated target set. Unassessed returns receive no annotated hit credit and are not automatically unrelated. Cutoff: 3, from the saved run's max_recommendations setting. Scored questions: 2, N/A: 0, unscored: 0.
+
+Full annotated-target recall is retained below as a secondary coverage diagnostic. It counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. Scored target-bearing ordinary questions: 2/2; mapping-unscored: 0. Questions without annotated targets are excluded.
 
 ## Supporting diagnostics
 
 | Diagnostic | Result |
 |---|---:|
+| Full annotated-target recall (micro) | 2/10 (20.0%) |
 | Hit-rate upper bound, including unresolved outputs | 2/2 (100.0%) |
 | All unique returned recommendations | 6 |
 | Direct / related / stretch | 1 / 1 / 0 |
@@ -617,10 +622,10 @@ Title selection presents every number/title, then only shortlisted full statemen
 
 D=direct, R=related, S=stretch, X=unrelated, ?=uncertain, U=unassessed, !=mapping-unscored.
 
-| Question ID | Status | Recommended problems (reference labels) | Seconds |
-|---|---|---|---:|
-| lcrec-v2-008-descriptive | completed | 427 (D), 558 (R), 1274 (U) | 29.9 |
-| lcrec-v2-018-descriptive | completed | 973 (U), 658 (U), 295 (U) | 18.1 |
+| Question ID | Status | Recommended problems (reference labels) | Capped recall@3 | Seconds |
+|---|---|---|---:|---:|
+| lcrec-v2-008-descriptive | completed | 427 (D), 558 (R), 1274 (U) | 100.0% | 29.9 |
+| lcrec-v2-018-descriptive | completed | 973 (U), 658 (U), 295 (U) | 0.0% | 18.1 |
 
 Uncertain, unseen and invalidly mapped items are never automatically wrong. Failed questions are excluded from completed-question denominators and remain visible above. Predictions are scored by verified identity and frozen labels, not by the production judge's own grade. Source occurrence does not guarantee a generated explanation is supported. PDFs and indexes are not distributed.
 

@@ -1,5 +1,7 @@
 # V2 operation-based query evaluation
 
+**Offline metric update:** Capped Recall@3 averages each eligible question's target hits divided by `min(3, positive target count)`. Match, Relevant, and Stretch count when in the annotated target set. Saved predictions and original inference metadata are unchanged. The original recall discussion below refers to full annotated-target recall, now a secondary diagnostic. Eligible question counts: 35 / 35.
+
 Status: the operation-query implementation was reverted after this evaluation. The active pipeline uses the previous pattern-based workflow with shortlist 30, matching the [previous report](../shortlist-30/summary.md). These results and their frozen settings remain as experiment history.
 
 ## Conclusion
@@ -18,7 +20,8 @@ Both runs use shortlist **30**, the same 40 v2 questions, 360 frozen pair annota
 | Assessed precision | 35/35 (100.0%) | 25/25 (100.0%) |
 | Confirmed hit rate | 18/36 (50.0%) | 15/36 (41.7%) |
 | Hit-rate upper bound | 35/36 (97.2%) | 36/36 (100.0%) |
-| Annotated-target recall (micro) | 35/668 (5.2%) | 25/668 (3.7%) |
+| Capped recall@3 (macro) | 33.3% | 23.8% |
+| Full annotated-target recall (secondary) (micro) | 35/668 (5.2%) | 25/668 (3.7%) |
 | Label coverage | 37/108 (34.3%) | 25/111 (22.5%) |
 | Returned recommendations | 108 | 111 |
 | Direct / related / stretch | 7 / 17 / 11 | 5 / 15 / 5 |

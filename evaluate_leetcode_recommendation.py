@@ -391,7 +391,55 @@ def percentile(values, p):
     return values[lo] + (values[hi] - values[lo]) * (index - lo)
 
 
-def summarize(records):
+def capped_recall(record, cutoff):
+    """Recall within the recommendation budget, using the existing verified targets."""
+    if type(cutoff) is not int or cutoff < 1:
+        raise ValueError("The capped-recall cutoff must be a positive integer.")
+    result = dict(cutoff=cutoff, status="not_applicable", score=None,
+                  matched_targets=None, denominator=None, total_targets=None)
+    if record["status"] != "completed":
+        return {**result, "status": "unscored", "reason": "Question execution failed."}
+    if record["kind"] != "ordinary":
+        return {**result, "reason": "Naming controls are scored separately."}
+    assessment = record["assessment"]
+    stage = assessment.get("stage_coverage", {}).get("recommendations", {})
+    total = stage.get("total_targets")
+    if type(total) is not int or total < 0:
+        return {**result, "status": "unscored", "reason": "Missing or invalid target mapping."}
+    result["total_targets"] = total
+    if not total:
+        return {**result, "reason": "The question has no annotated positive targets."}
+    if stage.get("status") != "scored" or assessment["label_counts"].get("unscored", 0):
+        return {**result, "status": "unscored", "reason": "Recommendation mapping or verification failed."}
+    items = assessment.get("items")
+    target_ids = stage.get("matched_target_ids")
+    if (not isinstance(items, list) or not isinstance(target_ids, list)
+            or any(not isinstance(target, str) for target in target_ids)
+            or any(not isinstance(item, dict) or not isinstance(item.get("problem_id"), str) for item in items)
+            or len(set(target_ids)) > total):
+        return {**result, "status": "unscored", "reason": "Invalid recommendation or target records."}
+    verified_targets = {item.get("pair_id") for item in items
+                        if item.get("status") == "verified" and item.get("label") in USEFUL}
+    if not set(target_ids).issubset(verified_targets):
+        return {**result, "status": "unscored", "reason": "Target hits lack verified positive recommendations."}
+    # Count each problem once, in the order actually recommended to the user.
+    first_items = {}
+    for item in items:
+        first_items.setdefault(item["problem_id"], item)
+    top_items = list(first_items.values())[:cutoff]
+    hits = {item["pair_id"] for item in top_items
+            if item.get("pair_id") in target_ids and item.get("label") in USEFUL
+            and item.get("status") == "verified"}
+    denominator = min(cutoff, total)
+    return {**result, "status": "scored", "score": len(hits) / denominator,
+            "matched_targets": len(hits), "denominator": denominator}
+
+
+def summarize(records, recommendation_limit=3):
+    if type(recommendation_limit) is not int or recommendation_limit < 1:
+        raise ValueError("The capped-recall cutoff must be a positive integer.")
+    recall_results = [capped_recall(record, recommendation_limit) for record in records]
+    recall_scored = [item for item in recall_results if item["status"] == "scored"]
     completed = [r for r in records if r["status"] == "completed"]
     ordinary = [r for r in completed if r["kind"] == "ordinary"]
     controls = [r for r in completed if r["kind"] == "explicit_naming_control"]
@@ -419,6 +467,13 @@ def summarize(records):
         latency_seconds=dict(mean=statistics.mean(times), median=statistics.median(times), p95=percentile(times, .95)) if times else None,
         llm_calls=sum(r.get("telemetry", {}).get("llm_calls", 0) for r in records),
         token_usage=dict(tokens) if any(r.get("telemetry", {}).get("token_usage") is not None for r in records) else None,
+        capped_recall=dict(cutoff=recommendation_limit, averaging="macro",
+            score=statistics.mean(item["score"] for item in recall_scored) if recall_scored else None,
+            scored_questions=len(recall_scored),
+            not_applicable_questions=sum(item["status"] == "not_applicable" for item in recall_results),
+            unscored_questions=sum(item["status"] == "unscored" for item in recall_results),
+            matched_targets=sum(item["matched_targets"] for item in recall_scored),
+            capped_target_slots=sum(item["denominator"] for item in recall_scored)),
         pattern_fallbacks=sum(r.get("output", {}).get("pattern_extraction", {}).get("status") == "fallback" for r in completed),
         unscored_candidate_judgments=sum(j.get("status", "").startswith("unscored") for r in completed
             for j in r.get("output", {}).get("conceptual_judgments", [])))
@@ -426,6 +481,9 @@ def summarize(records):
 
 def build_summary(run, records, metrics):
     counts = metrics["label_counts"]
+    capped = metrics["capped_recall"]
+    cutoff = capped["cutoff"]
+    capped_score = f"{capped['score']:.1%}" if capped["score"] is not None else "N/A"
     method = run["config"]["related_problem"].get("method", "retrieval")
     batched = method in ("batched", "titles")
     def fraction(numerator, denominator):
@@ -454,19 +512,28 @@ def build_summary(run, records, metrics):
         "| Metric | Result |", "|---|---:|",
         f"| Assessed precision | {percentage(metrics['useful_items'], metrics['scored_items'])} |",
         f"| Hit rate | {percentage(metrics['useful_ordinary_questions'], metrics['ordinary_questions'])} |",
-        f"| Annotated-target recall (micro) | {percentage(matched_targets, total_targets)} |",
+        f"| Capped recall@{cutoff} (macro) | {capped_score} |",
         f"| Label coverage | {percentage(labeled_items, metrics['recommendations'])} |", "",
         "Relevant means a frozen reference label of direct match, related practice, or stretch connection. "
         "Assessed precision excludes uncertain, unassessed and invalidly mapped recommendations. "
         "Hit rate is the fraction of completed ordinary questions with at least one relevant recommendation. "
         "Label coverage includes uncertain labels and does not mean every recommendation has a definitive relevance judgment.", "",
-        "Annotated-target recall counts original positive targets actually recommended, summed across questions "
+        f"Capped recall@{cutoff} divides each eligible ordinary question's annotated target hits in its top {cutoff} "
+        f"recommendations by min({cutoff}, its positive target count), then averages question scores equally. "
+        "Direct match, related practice and stretch connection all receive positive credit when in the annotated target set. "
+        "Unassessed returns receive no annotated hit credit and are not automatically unrelated. "
+        f"Cutoff: {cutoff}, from the saved run's max_recommendations setting. "
+        f"Scored questions: {capped['scored_questions']}, N/A: {capped['not_applicable_questions']}, "
+        f"unscored: {capped['unscored_questions']}.", "",
+        "Full annotated-target recall is retained below as a secondary coverage diagnostic. "
+        "It counts original positive targets actually recommended, summed across questions "
         "(micro averaging). Targets count once within a question and again for another wording. "
         "These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. "
         f"Scored target-bearing ordinary questions: {len(scored_targets)}/{len(target_records)}; "
         f"mapping-unscored: {len(target_records) - len(scored_targets)}. Questions without annotated targets are excluded.", "",
         "## Supporting diagnostics", "",
         "| Diagnostic | Result |", "|---|---:|",
+        f"| Full annotated-target recall (micro) | {percentage(matched_targets, total_targets)} |",
         f"| Hit-rate upper bound, including unresolved outputs | {percentage(metrics['useful_ordinary_upper'], metrics['ordinary_questions'])} |",
         f"| All unique returned recommendations | {metrics['recommendations']} |",
         f"| Direct / related / stretch | {' / '.join(str(counts.get(k, 0)) for k in ('direct_match', 'related_practice', 'stretch_connection'))} |",
@@ -508,14 +575,16 @@ def build_summary(run, records, metrics):
                   "dense/BM25 and cross-encoder stages do not apply. "
                   "Python checks selected identities and literal evidence spans; semantic relevance is the selection model's judgment.", ""]
     lines += ["", "## Per-question results", "", "D=direct, R=related, S=stretch, X=unrelated, ?=uncertain, U=unassessed, !=mapping-unscored.", "",
-              "| Question ID | Status | Recommended problems (reference labels) | Seconds |", "|---|---|---|---:|"]
+              f"| Question ID | Status | Recommended problems (reference labels) | Capped recall@{cutoff} | Seconds |", "|---|---|---|---:|---:|"]
     labels = dict(direct_match="D", related_practice="R", stretch_connection="S", unrelated="X", uncertain="?", unassessed="U", unscored="!")
     for record in records:
         items = record.get("assessment", {}).get("items", [])
+        recall = capped_recall(record, cutoff)
+        recall_text = f"{recall['score']:.1%}" if recall["status"] == "scored" else "N/A" if recall["status"] == "not_applicable" else "unscored"
         description = ", ".join(f"{item.get('number', item['problem_id'])} ({labels[item['label']]})" for item in items)
         if record["status"] == "failed":
             description = "execution failed (unscored)"
-        lines.append(f"| {record['id']} | {record['status']} | {description or 'abstain'} | {record['seconds']:.1f} |")
+        lines.append(f"| {record['id']} | {record['status']} | {description or 'abstain'} | {recall_text} | {record['seconds']:.1f} |")
     lines += ["", "Uncertain, unseen and invalidly mapped items are never automatically wrong. Failed questions "
               "are excluded from completed-question denominators and remain visible above. Predictions are scored "
               "by verified identity and frozen labels, not by the production judge's own grade. Source occurrence "
@@ -528,11 +597,14 @@ def build_summary(run, records, metrics):
 def write_reports(results_dir, run, records):
     results_dir = Path(results_dir)
     results_dir.parent.mkdir(parents=True, exist_ok=True)
-    metrics = summarize(records)
+    cutoff = run["config"]["related_problem"]["recommendation_validation"]["max_recommendations"]
+    metrics = summarize(records, cutoff)
+    recall_by_question = {record["id"]: capped_recall(record, cutoff) for record in records}
     pending = [{"question_id": r["id"], "topic_id": r["topic_id"], "question": r["question"],
                 **item, "review_status": "unassessed"}
                for r in records for item in r.get("assessment", {}).get("items", []) if item["label"] == "unassessed"]
-    details = dict(schema_version="1.0.0", run=run, metrics=metrics, questions=records)
+    details = dict(schema_version="1.0.0", run=run, metrics=metrics, questions=records,
+                   capped_recall_by_question=recall_by_question)
     with tempfile.TemporaryDirectory(prefix=".leetcode-report-", dir=results_dir.parent) as directory:
         stage = Path(directory)
         (stage / "summary.md").write_text(build_summary(run, records, metrics), encoding="utf-8")
@@ -540,12 +612,15 @@ def write_reports(results_dir, run, records):
         (stage / "pending_review.jsonl").write_text("".join(json.dumps(item, ensure_ascii=False) + "\n" for item in pending), encoding="utf-8")
         fields = ["run_id", "question_id", "question", "kind", "status", "recommendations", "reference_labels", "useful_items",
                   "scored_items", "useful_over_scored", "unassessed_items", "uncertain_items", "mapping_unscored_items",
-                  "abstained", "control_conformant", "seconds", "llm_calls", "generated_answer", "error"]
+                  "abstained", "control_conformant", "seconds", "llm_calls", "generated_answer", "error",
+                  "capped_recall_cutoff", "capped_recall_status", "capped_recall", "capped_recall_matched_targets",
+                  "capped_recall_denominator", "capped_recall_total_targets"]
         with (stage / "per_question.csv").open("w", encoding="utf-8", newline="") as file:
             writer = csv.DictWriter(file, fieldnames=fields)
             writer.writeheader()
             for record in records:
                 assessment = record.get("assessment", {})
+                recall = recall_by_question[record["id"]]
                 items, counts = assessment.get("items", []), assessment.get("label_counts", {})
                 writer.writerow(dict(run_id=run["run_id"], question_id=record["id"], question=record["question"], kind=record["kind"],
                     status=record["status"], recommendations=";".join(str(i.get("number", i["problem_id"])) for i in items),
@@ -555,7 +630,10 @@ def write_reports(results_dir, run, records):
                     mapping_unscored_items=counts.get("unscored", 0), abstained=assessment.get("abstained"),
                     control_conformant=assessment.get("control_conformant"), seconds=record["seconds"],
                     llm_calls=record.get("telemetry", {}).get("llm_calls", 0),
-                    generated_answer=record.get("output", {}).get("generated_answer", ""), error=record.get("error", "")))
+                    generated_answer=record.get("output", {}).get("generated_answer", ""), error=record.get("error", ""),
+                    capped_recall_cutoff=cutoff, capped_recall_status=recall["status"], capped_recall=recall["score"],
+                    capped_recall_matched_targets=recall["matched_targets"], capped_recall_denominator=recall["denominator"],
+                    capped_recall_total_targets=recall["total_targets"]))
         # Prepare every output first. Retain rollback copies if replacement fails.
         results_dir.mkdir(parents=True, exist_ok=True)
         backups = {name: (results_dir / name).read_bytes() if (results_dir / name).exists() else None for name in OUTPUTS}

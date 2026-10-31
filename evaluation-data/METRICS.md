@@ -90,6 +90,8 @@ For a completed question `q`, define:
 - `l_q`: returned recommendations with a frozen label, including uncertain.
 - `T_q`: the explicit positive target set for the question's topic.
 - `h_q`: distinct target identities in `T_q` actually recommended.
+- `k`: the saved run's `related_problem.recommendation_validation.max_recommendations` setting, currently 3.
+- `h_q@k`: distinct target identities in the first `k` unique recommendations, preserving their returned order.
 
 ### Assessed precision
 
@@ -113,18 +115,35 @@ A single Relevant or Stretch recommendation is sufficient for a hit. Match is no
 
 The 40-question v2 benchmark has 36 ordinary requests and four naming controls. Controls are evaluated separately. Failed executions are also excluded from the completed-question denominator and remain explicit failures. For example, a run with six failed ordinary questions reports hit rate over 30 completed ordinary questions. Confirmed hits per all 36 attempted ordinary questions can be reported alongside it to show end-to-end coverage.
 
-### Annotated-target recall
+### Capped Recall@k: headline recall
+
+```text
+capped recall@k(q) = h_q@k / min(k, |T_q|)
+reported score    = mean(capped recall@k(q)) over eligible questions
+```
+
+This is a **macro average**, giving each eligible question equal weight. The denominator uses the configured recommendation budget, not the number of problems actually returned. With at least three annotated positives and `k = 3`, three positive returns score 100%, one scores 33.3%, and abstention scores 0%. If only two positive targets exist, recovering both scores 100%.
+
+Match, Relevant, and Stretch all receive equal positive credit when they belong to the question's annotated target set. Unassessed and uncertain returns receive no annotated-hit credit, without being declared unrelated. Duplicate identities count once. Increasing the configured output budget changes `k`, so compare runs using the same cutoff.
+
+This follows [BEIR's capped-recall definition](https://github.com/beir-cellar/beir/blob/main/beir/retrieval/custom_metrics.py). It measures annotated target recovery within a short recommendation budget. Labels remain incomplete, so valid unannotated alternatives may receive no credit. Both recall formulas are reported explicitly.
+
+Eligibility is the same as for full target recall below. Controls and questions without positive targets are N/A. Execution failures and invalid mappings are unscored. A completed abstention with targets scores zero. N/A and unscored questions are excluded from the mean and counted separately.
+
+The Markdown headline, JSON `metrics.capped_recall`, and CSV `capped_recall` column use this definition. JSON `capped_recall_by_question` and CSV columns also record each score's cutoff, status, matched-target count, capped denominator, and full target count.
+
+### Full annotated-target recall: secondary diagnostic
 
 ```text
 recall(q)               = h_q / |T_q|
 annotated-target recall = Σ h_q / Σ |T_q|
 ```
 
-The corpus score is **micro averaged over target occurrences** in eligible ordinary questions. The same topic's targets count once for each wording because each wording is a separate pipeline execution.
+This secondary corpus score is **micro averaged over target occurrences** in eligible ordinary questions. It retains the original calculation. The same topic's targets count once for each wording because each wording is a separate pipeline execution.
 
 For current **v2, every positively annotated pair is in `T_q`**, including Match, Relevant, and Stretch. Unrelated, uncertain, and unlisted pairs are not positive targets. Historical v1 reports use their original smaller explicit target subset and retain those definitions.
 
-Recall includes completed ordinary questions with nonempty target sets and valid stage mappings. If any recommended item is mapping-unscored, the current evaluator excludes that entire question from recall and reports the exclusion. Merely uncertain or unassessed returns do not exclude the question. A completed abstention gets recall 0 when targets exist. Controls and questions without positive targets have N/A ordinary target recall.
+Both recall metrics include completed ordinary questions with nonempty target sets and valid stage mappings. If any recommended item is mapping-unscored, the evaluator excludes that entire question from recall and reports the exclusion. Merely uncertain or unassessed returns do not exclude the question. A completed abstention gets recall 0 when targets exist. Controls and questions without positive targets have N/A recall.
 
 The target list is incomplete semantic ground truth. This metric measures recovery of annotated identities, not every valid possible relationship across all 4,000 problems.
 
@@ -142,23 +161,24 @@ Each of the four v2 naming controls requires a literal method name in the proble
 
 Suppose one ordinary question has five annotated targets: one Match, two Relevant, and two Stretch problems. These numbers illustrate the formulas and are not an extra benchmark record.
 
-| Three returned problems | Assessed precision | Annotated-target recall | Confirmed hit | Label coverage |
-|---|---:|---:|---:|---:|
-| Relevant, Stretch, unrelated | 2/3 | 2/5 | Yes | 3/3 |
-| Relevant, Stretch, unassessed | 2/2 | 2/5 | Yes | 2/3 |
-| Three unassessed problems | N/A | 0/5 | No confirmed hit | 0/3 |
-| No recommendations | N/A | 0/5 | No | N/A |
+| Three returned problems | Assessed precision | Capped Recall@3 | Full target recall | Confirmed hit | Label coverage |
+|---|---:|---:|---:|---:|---:|
+| Relevant, Stretch, unrelated | 2/3 | 2/3 | 2/5 | Yes | 3/3 |
+| Relevant, Stretch, unassessed | 2/2 | 2/3 | 2/5 | Yes | 2/3 |
+| Three unassessed problems | N/A | 0/3 | 0/5 | No confirmed hit | 0/3 |
+| No recommendations | N/A | 0/3 | 0/5 | No | N/A |
 
 The Relevant and Stretch returns count toward recall in both first scenarios. They do not need to be direct matches. The second scenario's unassessed return does not become a false positive or an extra annotated hit.
 
-## Why LeetCode recall is low in the current report
+## Current results and the full-recall ceiling
 
 The [source-fixed collective report](../evaluation-results/leetcode-recommendation/v2/experiments/title-selection-full-source-fixed/source_fix.md) already counts all three positive grades:
 
 - The references contain `21 Match + 180 Relevant + 134 Stretch = 335` positive topic/problem pairs.
 - Their two wordings create `335 × 2 = 670` target occurrences across 36 ordinary questions.
 - Recommendations hit `13 Match + 26 Relevant + 18 Stretch = 57` targets.
-- Recall is therefore `57 / 670 = 8.5%`.
+- Full annotated-target recall is therefore `57 / 670 = 8.5%`, retained as a secondary diagnostic.
+- **Macro Capped Recall@3 is 54.6%**, averaging the 36 eligible ordinary questions. The four naming controls are N/A.
 - The same report has hit rate `29 / 36 = 80.6%` because that metric asks whether each question received at least one useful recommendation.
 
 The configured output cap is only **three recommendations per question**. Some topics have dozens of annotated positives, so a short useful list covers a small fraction of their targets. With 71 targets, even three annotated positive returns yield recall `3/71 = 4.2%`.
@@ -171,8 +191,16 @@ maximum annotated-target recall = Σ min(3, |T_q|) / Σ |T_q|
                                 = 15.8%
 ```
 
-Two quadtree questions have only two targets each, which makes the maximum numerator 106 rather than 108. This ceiling assumes valid mappings and selecting annotated targets for every output slot. It is not an additional implemented metric or a guarantee of recommendation quality.
+Two quadtree questions have only two targets each, which makes the maximum numerator 106 rather than 108. This ceiling assumes valid mappings and selecting annotated targets for every output slot. Capped recall addresses this budget mismatch and can reach 100% without recommending every annotated target.
 
-Adding more relevance tiers to a positive definition can expand both its numerator and denominator, so it does not necessarily raise recall. Here all three tiers are already included. Hit rate captures the goal of finding at least one reasonably related practice problem, while assessed precision, label coverage, and annotated-target recall describe different aspects of the returned list.
+For the current predictions, the two quadtree questions each score `2/2`. The other 34 ordinary questions contribute 53 hits with denominator 3 each:
 
-No labels, target sets, scoring code, or historical scores were changed to produce this explanation. The reported counts come from the saved composite report, whose provenance distinguishes retained results from targeted reruns.
+```text
+macro capped recall@3 = (2/2 + 2/2 + 53/3) / 36 = 54.6%
+```
+
+Pooling capped counts would instead give `57/106 = 53.8%`. That is a micro calculation and is **not** the reported macro score.
+
+Adding more relevance tiers to a positive definition can expand both its numerator and denominator, so it does not necessarily raise recall. Here all three tiers are already included. Hit rate captures whether at least one useful problem was found. Capped recall measures recovery within the recommendation budget, while full target recall records coverage of the larger annotation set.
+
+Capped recall was added through an offline metric-reporting update to saved predictions. Original inference records, settings, labels, and target sets are preserved. The underlying composite report distinguishes retained results from targeted reruns. No new API calls were needed.

@@ -1,4 +1,4 @@
-run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error
+run_id,question_id,question,kind,status,recommendations,reference_labels,useful_items,scored_items,useful_over_scored,unassessed_items,uncertain_items,mapping_unscored_items,abstained,control_conformant,seconds,llm_calls,generated_answer,error,capped_recall_cutoff,capped_recall_status,capped_recall,capped_recall_matched_targets,capped_recall_denominator,capped_recall_total_targets
 imported-azure-gpt51-v1,related-diag-001-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what is the Hough transform?",ordinary,completed,1828;3009;149,stretch_connection;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,139.83229570300318,69,"1828. Queries on Number of Points Inside a Circle (Medium)
 Connection: Related practice
 Related practice pattern: accumulator-based voting to detect parameterized structures
@@ -32,7 +32,7 @@ Technical quote: The Hough transform, named after its original inventor (Hough 1
 technique for having edges “vote” for plausible line locations (Duda and Hart 1972; Ballard
 1981; Illingworth and Kittler 1988).
 Problem quote: Given distinct planar points, return the greatest number lying on one straight line.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 75",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 75",,3,scored,1.0,1,1,1
 imported-azure-gpt51-v1,related-diag-001-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how does the Hough transform use edge points to vote for possible lines?",ordinary,completed,149;2280;1610,related_practice;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,135.5158354700543,64,"149. Max Points on a Line (Hard)
 Connection: Related practice
 Related practice pattern: parameter-space voting with accumulators
@@ -67,7 +67,7 @@ bin values are examined for potential line ﬁts.15 Unless the points on a line 
 a better approach is to use the local orientation information at each edgel to vote for a single
 Problem quote: Return
 the greatest visible count over all orientations.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 806",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 504; LeetCode_4000_Problem_Reference.pdf, PAGE: 806",,3,scored,1.0,1,1,1
 imported-azure-gpt51-v1,related-diag-002-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what is linear filtering?",ordinary,completed,3242;2428;3463,direct_match;related_practice;related_practice,3,3,1.0,0,0,0,False,,131.9670274599921,61,"3242. Design Neighbor Sum Service (Easy)
 Connection: Related practice
 Related practice pattern: Implement neighborhood operations as weighted sums over local inputs
@@ -101,7 +101,7 @@ each output pixel is a weighted summation of some number of input pixels (3.19).
 Problem quote: Perform this operation repeatedly until the string has
 exactly two digits: For each pair of successive digits in s, beginning at the first digit, calculate a
 new digit as the total of the two digits modulo 10.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1733",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1733",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-diag-002-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how does a linear image filter combine neighboring pixel values to produce an output pixel?",ordinary,completed,3242;2428;3070,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,146.8266762350686,65,"3242. Design Neighbor Sum Service (Easy)
 Connection: Related practice
 Related practice pattern: Sliding-window weighted sum over local neighborhoods
@@ -149,7 +149,7 @@ f(i +k,j +l)h(k,l ). (3.12)
 The entries in the weight kernel or mask h(k,l ) are often called the ﬁlter coefﬁcients.
 Problem quote: Required result: the count of
 submatrices that contain the top-left element of the grid, and have a sum less than or equal to k.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 146; LeetCode_4000_Problem_Reference.pdf, PAGE: 1536",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 146; LeetCode_4000_Problem_Reference.pdf, PAGE: 1536",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-diag-003-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what is a summed-area table?",ordinary,completed,363;1878;3027,related_practice;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,167.29936442687176,74,"363. Max Sum of Rectangle No Larger Than K (Hard)
 Connection: Related practice
 Related practice pattern: 2D prefix-sum table for O(1) rectangular range queries
@@ -206,7 +206,7 @@ Technical quote: To ﬁnd the summed area (integral) inside a rectangle [i0,i 1]
 Problem quote: Given distinct points, count ordered choices (Alice,Bob) for which Alice is the upper-left corner and
 Bob the lower-right corner of their axis-aligned closed rectangle: Alice.x<=Bob.x and
 Alice.y>=Bob.y.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 1514",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 1514",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-diag-003-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how can an integral image support repeated rectangular pixel-sum queries?",ordinary,completed,304;221;363,direct_match;uncertain;related_practice,2,2,1.0,0,1,0,False,,167.1214584391564,72,"304. Range Sum Query 2D - Immutable (Medium)
 Connection: Direct match
 Related practice pattern: Precompute a 2D prefix-sum (integral image) using a raster-scan recurrence, then answer any axis-aligned rectangular sum query in O(1) time by combining the prefix values at the rectangle’s corners.
@@ -262,7 +262,7 @@ The images(i,j ) is also often called an integral image (see Figure 3.17) and ca
 computed using only two additions per pixel if separate row sums are used (Viola and Jones
 2004).
 Problem quote: Return the largest sum of a nonempty axis-aligned rectangle in matrix that is at most k.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 182",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 155; LeetCode_4000_Problem_Reference.pdf, PAGE: 182",,3,scored,0.5,1,2,2
 imported-azure-gpt51-v1,related-diag-004-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what are connected components in an image?",ordinary,completed,3311;1559;85,stretch_connection;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,112.35245571192354,50,"3311. Construct 2D Grid Matching Graph Layout (Hard)
 Connection: Related practice
 Related practice pattern: Region-growing via connectivity labels
@@ -297,8 +297,8 @@ Another useful semi-global image operation is ﬁnding connected components, whi
 ﬁned as regions of adjacent pixels that have the same input value or label.
 Problem quote: Given a rectangular matrix of character entries zero and one, find the largest axis-aligned
 rectangular region containing only ones.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 167; LeetCode_4000_Problem_Reference.pdf, PAGE: 43",
-imported-azure-gpt51-v1,related-diag-004-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how do four-neighbor connectivity and equal pixel labels define separate image regions?",ordinary,completed,,,0,0,,0,0,0,True,,2.8233757570851594,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 167; LeetCode_4000_Problem_Reference.pdf, PAGE: 43",,3,scored,0.0,0,3,3
+imported-azure-gpt51-v1,related-diag-004-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how do four-neighbor connectivity and equal pixel labels define separate image regions?",ordinary,completed,,,0,0,,0,0,0,True,,2.8233757570851594,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,,3,scored,0.0,0,3,3
 imported-azure-gpt51-v1,related-diag-005-short,"According to ""Speech and Language Processing.pdf"", what is minimum edit distance?",ordinary,completed,72;3579;3213,direct_match;related_practice;related_practice,3,3,1.0,0,0,0,False,,147.69610332604498,65,"72. Edit Distance (Medium)
 Connection: Direct match
 Related practice pattern: Dynamic programming over a 2D table to compute a minimal-cost sequence of edit operations transforming one string into another
@@ -326,7 +326,7 @@ What transfers: Technical component: Dynamic programming over a 2D table to comp
 Important difference: Technical pattern uses DP, problem text doesn’t specify algorithm.
 Technical quote: The edit distance betweenXandYis thusD[n,m].
 Problem quote: Required result: the smallest cost to make s equal to target.
-SOURCES: Speech and Language Processing.pdf, PAGE: 70; LeetCode_4000_Problem_Reference.pdf, PAGE: 1607",
+SOURCES: Speech and Language Processing.pdf, PAGE: 70; LeetCode_4000_Problem_Reference.pdf, PAGE: 1607",,3,scored,0.5,1,2,2
 imported-azure-gpt51-v1,related-diag-005-descriptive,"According to ""Speech and Language Processing.pdf"", how does edit distance compare two strings using insertions, deletions, and substitutions?",ordinary,completed,72;161;2976,direct_match;direct_match;related_practice,3,3,1.0,0,0,0,False,,140.53845761879347,69,"72. Edit Distance (Medium)
 Connection: Direct match
 Related practice pattern: Dynamic-programming alignment with weighted edit operations
@@ -365,7 +365,7 @@ tion) needed to transform one string into another.
 Problem quote: In one operation, you can pick a
 character x from the string and change it to the character y at a cost of z if there exists any index j
 such that cost[j] == z, original[j] == x, and changed[j] == y.
-SOURCES: Speech and Language Processing.pdf, PAGE: 68; LeetCode_4000_Problem_Reference.pdf, PAGE: 1489",
+SOURCES: Speech and Language Processing.pdf, PAGE: 68; LeetCode_4000_Problem_Reference.pdf, PAGE: 1489",,3,scored,1.0,2,2,2
 imported-azure-gpt51-v1,related-diag-006-short,"According to ""Grokking-the-system-design-interview-free.pdf"", how does a trie support autocomplete?",ordinary,completed,1804;501;3318,direct_match;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,158.96341691398993,73,"1804. Implement Trie II (Prefix Tree) (Medium)
 Connection: Related practice
 Related practice pattern: Maintain aggregated suggestion metadata at each trie node and query only the relevant subtrees to support fast autocomplete.
@@ -402,7 +402,7 @@ storing frequencies of our typeahead suggestions with each node, we need to upda
 them too.
 Problem quote: The x-sum of an array is
 calculated by the following procedure: Count the occurrences of all elements in the array.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 95; LeetCode_4000_Problem_Reference.pdf, PAGE: 1660",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 95; LeetCode_4000_Problem_Reference.pdf, PAGE: 1660",,3,scored,0.0,0,1,1
 imported-azure-gpt51-v1,related-diag-006-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", how can a character-by-character tree find stored phrases beginning with a typed prefix?",ordinary,completed,1804;28;527,direct_match;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,129.2779998080805,63,"1804. Implement Trie II (Prefix Tree) (Medium)
 Connection: Related practice
 Related practice pattern: Prefix-tree traversal from a prefix node to enumerate or rank all stored strings sharing that prefix
@@ -473,7 +473,7 @@ Now if the user has typed ‘cap’, our service can traverse the trie to go to 
 to find all the terms that start with this prefix (e.g., cap-tion, cap-ital etc).
 Problem quote: When abbreviations conflict,
 lengthen the prefixes of all conflicting words until they differ.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 93; LeetCode_4000_Problem_Reference.pdf, PAGE: 264",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 93; LeetCode_4000_Problem_Reference.pdf, PAGE: 264",,3,scored,0.0,0,1,1
 imported-azure-gpt51-v1,related-diag-007-short,"According to ""Grokking-the-system-design-interview-free.pdf"", what does LRU cache eviction do?",ordinary,completed,146;460;641,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,130.87942894292064,66,"146. LRU Cache (Medium)
 Connection: Direct match
 Related practice pattern: Use recency-ordered storage to evict the least recently accessed item when cache capacity is reached.
@@ -506,7 +506,7 @@ least recently viewed row first.
 Problem quote: Design MyCircularDeque(k) with fixed capacity. insertFront/insertLast and deleteFront/deleteLast
 report success. getFront/getRear return endpoint values or -1 if empty. isEmpty and isFull report
 status.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 47; LeetCode_4000_Problem_Reference.pdf, PAGE: 321",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 47; LeetCode_4000_Problem_Reference.pdf, PAGE: 321",,3,scored,1.0,1,1,1
 imported-azure-gpt51-v1,related-diag-007-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", when a cache is full, how can access recency determine which stored URL is discarded?",ordinary,completed,146;460;895,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,138.96997703192756,71,"146. LRU Cache (Medium)
 Connection: Direct match
 Related practice pattern: Use an access-ordered map (like a linked hash map) to track recency and evict the least recently accessed entry when capacity is reached.
@@ -538,7 +538,7 @@ Technical quote: Under this policy,
 we discard the least recently used URL first.
 Problem quote: Pop removes a value having the highest current
 occurrence count; frequency ties choose the occurrence most recently pushed among tied values.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 24; LeetCode_4000_Problem_Reference.pdf, PAGE: 448",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 24; LeetCode_4000_Problem_Reference.pdf, PAGE: 448",,3,scored,1.0,1,1,1
 imported-azure-gpt51-v1,related-diag-008-short,"According to ""Probabilistic Machine Learning.pdf"", what is a topological ordering of a DAG?",ordinary,completed,3530;797;3967,related_practice;stretch_connection;uncertain,2,2,1.0,0,1,0,False,,112.99836795311421,57,"3530. Maximum Profit from Valid Topological Order in DAG (Hard)
 Connection: Direct match
 Related practice pattern: Process graph nodes in an order where each node appears only after all its parent nodes have been processed
@@ -574,7 +574,7 @@ subjective than in any other kind of probabilistic model.
 4.2.1 Representing the joint distribution
 The key property of a DAG is that the nodes can be ordered such that parents come before children.
 Problem quote: Finish time of task i is latest + ownDuration.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 1985",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 1985",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-diag-008-descriptive,"According to ""Probabilistic Machine Learning.pdf"", how can directed dependencies be ordered so that every parent comes before its children?",ordinary,completed,3530;797;1494,related_practice;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,123.06470169895329,64,"3530. Maximum Profit from Valid Topological Order in DAG (Hard)
 Connection: Direct match
 Related practice pattern: Topological ordering via DAG traversal
@@ -612,7 +612,7 @@ The key property of a DAG is that the nodes can be ordered such that parents com
 Problem quote: In one semester, you can take
 at most k courses as long as you have taken all the prerequisites in the previous semesters for the
 courses you are taking.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 748",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 177; LeetCode_4000_Problem_Reference.pdf, PAGE: 748",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-diag-009-short,"According to ""Designing Data-Intensive Applications.pdf"", when can binary search replace an SSTable's in-memory index?",ordinary,completed,704;173;1428,direct_match;unrelated;related_practice,2,3,0.6666666666666666,0,0,0,False,,114.35737860691734,67,"704. Binary Search (Easy)
 Connection: Direct match
 Related practice pattern: Use direct offset computation to binary-search fixed-size records without an in-memory index
@@ -643,7 +643,7 @@ Technical quote: If all keys and values had a fixed size, you could use binary s
 memory index entirely.
 Problem quote: With a row-sorted binary matrix binaryMatrix, produce the index (indexed
 from zero) of the leftmost column with a 1 in it.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 715",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 715",,3,scored,0.5,1,2,2
 imported-azure-gpt51-v1,related-diag-009-descriptive,"According to ""Designing Data-Intensive Applications.pdf"", why do fixed-size keys and values permit binary search directly in a sorted segment file?",ordinary,completed,81;450;34,related_practice;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,112.48162219277583,69,"81. Search in Rotated Sorted Array II (Medium)
 Connection: Direct match
 Related practice pattern: Use fixed-size records so positions can be computed by index rather than scanned or indexed in memory
@@ -674,7 +674,7 @@ Technical quote: If all keys and values had a fixed size, you could use binary s
 memory index entirely.
 Problem quote: Given a nondecreasing integer array nums and integer target, return a two-element array
 containing the zero-based positions of its first and last occurrences.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 17",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 99; LeetCode_4000_Problem_Reference.pdf, PAGE: 17",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-diag-010-short,"According to ""Grokking-the-system-design-interview-free.pdf"", how does a Bloom filter test whether a URL was already seen?",ordinary,completed,3597;715;2166,related_practice;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,117.23344200896099,65,"3597. Partition String (Medium)
 Connection: Related practice
 Related practice pattern: Probabilistic membership testing with multiple hashes over a shared bit vector
@@ -708,7 +708,7 @@ the element and setting the corresponding bits.
 Problem quote: Build Bitset class: Bitset(int size) Initializes
 the Bitset with size bits, all of which are 0. void fix(int idx) Updates the value of the bit at the index
 idx to 1.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 1084",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 1084",,3,not_applicable,,,,0
 imported-azure-gpt51-v1,related-diag-010-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", how do hash-selected bits provide approximate set membership with possible false positives but no false negatives?",ordinary,completed,1804;3597;2166,related_practice;related_practice;related_practice,3,3,1.0,0,0,0,False,,122.98238249192946,67,"1804. Implement Trie II (Prefix Tree) (Medium)
 Connection: Related practice
 Related practice pattern: Use multiple hash functions to set and test bits in a shared bit vector for approximate membership checks
@@ -744,7 +744,7 @@ the element and setting the corresponding bits.
 Problem quote: Build Bitset class: Bitset(int size) Initializes
 the Bitset with size bits, all of which are 0. void fix(int idx) Updates the value of the bit at the index
 idx to 1.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 1084",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 126; LeetCode_4000_Problem_Reference.pdf, PAGE: 1084",,3,not_applicable,,,,0
 imported-azure-gpt51-v1,related-diag-011-short,"According to ""Grokking-the-system-design-interview-free.pdf"", how does consistent hashing choose a cache server?",ordinary,completed,555;514;918,stretch_connection;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,116.15379961207509,63,"555. Split Concatenated Strings (Medium)
 Connection: Related practice
 Related practice pattern: Ring-based hash routing: hash both servers and keys into a circular numeric space and route each key to the first server clockwise from its hash position on the ring.
@@ -775,7 +775,7 @@ Technical quote: Imagine that the integers in
 the range are placed on a ring such that the values are wrapped around.
 Problem quote: A segment may
 wrap from the final position to the first, but may use each array position at most once.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 190; LeetCode_4000_Problem_Reference.pdf, PAGE: 459",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 190; LeetCode_4000_Problem_Reference.pdf, PAGE: 459",,3,scored,0.0,0,1,1
 imported-azure-gpt51-v1,related-diag-011-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", after hashing a key onto a ring, how is its server found by moving clockwise?",ordinary,completed,34;503;708,stretch_connection;related_practice;related_practice,3,3,1.0,0,0,0,False,,103.77818804816343,62,"34. Find First and Last Position of Element in Sorted Array (Medium)
 Connection: Related practice
 Related practice pattern: Clockwise successor lookup on a circularly sorted list
@@ -816,7 +816,7 @@ o Move clockwise on the ring until finding the first cache it encounters.
 o That cache is the one that contains the key.
 Problem quote: Given any node in a sorted circular singly linked list and insertVal, insert one new node while
 preserving the circular nondecreasing order, allowing its wrap from maximum to minimum.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 191; LeetCode_4000_Problem_Reference.pdf, PAGE: 354",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 191; LeetCode_4000_Problem_Reference.pdf, PAGE: 354",,3,scored,0.0,0,1,1
 imported-azure-gpt51-v1,related-diag-012-short,"According to ""Speech and Language Processing.pdf"", how does beam search work in machine translation?",ordinary,completed,2818;3742;1696,stretch_connection;stretch_connection;stretch_connection,3,3,1.0,0,0,0,False,,99.1097040749155,60,"2818. Apply Operations to Maximize Score (Hard)
 Connection: Related practice
 Related practice pattern: Maintain a fixed-size set of top-k partial solutions at each step, expanding them in parallel and pruning back to k using a scoring function.
@@ -848,7 +848,7 @@ Technical quote: A hypothesis is an output sequence, a translation-so-
 far, together with its probability.
 Problem quote: Your score is the total of all nums[j]
 for each index j you visited in the array.
-SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 849",
+SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 849",,3,not_applicable,,,,0
 imported-azure-gpt51-v1,related-diag-012-descriptive,"According to ""Speech and Language Processing.pdf"", how are partial translations expanded and pruned to retain a bounded frontier during beam search?",ordinary,completed,1244;3278;1086,related_practice;related_practice;related_practice,3,3,1.0,0,0,0,False,,122.41099997307174,64,"1244. Design A Leaderboard (Medium)
 Connection: Related practice
 Related practice pattern: Generate all local successors for each state, score them cumulatively, then keep only the top-k states as the next frontier.
@@ -888,7 +888,7 @@ thek×Vhypotheses down to thekbest hypotheses, so there are never more thank
 hypotheses at the frontier of the search, and never more thankdecoders.
 Problem quote: With a list of the scores of different students, items, where items[i] = [ID_i, score_i] identifies one
 score from a student with ID_i, calculate each student's top five average.
-SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 543",
+SOURCES: Speech and Language Processing.pdf, PAGE: 295; LeetCode_4000_Problem_Reference.pdf, PAGE: 543",,3,not_applicable,,,,0
 imported-azure-gpt51-v1,related-fresh-001-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", what is median filtering?",ordinary,completed,480;295;2428,related_practice;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,106.98088464699686,61,"480. Sliding Window Median (Hard)
 Connection: Direct match
 Related practice pattern: Neighborhood-based robust aggregation by median selection
@@ -922,7 +922,7 @@ Technical quote: Median ﬁltering
 A better ﬁlter to use in this case is themedian ﬁlter, which selects the median value from each
 pixel’s neighborhood (Figure 3.19a).
 Problem quote: Return the largest sum of these seven cells over all window positions.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1215",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1215",,3,scored,1.0,1,1,1
 imported-azure-gpt51-v1,related-fresh-001-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how does median filtering replace a pixel using the median of its neighborhood rather than a weighted average?",ordinary,completed,4;2387;3122,related_practice;related_practice;unrelated,2,3,0.6666666666666666,0,0,0,False,,130.761898673838,62,"4. Median of Two Sorted Arrays (Hard)
 Connection: Direct match
 Related practice pattern: Neighborhood aggregation via rank (median) instead of weighted averaging
@@ -957,7 +957,7 @@ A better ﬁlter to use in this case is themedian ﬁlter, which selects the med
 pixel’s neighborhood (Figure 3.19a).
 Problem quote: In one operation, you can change the value of any cell to
 any nonnegative number.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1562",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 158; LeetCode_4000_Problem_Reference.pdf, PAGE: 1562",,3,scored,0.0,0,1,1
 imported-azure-gpt51-v1,related-fresh-002-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", how does nearest-neighbor feature matching work?",ordinary,completed,3919;3488;3275,related_practice;related_practice;related_practice,3,3,1.0,0,0,0,False,,130.6725226577837,64,"3919. Minimum Cost to Move Between Indices (Medium)
 Connection: Related practice
 Related practice pattern: Nearest-neighbor search with distance-ratio validation
@@ -990,7 +990,7 @@ Technical quote: The simplest way to ﬁnd all corresponding feature points is t
 tures against all other features in each pair of potentially matching images.
 Problem quote: After each query, you need to find the distance of the k^th nearest
 obstacle from the origin.
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 471; LeetCode_4000_Problem_Reference.pdf, PAGE: 1638",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 471; LeetCode_4000_Problem_Reference.pdf, PAGE: 1638",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-fresh-002-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", how are feature descriptors ranked by Euclidean distance to choose a nearby match?",ordinary,completed,3488;2736;3534,related_practice;unrelated;unrelated,1,3,0.3333333333333333,0,0,0,False,,119.32610119087622,66,"3488. Closest Equal Element Queries (Medium)
 Connection: Related practice
 Related practice pattern: Rank high-dimensional descriptors by Euclidean distance after optional axis rescaling/whitening, then select nearest neighbors under a distance threshold or nearest-neighbor distance ratio.
@@ -1028,7 +1028,7 @@ tial matches.
 Problem quote: An undirected edge exists
 between nodes i and j if the absolute difference between nums[i] and nums[j] is at most maxDiff
 (i.e., |nums[i] - nums[j]| <= maxDiff).
-SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 467; LeetCode_4000_Problem_Reference.pdf, PAGE: 1769",
+SOURCES: Computer Vision: Algorithms and Applications.pdf, PAGE: 467; LeetCode_4000_Problem_Reference.pdf, PAGE: 1769",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-fresh-003-short,"According to ""Probabilistic Machine Learning.pdf"", how does Box-Muller Gaussian sampling start?",ordinary,completed,478;497;381,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,125.88535977201536,62,"478. Generate Random Point in a Circle (Medium)
 Connection: Direct match
 Related practice pattern: rejection-based transformation from simple uniform samples to structured target samples
@@ -1067,7 +1067,7 @@ Problem quote: Design RandomizedCollection, a multiset. insert(val) adds an occu
 was previously absent. remove(val) removes one occurrence if present and reports success.
 getRandom() samples uniformly among stored occurrences, so repeated values have proportional
 probability.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 191",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 191",,3,scored,1.0,1,1,1
 imported-azure-gpt51-v1,related-fresh-003-descriptive,"According to ""Probabilistic Machine Learning.pdf"", what uniformly sampled geometric region is used before the Box-Muller transformation produces Gaussian samples?",ordinary,completed,478;497;381,direct_match;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,104.88235054095276,57,"478. Generate Random Point in a Circle (Medium)
 Connection: Direct match
 Related practice pattern: rejection sampling to obtain uniform points in a constrained geometric region
@@ -1105,7 +1105,7 @@ Problem quote: Design RandomizedCollection, a multiset. insert(val) adds an occu
 was previously absent. remove(val) removes one occurrence if present and reports success.
 getRandom() samples uniformly among stored occurrences, so repeated values have proportional
 probability.
-SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 191",
+SOURCES: Probabilistic Machine Learning.pdf, PAGE: 521; LeetCode_4000_Problem_Reference.pdf, PAGE: 191",,3,scored,1.0,1,1,1
 imported-azure-gpt51-v1,related-fresh-004-short,"According to ""Designing Data-Intensive Applications.pdf"", how are sorted SSTable segments merged?",ordinary,completed,23;21;632,direct_match;direct_match;stretch_connection,3,3,1.0,0,0,0,False,,116.96188498917036,65,"23. Merge k Sorted Lists (Hard)
 Connection: Direct match
 Related practice pattern: k-way merge of multiple sorted streams into one sorted output
@@ -1143,7 +1143,7 @@ at the first key in each file, copy the lowest key (according to the sort order)
 the output file, and repeat.
 Problem quote: Given sorted integer lists, return a smallest inclusive value interval containing at least one
 member from every list.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 316",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 316",,3,scored,0.5,1,2,2
 imported-azure-gpt51-v1,related-fresh-004-descriptive,"According to ""Designing Data-Intensive Applications.pdf"", how does repeatedly taking the smallest remaining input key merge several sorted segment files into one sorted output?",ordinary,completed,23;88;3801,direct_match;direct_match;related_practice,3,3,1.0,0,0,0,False,,138.80223120492883,72,"23. Merge k Sorted Lists (Hard)
 Connection: Direct match
 Related practice pattern: K-way merge of multiple sorted streams using a smallest-key selection loop
@@ -1179,7 +1179,7 @@ at the first key in each file, copy the lowest key (according to the sort order)
 the output file, and repeat.
 Problem quote: Permitted: repeatedly choose two lists a = lists[i] and b =
 lists[j], where i != j, and merge them.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 1902",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 98; LeetCode_4000_Problem_Reference.pdf, PAGE: 1902",,3,scored,1.0,2,2,2
 imported-azure-gpt51-v1,related-fresh-005-short,"According to ""Grokking-the-system-design-interview-free.pdf"", how does the sliding-window rate limiter track recent requests?",ordinary,completed,3433;635;1939,stretch_connection;related_practice;related_practice,3,3,1.0,0,0,0,False,,100.21953827003017,49,"3433. Count Mentions Per User (Medium)
 Connection: Related practice
 Related practice pattern: Use a per-user sorted collection of timestamps to maintain a sliding window of recent events, inserting each new event time and expiring entries older than the window to enforce rate limits.
@@ -1213,7 +1213,7 @@ can store the timestamp of each request in a Redis Sorted Set in our ‘value’
 hash-table.
 Problem quote: Find the IDs of the users that requested a confirmation message twice
 within a 24-hour window.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 970",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 970",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-fresh-005-descriptive,"According to ""Grokking-the-system-design-interview-free.pdf"", how does expiring old request timestamps let a rate limiter count requests in a moving time window?",ordinary,completed,1797;3433;362,related_practice;stretch_connection;related_practice,3,3,1.0,0,0,0,False,,103.3408110961318,50,"1797. Design Authentication Manager (Medium)
 Connection: Related practice
 Related practice pattern: Sliding-window counter by pruning expired timestamps then counting remaining events
@@ -1247,7 +1247,7 @@ Technical quote: Remove all the timestamps from the Sorted Set that are older th
 “CurrentTime - 1 minute”.
 Problem quote: A query returns the number with timestamps greater than timestamp -
 300 and no greater than timestamp.
-SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 181",
+SOURCES: Grokking-the-system-design-interview-free.pdf, PAGE: 107; LeetCode_4000_Problem_Reference.pdf, PAGE: 181",,3,scored,0.5,1,2,2
 imported-azure-gpt51-v1,related-fresh-006-short,"According to ""Designing Data-Intensive Applications.pdf"", why does sorting a column help run-length compression?",ordinary,completed,987;83;3014,stretch_connection;related_practice;unrelated,2,3,0.6666666666666666,0,0,0,False,,109.09644138510339,71,"987. Vertical Order Traversal of a Binary Tree (Hard)
 Connection: Related practice
 Related practice pattern: Pre-sort data on a low-cardinality key before applying run-length encoding to maximize contiguous runs of identical values.
@@ -1280,7 +1280,7 @@ Technical quote: If
 the primary sort column does not have many distinct values, then after sorting, it will
 have long sequences where the same value is repeated many times in a row.
 Problem quote: Choose the assignment and order to minimize the presses for word.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 1508",
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 1508",,3,scored,0.0,0,2,2
 imported-azure-gpt51-v1,related-fresh-006-descriptive,"According to ""Designing Data-Intensive Applications.pdf"", how do long consecutive runs of identical column values make run-length encoding compact?",ordinary,completed,1868;83;228,related_practice;related_practice;stretch_connection,3,3,1.0,0,0,0,False,,117.02035585907288,75,"1868. Product of Two Run-Length Encoded Arrays (Medium)
 Connection: Direct match
 Related practice pattern: Replace long runs of identical values with (value, run_length) pairs to store columns compactly when data is sorted and has few distinct values.
@@ -1314,8 +1314,8 @@ Technical quote: If
 the primary sort column does not have many distinct values, then after sorting, it will
 have long sequences where the same value is repeated many times in a row.
 Problem quote: Each range must be a maximal consecutive run.
-SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 114",
-imported-azure-gpt51-v1,related-fresh-007-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", find a LeetCode problem whose statement explicitly requires a fundamental matrix for correspondences between camera images. If none names it, abstain.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,2.6110565699636936,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
-imported-azure-gpt51-v1,related-fresh-007-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", which LeetCode specification explicitly names the fundamental matrix used for epipolar correspondences? If none does, do not substitute an ordinary matrix problem.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.1135672200471163,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
-imported-azure-gpt51-v1,related-fresh-008-short,"According to ""Speech and Language Processing.pdf"", find a LeetCode problem whose statement explicitly requires an n-gram language model. If none names that model, abstain.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.0992175398860127,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
-imported-azure-gpt51-v1,related-fresh-008-descriptive,"According to ""Speech and Language Processing.pdf"", which LeetCode specification explicitly requires an n-gram language model for next-word probabilities? Do not substitute word counting or bigram occurrence lookup.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,2.698226723819971,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,
+SOURCES: Designing Data-Intensive Applications.pdf, PAGE: 122; LeetCode_4000_Problem_Reference.pdf, PAGE: 114",,3,scored,0.0,0,2,2
+imported-azure-gpt51-v1,related-fresh-007-short,"According to ""Computer Vision: Algorithms and Applications.pdf"", find a LeetCode problem whose statement explicitly requires a fundamental matrix for correspondences between camera images. If none names it, abstain.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,2.6110565699636936,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,,3,not_applicable,,,,
+imported-azure-gpt51-v1,related-fresh-007-descriptive,"According to ""Computer Vision: Algorithms and Applications.pdf"", which LeetCode specification explicitly names the fundamental matrix used for epipolar correspondences? If none does, do not substitute an ordinary matrix problem.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.1135672200471163,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,,3,not_applicable,,,,
+imported-azure-gpt51-v1,related-fresh-008-short,"According to ""Speech and Language Processing.pdf"", find a LeetCode problem whose statement explicitly requires an n-gram language model. If none names that model, abstain.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,3.0992175398860127,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,,3,not_applicable,,,,
+imported-azure-gpt51-v1,related-fresh-008-descriptive,"According to ""Speech and Language Processing.pdf"", which LeetCode specification explicitly requires an n-gram language model for next-word probabilities? Do not substitute word counting or bigram occurrence lookup.",explicit_naming_control,completed,,,0,0,,0,0,0,True,True,2.698226723819971,2,No related LeetCode recommendation is supported by the current retrieved evidence: no candidate passed conceptual reranking. See the extraction and judgment diagnostics.,,3,not_applicable,,,,

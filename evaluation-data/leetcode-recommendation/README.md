@@ -11,6 +11,6 @@ A question record points to shared textbook evidence and topic/problem reference
 
 The three positive grades are **Match** (`direct_match`), **Relevant** (`related_practice`), and **Stretch** (`stretch_connection`). All count as useful for assessed precision and hit rate. In v2, all 335 positive pairs also belong to the recall target sets. Unrelated and uncertain reference labels are separate, and an unlisted pair remains unassessed.
 
-[METRICS.md](../METRICS.md) documents the exact calculations, exclusions, aggregation, prediction scenarios, and the output-cap explanation for low recall. Recall is not restricted to direct matches. Versioned v1/v2 documents and manifests retain their frozen contents.
+[METRICS.md](../METRICS.md) documents the exact calculations, exclusions, aggregation, and prediction scenarios. The headline recall is macro **Capped Recall@k**, dividing target hits in the top `k` returns by `min(k, positive target count)` per question. `k` is the run's configured recommendation limit. Full annotated-target recall remains secondary. All three positive grades count when included in the version's target set. Versioned v1/v2 documents and manifests retain their frozen contents.
 
 Preparation and freeze files retain creation-time paths, configuration fingerprints and not-yet-evaluated status. Current execution settings and completion status belong to the versioned evaluation reports, rather than rewriting those historical records.

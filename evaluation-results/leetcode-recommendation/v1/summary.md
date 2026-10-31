@@ -1,5 +1,7 @@
 # LeetCode recommendation evaluation
 
+**Offline metric update:** Macro Capped Recall@3 was calculated from saved predictions. No new inference was run. Original inference metadata is retained. Full annotated-target recall remains a secondary diagnostic.
+
 Fixed source-grounded development benchmark; labels are incomplete and include useful stretch practice. This is not held-out generalization or a score of answer correctness/faithfulness.
 
 - Run ID: `imported-azure-gpt51-v1`; origin: `imported_historical_run_no_new_inference`
@@ -15,17 +17,20 @@ Fixed source-grounded development benchmark; labels are incomplete and include u
 |---|---:|
 | Assessed precision | 98/103 (95.1%) |
 | Hit rate | 35/36 (97.2%) |
-| Annotated-target recall (micro) | 16/54 (29.6%) |
+| Capped recall@3 (macro) | 35.9% |
 | Label coverage | 105/105 (100.0%) |
 
 Relevant means a frozen reference label of direct match, related practice, or stretch connection. Assessed precision excludes uncertain, unassessed and invalidly mapped recommendations. Hit rate is the fraction of completed ordinary questions with at least one relevant recommendation. Label coverage includes uncertain labels and does not mean every recommendation has a definitive relevance judgment.
 
-Annotated-target recall counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. Scored target-bearing ordinary questions: 32/32; mapping-unscored: 0. Questions without annotated targets are excluded.
+Capped recall@3 divides each eligible ordinary question's annotated target hits in its top 3 recommendations by min(3, its positive target count), then averages question scores equally. Direct match, related practice and stretch connection all receive positive credit when in the annotated target set. Unassessed returns receive no annotated hit credit and are not automatically unrelated. Cutoff: 3, from the saved run's max_recommendations setting. Scored questions: 32, N/A: 8, unscored: 0.
+
+Full annotated-target recall is retained below as a secondary coverage diagnostic. It counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. Scored target-bearing ordinary questions: 32/32; mapping-unscored: 0. Questions without annotated targets are excluded.
 
 ## Supporting diagnostics
 
 | Diagnostic | Result |
 |---|---:|
+| Full annotated-target recall (micro) | 16/54 (29.6%) |
 | Hit-rate upper bound, including unresolved outputs | 35/36 (97.2%) |
 | All unique returned recommendations | 105 |
 | Direct / related / stretch | 17 / 48 / 33 |
@@ -451,48 +456,48 @@ Secondary diagnostics use the original positive targets, not an exhaustive relev
 
 D=direct, R=related, S=stretch, X=unrelated, ?=uncertain, U=unassessed, !=mapping-unscored.
 
-| Question ID | Status | Recommended problems (reference labels) | Seconds |
-|---|---|---|---:|
-| related-diag-001-short | completed | 1828 (S), 3009 (S), 149 (R) | 139.8 |
-| related-diag-001-descriptive | completed | 149 (R), 2280 (S), 1610 (S) | 135.5 |
-| related-diag-002-short | completed | 3242 (D), 2428 (R), 3463 (R) | 132.0 |
-| related-diag-002-descriptive | completed | 3242 (D), 2428 (R), 3070 (S) | 146.8 |
-| related-diag-003-short | completed | 363 (R), 1878 (S), 3027 (S) | 167.3 |
-| related-diag-003-descriptive | completed | 304 (D), 221 (?), 363 (R) | 167.1 |
-| related-diag-004-short | completed | 3311 (S), 1559 (R), 85 (S) | 112.4 |
-| related-diag-004-descriptive | completed | abstain | 2.8 |
-| related-diag-005-short | completed | 72 (D), 3579 (R), 3213 (R) | 147.7 |
-| related-diag-005-descriptive | completed | 72 (D), 161 (D), 2976 (R) | 140.5 |
-| related-diag-006-short | completed | 1804 (D), 501 (S), 3318 (S) | 159.0 |
-| related-diag-006-descriptive | completed | 1804 (D), 28 (S), 527 (R) | 129.3 |
-| related-diag-007-short | completed | 146 (D), 460 (R), 641 (S) | 130.9 |
-| related-diag-007-descriptive | completed | 146 (D), 460 (R), 895 (S) | 139.0 |
-| related-diag-008-short | completed | 3530 (R), 797 (S), 3967 (?) | 113.0 |
-| related-diag-008-descriptive | completed | 3530 (R), 797 (S), 1494 (R) | 123.1 |
-| related-diag-009-short | completed | 704 (D), 173 (X), 1428 (R) | 114.4 |
-| related-diag-009-descriptive | completed | 81 (R), 450 (S), 34 (R) | 112.5 |
-| related-diag-010-short | completed | 3597 (R), 715 (S), 2166 (R) | 117.2 |
-| related-diag-010-descriptive | completed | 1804 (R), 3597 (R), 2166 (R) | 123.0 |
-| related-diag-011-short | completed | 555 (S), 514 (S), 918 (S) | 116.2 |
-| related-diag-011-descriptive | completed | 34 (S), 503 (R), 708 (R) | 103.8 |
-| related-diag-012-short | completed | 2818 (S), 3742 (S), 1696 (S) | 99.1 |
-| related-diag-012-descriptive | completed | 1244 (R), 3278 (R), 1086 (R) | 122.4 |
-| related-fresh-001-short | completed | 480 (R), 295 (R), 2428 (S) | 107.0 |
-| related-fresh-001-descriptive | completed | 4 (R), 2387 (R), 3122 (X) | 130.8 |
-| related-fresh-002-short | completed | 3919 (R), 3488 (R), 3275 (R) | 130.7 |
-| related-fresh-002-descriptive | completed | 3488 (R), 2736 (X), 3534 (X) | 119.3 |
-| related-fresh-003-short | completed | 478 (D), 497 (R), 381 (S) | 125.9 |
-| related-fresh-003-descriptive | completed | 478 (D), 497 (R), 381 (S) | 104.9 |
-| related-fresh-004-short | completed | 23 (D), 21 (D), 632 (S) | 117.0 |
-| related-fresh-004-descriptive | completed | 23 (D), 88 (D), 3801 (R) | 138.8 |
-| related-fresh-005-short | completed | 3433 (S), 635 (R), 1939 (R) | 100.2 |
-| related-fresh-005-descriptive | completed | 1797 (R), 3433 (S), 362 (R) | 103.3 |
-| related-fresh-006-short | completed | 987 (S), 83 (R), 3014 (X) | 109.1 |
-| related-fresh-006-descriptive | completed | 1868 (R), 83 (R), 228 (S) | 117.0 |
-| related-fresh-007-short | completed | abstain | 2.6 |
-| related-fresh-007-descriptive | completed | abstain | 3.1 |
-| related-fresh-008-short | completed | abstain | 3.1 |
-| related-fresh-008-descriptive | completed | abstain | 2.7 |
+| Question ID | Status | Recommended problems (reference labels) | Capped recall@3 | Seconds |
+|---|---|---|---:|---:|
+| related-diag-001-short | completed | 1828 (S), 3009 (S), 149 (R) | 100.0% | 139.8 |
+| related-diag-001-descriptive | completed | 149 (R), 2280 (S), 1610 (S) | 100.0% | 135.5 |
+| related-diag-002-short | completed | 3242 (D), 2428 (R), 3463 (R) | 0.0% | 132.0 |
+| related-diag-002-descriptive | completed | 3242 (D), 2428 (R), 3070 (S) | 0.0% | 146.8 |
+| related-diag-003-short | completed | 363 (R), 1878 (S), 3027 (S) | 0.0% | 167.3 |
+| related-diag-003-descriptive | completed | 304 (D), 221 (?), 363 (R) | 50.0% | 167.1 |
+| related-diag-004-short | completed | 3311 (S), 1559 (R), 85 (S) | 0.0% | 112.4 |
+| related-diag-004-descriptive | completed | abstain | 0.0% | 2.8 |
+| related-diag-005-short | completed | 72 (D), 3579 (R), 3213 (R) | 50.0% | 147.7 |
+| related-diag-005-descriptive | completed | 72 (D), 161 (D), 2976 (R) | 100.0% | 140.5 |
+| related-diag-006-short | completed | 1804 (D), 501 (S), 3318 (S) | 0.0% | 159.0 |
+| related-diag-006-descriptive | completed | 1804 (D), 28 (S), 527 (R) | 0.0% | 129.3 |
+| related-diag-007-short | completed | 146 (D), 460 (R), 641 (S) | 100.0% | 130.9 |
+| related-diag-007-descriptive | completed | 146 (D), 460 (R), 895 (S) | 100.0% | 139.0 |
+| related-diag-008-short | completed | 3530 (R), 797 (S), 3967 (?) | 0.0% | 113.0 |
+| related-diag-008-descriptive | completed | 3530 (R), 797 (S), 1494 (R) | 0.0% | 123.1 |
+| related-diag-009-short | completed | 704 (D), 173 (X), 1428 (R) | 50.0% | 114.4 |
+| related-diag-009-descriptive | completed | 81 (R), 450 (S), 34 (R) | 0.0% | 112.5 |
+| related-diag-010-short | completed | 3597 (R), 715 (S), 2166 (R) | N/A | 117.2 |
+| related-diag-010-descriptive | completed | 1804 (R), 3597 (R), 2166 (R) | N/A | 123.0 |
+| related-diag-011-short | completed | 555 (S), 514 (S), 918 (S) | 0.0% | 116.2 |
+| related-diag-011-descriptive | completed | 34 (S), 503 (R), 708 (R) | 0.0% | 103.8 |
+| related-diag-012-short | completed | 2818 (S), 3742 (S), 1696 (S) | N/A | 99.1 |
+| related-diag-012-descriptive | completed | 1244 (R), 3278 (R), 1086 (R) | N/A | 122.4 |
+| related-fresh-001-short | completed | 480 (R), 295 (R), 2428 (S) | 100.0% | 107.0 |
+| related-fresh-001-descriptive | completed | 4 (R), 2387 (R), 3122 (X) | 0.0% | 130.8 |
+| related-fresh-002-short | completed | 3919 (R), 3488 (R), 3275 (R) | 0.0% | 130.7 |
+| related-fresh-002-descriptive | completed | 3488 (R), 2736 (X), 3534 (X) | 0.0% | 119.3 |
+| related-fresh-003-short | completed | 478 (D), 497 (R), 381 (S) | 100.0% | 125.9 |
+| related-fresh-003-descriptive | completed | 478 (D), 497 (R), 381 (S) | 100.0% | 104.9 |
+| related-fresh-004-short | completed | 23 (D), 21 (D), 632 (S) | 50.0% | 117.0 |
+| related-fresh-004-descriptive | completed | 23 (D), 88 (D), 3801 (R) | 100.0% | 138.8 |
+| related-fresh-005-short | completed | 3433 (S), 635 (R), 1939 (R) | 0.0% | 100.2 |
+| related-fresh-005-descriptive | completed | 1797 (R), 3433 (S), 362 (R) | 50.0% | 103.3 |
+| related-fresh-006-short | completed | 987 (S), 83 (R), 3014 (X) | 0.0% | 109.1 |
+| related-fresh-006-descriptive | completed | 1868 (R), 83 (R), 228 (S) | 0.0% | 117.0 |
+| related-fresh-007-short | completed | abstain | N/A | 2.6 |
+| related-fresh-007-descriptive | completed | abstain | N/A | 3.1 |
+| related-fresh-008-short | completed | abstain | N/A | 3.1 |
+| related-fresh-008-descriptive | completed | abstain | N/A | 2.7 |
 
 Uncertain, unseen and invalidly mapped items are never automatically wrong. Failed questions are excluded from completed-question denominators and remain visible above. Predictions are scored by verified identity and frozen labels, not by the production judge's own grade. Source occurrence does not guarantee a generated explanation is supported. PDFs and indexes are not distributed.
 

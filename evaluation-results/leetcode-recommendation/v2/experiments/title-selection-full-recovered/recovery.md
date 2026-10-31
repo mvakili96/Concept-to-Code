@@ -1,5 +1,7 @@
 # Recovered collective LeetCode results
 
+**Offline metric update:** Capped Recall@3 averages each eligible question's target hits divided by `min(3, positive target count)`. Match, Relevant, and Stretch count when in the annotated target set. Saved predictions and original inference metadata are unchanged. The original recall discussion below refers to full annotated-target recall, now a secondary diagnostic. Eligible question counts: 34.
+
 **34 saved successful evaluations were reused unchanged; only the six previously failed questions were rerun.** The original full report and its failures remain intact. This report combines two code/execution snapshots, rather than claiming a fresh homogeneous run on all 40 questions.
 
 | Metric | Collective result |
@@ -7,7 +9,8 @@
 | Completed questions | 40/40 (100.0%) |
 | Assessed precision | 55/55 (100.0%) |
 | Confirmed hit rate, all ordinary attempts | 28/36 (77.8%) |
-| Annotated-target recall (micro) | 55/660 (8.3%) |
+| Capped recall@3 (macro) | 54.9% |
+| Full annotated-target recall (secondary) (micro) | 55/660 (8.3%) |
 | Label coverage | 55/96 (57.3%) |
 | Naming controls conforming | 4/4 (100.0%) |
 | Execution failures remaining | 0 |
