@@ -15,9 +15,29 @@ Features include **IndexFlat (exact k-nearest neighbors)** or **HNSW (approximat
 
 ## Pipeline flowchart
 
-Purple boxes are **Azure OpenAI GPT-5.1 API calls**. Blue boxes run locally. Dashed arrows show reused data, retries, or the next chat turn. [Diagram notes](docs/pipeline-flowchart.md).
+<!-- Keep these Mermaid blocks identical to docs/pipeline-flowchart.md. -->
+```mermaid
+flowchart LR
+    subgraph LEGEND["Legend"]
+        direction LR
+        L_API["Azure OpenAI · GPT-5.1 API"]:::api
+        L_LOCAL["Local processing"]:::local
+        L_DATA["Documents & indexes"]:::data
+        L_RESULT["Input / output"]:::result
+        L_DECISION["Decision"]:::decision
+        L_DASH["Dashed arrows<br/>Reuse · retries · chat loop"]:::legendText
+        L_API ~~~ L_LOCAL ~~~ L_DATA ~~~ L_RESULT ~~~ L_DECISION ~~~ L_DASH
+    end
 
-<!-- Keep this Mermaid block identical to docs/pipeline-flowchart.md. -->
+    classDef api fill:#EDE9FE,stroke:#7C3AED,color:#3B0764,stroke-width:2px
+    classDef local fill:#E0F2FE,stroke:#0284C7,color:#0C4A6E
+    classDef data fill:#F1F5F9,stroke:#64748B,color:#0F172A
+    classDef result fill:#DCFCE7,stroke:#16A34A,color:#14532D
+    classDef decision fill:#FEF3C7,stroke:#D97706,color:#78350F
+    classDef legendText fill:transparent,stroke:transparent
+    style LEGEND fill:transparent,stroke:#94A3B8
+```
+
 ```mermaid
 flowchart TD
     subgraph SOURCES["Indexing & source preparation"]
@@ -90,6 +110,8 @@ flowchart TD
     class USER,OUTPUT,RELATED_OUTPUT result
     class REQUEST decision
 ```
+
+[Diagram notes](docs/pipeline-flowchart.md).
 
 ## Run
 
