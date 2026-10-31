@@ -41,7 +41,7 @@ Source PDFs, generated indexes, and `.env` are git-ignored. Conversation history
 | Benchmark | Command | Report |
 |---|---|---|
 | [Document QA: 50 questions](evaluation-data/document-qa/) | `python evaluate_document_qa.py` | [Evidence text precision/recall](evaluation-results/document-qa/summary.md) |
-| [LeetCode v2: 40 questions](evaluation-data/leetcode-recommendation/v2/) | `python evaluate_leetcode_recommendation.py` | [Recommendation metrics and provenance](evaluation-results/leetcode-recommendation/v2/experiments/title-selection-full-source-fixed/source_fix.md) |
+| [LeetCode v2: 40 questions](evaluation-data/leetcode-recommendation/v2/) | `python evaluate_leetcode_recommendation.py` | [Final title-selection results](evaluation-results/leetcode-recommendation/v2/summary.md) |
 
 Both scripts use the production pipeline. Optional command-line arguments:
 

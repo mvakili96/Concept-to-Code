@@ -172,7 +172,7 @@ The Relevant and Stretch returns count toward recall in both first scenarios. Th
 
 ## Current results and the full-recall ceiling
 
-The [source-fixed collective report](../evaluation-results/leetcode-recommendation/v2/experiments/title-selection-full-source-fixed/source_fix.md) already counts all three positive grades:
+The [final title-selection report](../evaluation-results/leetcode-recommendation/v2/summary.md) already counts all three positive grades:
 
 - The references contain `21 Match + 180 Relevant + 134 Stretch = 335` positive topic/problem pairs.
 - Their two wordings create `335 × 2 = 670` target occurrences across 36 ordinary questions.

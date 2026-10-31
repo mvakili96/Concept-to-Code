@@ -88,9 +88,8 @@ class CappedRecallTests(unittest.TestCase):
 class ReportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.saved = evaluation.json_read(evaluation.ROOT / (
-            "evaluation-results/leetcode-recommendation/v2/experiments/"
-            "title-selection-full-source-fixed/details.json"))
+        cls.saved = evaluation.json_read(
+            evaluation.ROOT / "evaluation-results/leetcode-recommendation/v2/details.json")
 
     def completed_record(self, labels, total_targets):
         sample = copy.deepcopy(self.saved["questions"][0])

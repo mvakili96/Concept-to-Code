@@ -49,7 +49,7 @@ The catalogue covers all 4,000 original statements. The scan ledger records 80,0
 
 ## Versions, source anchors, and review status
 
-- The original LeetCode [v1 benchmark](leetcode-recommendation/v1/) and its reports remain historical. Its explicit recall-target subset differs from v2's all-positive target policy.
+- The original LeetCode [v1 benchmark](leetcode-recommendation/v1/) is retained alongside v2. Its explicit recall-target subset differs from v2's all-positive target policy. Published LeetCode results use v2.
 - Corpus manifests pin PDF bytes with SHA-256 hashes. PDF files belong in the ignored `documents/` directory. Pages are one-based physical PDF pages, not printed book labels. LeetCode passage offsets are zero-based `[start, end_exclusive)` character ranges.
 - Evidence is anchored to original prose and problem identities, not current chunk IDs. Figures, captions, tables, layout interpretation, and scanned content are excluded from the reference evidence.
 - `reviewed_and_verified`, `source_audited`, and `codex_source_audit` describe automated source auditing. They do not mean human approval or guarantee semantic correctness.
@@ -59,6 +59,6 @@ The catalogue covers all 4,000 original statements. The scan ledger records 80,0
 
 Use `python evaluate_document_qa.py` or `python evaluate_leetcode_recommendation.py` from the repository root. Dataset and output paths are configured in `config.yml`. Both scripts accept `--limit 1` for a first-question check. LeetCode also supports `--resume` for compatible saved progress and `--restart` for a fresh run. Azure-backed inference incurs API usage.
 
-[Document-QA report](../evaluation-results/document-qa/summary.md) · [Latest LeetCode collective report](../evaluation-results/leetcode-recommendation/v2/experiments/title-selection-full-source-fixed/source_fix.md) · [All results](../evaluation-results/README.md).
+[Document-QA report](../evaluation-results/document-qa/summary.md) · [Final LeetCode title-selection report](../evaluation-results/leetcode-recommendation/v2/summary.md) · [All results](../evaluation-results/README.md).
 
 The latest LeetCode report combines saved results with targeted reruns. Its provenance records the execution segments rather than claiming a fresh homogeneous full-benchmark run. Capped recall was added to saved reports offline, preserving their inference records and settings. Versioned manifests and frozen preparation documents retain their original contents.
