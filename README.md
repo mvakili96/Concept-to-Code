@@ -1,5 +1,13 @@
 # Grounded Interview Prep RAG
 
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![Microsoft Azure](https://img.shields.io/badge/Microsoft%20Azure-0078D4?style=flat)
+![Azure OpenAI](https://img.shields.io/badge/Azure%20OpenAI-412991?style=flat)
+![RAG](https://img.shields.io/badge/RAG-7C3AED?style=flat)
+![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat)
+![FAISS](https://img.shields.io/badge/FAISS-0467DF?style=flat)
+![Hybrid Search: Dense + BM25](https://img.shields.io/badge/Hybrid%20Search-Dense%20%2B%20BM25-0F766E?style=flat)
+
 I developed this project for my own interview preparation: I wanted grounded explanations of concepts in computer vision, machine learning, NLP, system design, and data systems, paired with related LeetCode problems to help me practice the underlying reasoning skills.
 
 ## Workflows
