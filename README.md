@@ -148,18 +148,22 @@ Source PDFs, generated indexes, and `.env` are git-ignored. Conversation history
 
 | Benchmark | Command | Report |
 |---|---|---|
-| [Document QA: 50 questions](evaluation-data/document-qa/) | `python evaluate_document_qa.py` | [Evidence text precision/recall](evaluation-results/document-qa/summary.md) |
+| [Document QA: 50 questions](evaluation-data/document-qa/) | `python evaluate_document_qa.py` | [Final-answer quality](evaluation-results/document-qa/summary.md) |
 | [LeetCode v2: 40 questions](evaluation-data/leetcode-recommendation/v2/) | `python evaluate_leetcode_recommendation.py` | [Final title-selection results](evaluation-results/leetcode-recommendation/v2/summary.md) |
 
 Both scripts use the production pipeline. Optional command-line arguments:
 
 - `--limit 1`: evaluate only the first question. Change the number to evaluate a larger subset, or omit it for the whole benchmark.
-- `--resume` (LeetCode only): continue saved progress, skipping recorded questions, including failures. Keep the same limit, code, configuration, data, and indexes.
-- `--restart` (LeetCode only): ignore saved progress and rerun the selected questions from scratch.
+- `--resume` (LeetCode, saved-answer, and judge evaluation): continue compatible saved progress, skipping recorded questions, including failures.
+- `--restart` (LeetCode, saved-answer, and judge evaluation): ignore saved progress and rerun the selected evaluation from scratch.
 
 For example, `python evaluate_leetcode_recommendation.py --limit 5` evaluates five questions. Add `--resume` to continue that same run after an interruption. Completed reports replace files in their configured results directories.
 
-QA measures annotated-passage overlap. LeetCode uses frozen relevance labels for assessed precision, hit rate, macro Capped Recall@k, and label coverage. Here `k` is the configured recommendation limit. [Metric definitions](evaluation-data/METRICS.md) explain the calculations and secondary full target recall. Labels are incomplete. The linked LeetCode report combines saved results with targeted reruns. These fixed development comparisons do not establish held-out generalization.
+Document QA generates answers with the production pipeline, then judges fact coverage, grounding, contradictions, and abstention. Use `python evaluate_qa_answers.py` to judge the saved answers in `predictions.json` without rerunning RAG. Both commands update the main Document QA report. Judge settings and prompts are in `config.yml`. These are LLM estimates.
+
+`python evaluate_qa_judge.py` measures that judge on [48 source-audited cases](evaluation-data/qa-judge-validation/) twice. The [performance report](evaluation-results/document-qa/judge-validation/summary.md) includes agreement, consistency, and errors, with 30 development and 18 reserved cases identified. `--verify-only` checks sources without API calls.
+
+QA evaluates final answers, using the retrieved context only to judge whether their claims are grounded. LeetCode uses frozen relevance labels for assessed precision, hit rate, macro Capped Recall@k, and label coverage. Here `k` is the configured recommendation limit. [Metric definitions](evaluation-data/METRICS.md) explain the calculations and secondary full target recall. Labels are incomplete. The linked LeetCode report combines saved results with targeted reruns. These fixed development comparisons do not establish held-out generalization.
 
 ## Limitations
 

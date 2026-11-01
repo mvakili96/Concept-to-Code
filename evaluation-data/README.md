@@ -1,13 +1,15 @@
 # Evaluation benchmarks
 
-The repository has two source-grounded benchmarks for comparing pipeline changes and ablations. Both evaluators call the production pipeline in `main.py`. They score its output against saved references, without asking an evaluation LLM to grade it.
+The repository has two source-grounded benchmarks for comparing pipeline changes and ablations. Both fresh-run evaluators call the production pipeline in `main.py`. Document QA uses an LLM judge to assess the final answers. LeetCode scores recommendations against frozen relevance labels.
 
 | Benchmark | Questions | Reference unit | Evaluated output |
 |---|---|---|---|
-| [Document QA](document-qa/) | 50, including 47 answerable and three controlled unanswerable questions | Specific PDF passages linked to an answer's required facts | Final reranked context supplied to the answering LLM |
+| [Document QA](document-qa/) | 50, including 47 answerable and three controlled unanswerable questions | Reference answers, atomic required facts, and exact PDF evidence | Final generated answers, with context used to assess grounding |
 | [LeetCode v2](leetcode-recommendation/v2/) | 40, covering 20 topics with two wordings each | Source-audited relevance labels for topic/problem pairs | Problems actually recommended to the user |
 
-See [METRICS.md](METRICS.md) for formulas, denominators, relevance labels, and worked examples. LeetCode reports macro **Capped Recall@k**, with `k` taken from the configured recommendation limit. Full annotated-target recall remains a secondary coverage diagnostic. The two benchmarks use different units, so their precision and recall percentages are not directly comparable.
+See [METRICS.md](METRICS.md) for formulas, denominators, relevance labels, and worked examples. QA reports fact coverage, grounding, contradictions, and abstention. LeetCode reports assessed precision, hit rate, macro **Capped Recall@k**, and label coverage. Their percentages measure different things and are not directly comparable.
+
+The separate [QA judge benchmark](qa-judge-validation/) contains 48 cases, with 30 development and 18 reserved cases identified. It measures label agreement and consistency across two runs. Expected labels are automatically source-audited, not human-approved. Both RAG benchmarks are unchanged.
 
 ## Document QA: what one sample contains
 
@@ -27,7 +29,7 @@ For example, **`ragbench-v1-001`** asks how Hough voting works and what orientat
 
 The three unanswerable cases restrict the question to a source that does not provide the requested fact. Their records contain an absence audit and expected abstention. A failed retrieval search is not used as proof of unanswerability.
 
-The dataset contains 125 atomic facts, 76 evidence records, and ten distractor passages. Facts and evidence groups support inspection, but the current evaluator scores text overlap rather than semantic fact or group satisfaction. [Schema](document-qa/SCHEMA.md) · [All questions, answers, and quotes](document-qa/REVIEW.md) · [Coverage](document-qa/COVERAGE.md).
+The dataset contains 125 atomic facts, 76 evidence records, and ten distractor passages. The judge compares required facts with the generated answer and independently checks that answer's claims against its supplied context. Evidence groups support inspection but are not a separate scored metric. [Schema](document-qa/SCHEMA.md) · [All questions, answers, and quotes](document-qa/REVIEW.md) · [Coverage](document-qa/COVERAGE.md).
 
 ## LeetCode v2: what one sample contains
 
@@ -57,7 +59,7 @@ The catalogue covers all 4,000 original statements. The scan ledger records 80,0
 
 ## Run and inspect results
 
-Use `python evaluate_document_qa.py` or `python evaluate_leetcode_recommendation.py` from the repository root. Dataset and output paths are configured in `config.yml`. Both scripts accept `--limit 1` for a first-question check. LeetCode also supports `--resume` for compatible saved progress and `--restart` for a fresh run. Azure-backed inference incurs API usage.
+Use `python evaluate_document_qa.py` or `python evaluate_leetcode_recommendation.py` from the repository root. Dataset and output paths are configured in `config.yml`. Both scripts accept `--limit 1` for a first-question check. `python evaluate_qa_answers.py` reuses saved QA answers and their exact context, updating the same answer-quality report. LeetCode and saved-answer judging support `--resume` for compatible progress and `--restart` for a fresh evaluation. Azure-backed inference incurs API usage.
 
 [Document-QA report](../evaluation-results/document-qa/summary.md) · [Final LeetCode title-selection report](../evaluation-results/leetcode-recommendation/v2/summary.md) · [All results](../evaluation-results/README.md).
 

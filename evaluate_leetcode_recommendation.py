@@ -528,7 +528,7 @@ def build_summary(run, records, metrics):
         "Full annotated-target recall is retained below as a secondary coverage diagnostic. "
         "It counts original positive targets actually recommended, summed across questions "
         "(micro averaging). Targets count once within a question and again for another wording. "
-        "These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. "
+        "These targets are incomplete; this is not exhaustive semantic recall. "
         f"Scored target-bearing ordinary questions: {len(scored_targets)}/{len(target_records)}; "
         f"mapping-unscored: {len(target_records) - len(scored_targets)}. Questions without annotated targets are excluded.", "",
         "## Supporting diagnostics", "",

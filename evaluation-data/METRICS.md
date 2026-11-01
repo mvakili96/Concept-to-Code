@@ -2,63 +2,53 @@
 
 [Benchmark structure and sample contents](README.md) · [Document-QA evaluator](../evaluate_document_qa.py) · [LeetCode evaluator](../evaluate_leetcode_recommendation.py)
 
-The current metrics are deterministic comparisons against saved references. Production LLMs still generate expansions, answers, and recommendation judgments, but their own opinions are not the evaluation ground truth. Answer correctness and faithfulness are not scored.
+Document QA uses LLM judgments to assess final generated answers. LeetCode uses deterministic lookup against frozen relevance labels for recommended problem identities. Their metrics have different units and meanings.
 
-## Document QA: evidence text precision and recall
+## Document QA: final-answer quality
 
-These metrics compare the **final reranked context supplied to the answering LLM** with the dataset's specific evidence passages. They do not score the entire retrieval candidate pool or count how many chunks are relevant.
+`python evaluate_document_qa.py` generates fresh answers through the production RAG, saves them with their exact context in `evaluation-results/document-qa/predictions.json`, and invokes the answer judge. `python evaluate_qa_answers.py` reuses those predictions without rerunning retrieval, reranking, or answer generation. Both write `summary.md`, `details.json`, and `per_question.csv` directly under `evaluation-results/document-qa/`.
 
-### Mapping text to PDF positions
+The report evaluates final answers only. Retrieved context supplies evidence for grounding their claims. No reranked-chunk precision or recall is calculated. Report output never overwrites the separate predictions input. Model settings, budgets, and judge prompts are in `qa_answer_evaluation`. The benchmark and results directory are in `document_qa_evaluation` in `config.yml`.
 
-For each question, the evaluator:
+JSON preserves exact original answers and context. The CSV display export trims trailing Markdown spacing at line endings.
 
-1. Normalizes reference and PDF text consistently for Unicode ligatures, case, whitespace, and line-break hyphenation.
-2. Maps each reference quote to one unique consecutive sequence of normalized words on its cited source and physical page. Unordered vocabulary overlap is not sufficient.
-3. Verifies every final chunk against its original PDF character slice and maps its complete words to positions on that page. Incomplete words at chunk boundaries are excluded.
-4. Forms unions of the reference positions and context positions. Positions are identified by source, physical page, and normalized word index.
+Coverage sees the question, full original answer, reference answer, ordered atomic facts, and reference evidence. Labels are `covered`, `missing_or_incomplete`, `contradicted`, or `uncertain`. A covered fact must preserve its conditions and numerical details, allowing paraphrases.
 
-Two occurrences of the same word at different positions remain distinct. Overlapping chunks and repeated evidence count a position only once. Added formatting labels such as `SOURCE` and `PAGE` are excluded, while real PDF headings or other text present inside a chunk body remain in the context denominator.
-
-### Per-question formulas
-
-Let `E_q` be the union of annotated reference-evidence positions and `C_q` the union of final-context body-word positions.
+Grounding uses two calls without reference facts or reference evidence. Python first removes whole SOURCE/PAGE citation rows, keeping original text and offsets. Extraction sees only the question and answer, classifying statements as substantive, abstention, or context-insufficiency. Grounding then sees only the substantive quotes and exact saved context, assigning `supported`, `unsupported`, `contradicted`, or `uncertain`. Every extracted quote must receive exactly one judgment. Guesses and technical negations remain substantive. Exclusions are retained for inspection. Citation-only answers need no call, and pure abstention stops after extraction.
 
 ```text
-evidence text precision(q) = |E_q ∩ C_q| / |C_q|
-evidence text recall(q)    = |E_q ∩ C_q| / |E_q|
+fact coverage                = covered required facts / all required facts
+reference contradiction rate = contradicted required facts / all required facts
+grounding rate               = supported extracted claims / all extracted claims
+context contradiction rate   = contradicted extracted claims / all extracted claims
 ```
 
-Precision asks how much of the supplied context overlaps the annotations. Recall asks how much annotated text reached the final context. Identical words in a different source or page do not match.
+Scores are macro averages over scored questions. Any uncertain label or exhausted quote/format failure makes that question's affected metric unscored. N/A and unscored results are excluded from averages and counted explicitly. An answer with no substantive claims has N/A grounding, not perfect grounding. A failed saved pipeline execution is unscored.
 
-The current implementation unions **all `evidence_records`**, including any annotated alternative passages. It does not choose the best alternative or calculate semantic satisfaction of `atomic_required_facts` or `required_evidence_groups`. Those fields document answer support and remain useful for inspection, but they are not separate scored metrics.
+The three controlled unanswerable QA questions have N/A fact coverage. Their separate abstention judgment sees the complete answer and returns `appropriate_abstention`, `unsupported_answer`, `mixed`, or `uncertain`. It also identifies acknowledgment of insufficient evidence and provision of a substantive answer/guess. Both true requires `mixed`, which Python checks for consistency. Abstention accuracy is appropriate abstentions divided by validly judged unanswerable questions.
 
-### Worked example from the saved QA report
+Quotes must occur in the supplied answer/context after Unicode, whitespace, and line-break-hyphen normalization. One corrective retry is allowed by default. Literal matching checks provenance, not entailment. Contradiction requires an incompatible proposition about the same subject and conditions. Missing evidence alone is insufficient. Unsupported does not necessarily mean false. Both generator and judge use GPT-5.1, so correlated errors remain possible. These are model estimates, not objective correctness or human approval.
 
-For `ragbench-v1-001`, the Hough-transform question:
+Five synthetic checks run before answer judging. They are calibration controls, not benchmark accuracy. `--limit 1`, `--resume`, `--restart`, and `--calibrate` support subsets, compatible progress, fresh runs, and calibration-only execution. The saved answers currently being judged used a 400-token generation limit. Report metadata retains that actual generation configuration, which can differ from current settings.
 
-- Reference evidence has **101** unique word positions.
-- Final context has **438** unique body-word positions.
-- Their intersection has **101** positions.
-- Precision is `101 / 438 = 23.1%`.
-- Recall is `101 / 101 = 100%`.
+## QA judge performance
 
-The individual chunks contain 506 word occurrences before overlap is deduplicated. The denominator is 438, so overlap does not count twice. This is an example from the [saved report](../evaluation-results/document-qa/details.json), not a new inference run.
+`python evaluate_qa_judge.py` evaluates the latest judge on [48 cases](qa-judge-validation/README.md) twice. The [report](../evaluation-results/document-qa/judge-validation/summary.md) presents both runs, their combined aggregate, and separate development/reserved counts. Thirty cases informed judge improvements. Eighteen were reserved from refinement. Combining them does not create an independent test estimate.
 
-### Aggregation and exceptional cases
+```text
+exact case agreement = cases with every expected label and claim inventory matching
+                       / all attempted cases
+valid response rate  = judgments passing quote/format checks without uncertainty
+                       / all attempted cases
+```
 
-The reported corpus value is a **macro average**: calculate each question's score first, then average only questions with `status: scored`. Precision and recall maintain separate scored denominators. Word totals are not pooled across questions.
+Unscored judgments remain in the exact-agreement denominator as failures. Coverage compares labels in fact order. Grounding aligns claims through normalized literal answer excerpts, with missing, extra, duplicate, or ambiguous mappings failing the inventory check. Expected labels are automatically audited against PDF prose and explicit inventory rules, not human approval or evaluated-model outputs. They never enter judge prompts.
 
-| Case | Precision | Recall |
-|---|---|---|
-| Valid mappings and nonempty context | Formula above | Formula above |
-| Valid reference evidence, empty context | N/A | 0 |
-| Unanswerable within allowed sources, with no positive evidence | N/A | N/A, even if context was retrieved |
-| Missing, ambiguous, invalid, or failed text mappings | Unscored | Unscored |
-| Pipeline execution fails | Unscored | Unscored |
+Task-specific confusion counts and per-label precision, recall, and macro F1 are stored in JSON. Extra claims contribute false positives, while missing/unscored items contribute false negatives. No-claim controls affect exact-case agreement but are not a semantic class in macro F1. Repeatability reports usable-and-identical decisions divided by all pairs and conditional agreement where both judgments are valid. Repetition does not double the independent case count, and consistent mistakes remain mistakes.
 
-Scored zeroes remain in averages. N/A and unscored cases are excluded and counted separately. In the current 50-question dataset, three controlled unanswerable questions normally receive N/A rather than retrieval-quality scores.
+There is no pass/fail qualification gate. Judge performance is reported with its observed errors and scope. Answer reports attach this measurement only with explicit protocol/data/model matching metadata. Inference code and prompt fingerprints are separate from report formatting, so reorganizing saved results does not imply new model calls. Dataset hashes, exact PDF quotes/pages/offsets, and original claim offsets are verified before paid inference. `--verify-only` performs these checks without API calls. `--resume` reuses compatible finished records, including failures, and `--restart` starts fresh. Checkpoints are ignored by Git.
 
-These are annotated-text overlap metrics, not semantic correctness. A valid alternative explanation or supporting passage can receive no overlap credit if it was not annotated.
+The saved 48-case report consolidates the latest completed judgments offline, with no relabeling or new API requests. Prior experiments and scores from older judges are kept outside the published tree. This is a small, automatically audited benchmark from the same source library, with no claim of human-level or unseen-topic generalization. Future tuning using reserved cases changes their interpretation to development examples.
 
 ## LeetCode relevance labels
 

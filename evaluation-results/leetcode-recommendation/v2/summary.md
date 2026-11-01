@@ -26,7 +26,7 @@ Relevant means a frozen reference label of direct match, related practice, or st
 
 Capped recall@3 divides each eligible ordinary question's annotated target hits in its top 3 recommendations by min(3, its positive target count), then averages question scores equally. Direct match, related practice and stretch connection all receive positive credit when in the annotated target set. Unassessed returns receive no annotated hit credit and are not automatically unrelated. Cutoff: 3, from the saved run's max_recommendations setting. Scored questions: 36, N/A: 4, unscored: 0.
 
-Full annotated-target recall is retained below as a secondary coverage diagnostic. It counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall or document-QA evidence-text recall. Scored target-bearing ordinary questions: 36/36; mapping-unscored: 0. Questions without annotated targets are excluded.
+Full annotated-target recall is retained below as a secondary coverage diagnostic. It counts original positive targets actually recommended, summed across questions (micro averaging). Targets count once within a question and again for another wording. These targets are incomplete; this is not exhaustive semantic recall. Scored target-bearing ordinary questions: 36/36; mapping-unscored: 0. Questions without annotated targets are excluded.
 
 ## Supporting diagnostics
 
