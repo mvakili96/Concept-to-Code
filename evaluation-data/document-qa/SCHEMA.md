@@ -39,21 +39,21 @@ Use `question`, `tags`, and `terminology_variants` to inspect whether conservati
 
 ### Retrieval and candidate merging
 
-Map chunks by `source` and `pdf_page`, then test whether the merged candidate set covers at least one alternative in every `required_evidence_group`. For explicitly restricted questions, evidence outside `allowed_sources` is inadmissible even if it contains the answer.
+Source/page anchors and evidence groups support inspecting which passages reach the answer context. For explicitly restricted questions, evidence outside `allowed_sources` is inadmissible even if it contains the answer. The current performance report evaluates generated answers, not candidate sets.
 
 ### Reranking
 
-Measure whether evidence-bearing chunks survive and move above labeled distractors. Report candidate recall before reranking and evidence-group recall after final top-k separately.
+Evidence records and distractors allow manual inspection of which passages survive reranking. Candidate recall and chunk-overlap metrics are not part of the current report.
 
 ### Context coverage
 
-The assembled context succeeds only when every required evidence group is satisfied. Multiple required groups are jointly necessary for the complete answer; alternatives within a group are interchangeable support.
+Multiple required groups document jointly necessary support for the reference answer, while alternatives within a group are interchangeable passages. These annotations provide provenance and inspection aids. They do not impose an exact-passage matching requirement on generated answers or become separate context scores.
 
-The evaluation script additionally reports deterministic `evidence_text_precision` and `evidence_text_recall`. It normalizes whitespace, Unicode ligatures, and line-break hyphenation. Annotated passages map to one consecutive word span in the extracted PDF source/page; final chunks use their verified splitter character offsets, excluding incomplete boundary-word fragments. Ambiguous or failed mappings are unscored. Position unions prevent chunk overlap and duplicate evidence from being counted twice. These metrics measure overlap with the specifically annotated passages, not semantic correctness, and may miss valid alternative evidence.
+The judge uses the exact supplied context to assess whether the generated answer's substantive claims are supported. It does not compare reranked chunks to reference passages or calculate chunk precision/recall. Evidence-group satisfaction is not separately scored.
 
 ### Generated answers
 
-The evaluation runner does not score answer correctness or faithfulness because this project focuses on retrieval and reranking rather than language-model evaluation. Generated answers remain in the detailed outputs, and answers for `unanswerable_within_allowed_sources` records are copied into the summary for manual inspection.
+The evaluator reports required-fact coverage, grounding of generated claims, reference/context contradiction rates, and abstention accuracy. Reference facts and their evidence support the coverage pass. Grounding independently sees the answer's extracted substantive claims and its exact supplied context. Unanswerable records receive a behavior judgment and N/A reference-fact coverage. Original answers, fact/claim labels, quotes, exclusions, and errors remain in the report. These are LLM estimates, with [judge performance](../../evaluation-results/document-qa/judge-validation/summary.md) documented separately.
 
 ## Versioning and quarantine
 

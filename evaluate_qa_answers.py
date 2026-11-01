@@ -246,6 +246,8 @@ def evaluate_saved_answer(question, judge):
     started = time.monotonic()
     result = dict(id=question["id"], question=question["question"], generated_answer=question["generated_answer"],
                   reference_answer=question["reference_answer"])
+    result.update({key:question[key] for key in ("required_facts", "reference_evidence", "answerability",
+                   "allowed_sources", "final_context", "errors") if key in question})
     if question.get("errors") or not question.get("generated_answer", "").strip():
         result["judgments"] = {stage: dict(status="unscored", result=None, reason="Saved pipeline execution failed or answer is empty.")
                                for stage in ("coverage", "grounding", "abstention")}
@@ -366,9 +368,10 @@ def write_reports(directory, run, questions, calibration):
     directory.mkdir(parents=True, exist_ok=True)
     metrics = summarize(questions)
     validation = run.get("judge_validation", {})
-    lines = ["# Saved QA answer evaluation", "",
+    lines = ["# Document QA: final-answer evaluation", "",
         "These are LLM judgments. Judge agreement and known limitations are reported separately, without a pass/fail qualification threshold.", "",
-        f"LLM-judged fact coverage and grounding of previously generated answers. Retrieval metrics remain in the [original QA report]({os.path.relpath(ROOT/'evaluation-results/document-qa/summary.md', directory)}).", "",
+        "Fact coverage, grounding, contradictions, and abstention evaluate the generated answers. "
+        "The saved context is used only as evidence for answer claims. No chunk precision or recall is calculated.", "",
         f"- Judge: Azure OpenAI `{run['judge_settings']['model_id']}`. Same model family as the answering model.",
         f"- Saved answer run: {run['source_run']['timestamp_utc']}, `{run['source_run']['model_id']}`, answer limit {run['source_run']['answer_max_new_tokens']} tokens.",
         f"- Saved input: `{run['input_path']}`, SHA-256 `{run['input_sha256']}`.",
@@ -378,6 +381,16 @@ def write_reports(directory, run, questions, calibration):
     for name, metric in metrics.items():
         score = f"{metric['average']:.1%}" if metric["average"] is not None else "N/A"
         lines.append(f"| {name.replace('_', ' ').capitalize()} | {score} | {metric['scored']} | {metric['not_applicable']} | {metric['unscored']} |")
+    source = run["source_run"]
+    if "ablation" in source:
+        lines += ["", "## Evaluated answer-generation settings", "",
+                  "These settings describe the saved answers, which may differ from the current configuration.", "",
+                  f"- Dense / BM25 / query expansion: `{source['ablation']}`.",
+                  f"- Dense index: `{source.get('dense_index_type')}`. Candidate limits: dense `{source.get('dense_top_k')}`, BM25 `{source.get('bm25_top_k')}`.",
+                  f"- Chunk size / overlap: `{source.get('chunk_size')}` / `{source.get('chunk_overlap')}` characters.",
+                  f"- Reranker: `{source.get('reranker_model')}`. Context limit: `{source.get('final_top_k')}` chunks.",
+                  f"- Embeddings: `{source.get('embedding_model')}`.",
+                  f"- Indexing mode: `{source.get('indexing_mode')}`."]
     if validation.get("available"):
         target = os.path.relpath(ROOT/validation["path"], directory).replace("details.json", "summary.md")
         lines += ["", f"[Judge performance on 48 cases]({target}): protocol match `{validation['matches_protocol']}`, full benchmark complete `{validation['complete']}`. "
@@ -403,6 +416,13 @@ def write_reports(directory, run, questions, calibration):
         label = abstention["result"]["label"] if abstention.get("result") else abstention["status"]
         lines.append(f"| {question['id']} | " + " | ".join(cell(scores[name]) for name in
             ("fact_coverage", "grounding_rate", "reference_contradiction_rate", "context_contradiction_rate")) + f" | {label} |")
+    unanswerable = [q for q in questions if q.get("answerability", {}).get("label")=="unanswerable_within_allowed_sources"]
+    if unanswerable:
+        lines += ["", "## Answers to unanswerable questions", ""]
+        for q in unanswerable:
+            lines += [f"### {q['id']}", "", q["question"], ""]
+            lines += ["> " + line.rstrip() if line.strip() else ">" for line in q["generated_answer"].splitlines()]
+            lines.append("")
     total_calls = sum(q["llm_calls"] for q in questions)
     tokens = Counter()
     for question in questions:
@@ -411,7 +431,7 @@ def write_reports(directory, run, questions, calibration):
               f"Calibration calls: {calibration['llm_calls']}, tokens: `{calibration['token_usage']}`. "
               "SDK retries may add requests not represented in call counts. Recorded usage is not an Azure bill.", "",
               "## Judge configuration", "", "```yaml", yaml.safe_dump(run["judge_settings"], sort_keys=False).rstrip(), "```", ""]
-    details = dict(schema_version="1.0.0", run=run, calibration=calibration, metric_summaries=metrics,
+    details = dict(schema_version="1.1.0", evaluation_target="generated_answers", run=run, calibration=calibration, metric_summaries=metrics,
                    questions=[{**q, "metrics": question_scores(q)} for q in questions])
     # Stage all three files before replacing a completed report.
     with tempfile.TemporaryDirectory(dir=directory.parent, prefix=".answer-report-") as temporary:
@@ -420,27 +440,30 @@ def write_reports(directory, run, questions, calibration):
         (stage / "summary.md").write_text("\n".join(lines), encoding="utf-8")
         with (stage / "per_question.csv").open("w", encoding="utf-8", newline="") as file:
             fields = ["question_id", "question", "generated_answer", "reference_answer"]
-            fields += [name + suffix for name in metrics for suffix in ("_score", "_status")]
-            writer = csv.DictWriter(file, fieldnames=fields)
+            fields += [name + suffix for name in metrics for suffix in ("_score", "_status", "_matched", "_total")]
+            writer = csv.DictWriter(file, fieldnames=fields, lineterminator="\n")
             writer.writeheader()
             for q in questions:
                 row = {key: q[key] for key in ("question", "generated_answer", "reference_answer")}
+                # CSV is a display export. JSON retains the exact original answer.
+                row["generated_answer"] = "\n".join(line.rstrip() for line in q["generated_answer"].split("\n"))
                 row["question_id"] = q["id"]
                 for name, metric in question_scores(q).items():
-                    row.update({name + "_score": metric["score"], name + "_status": metric["status"]})
+                    row.update({name + "_score": metric["score"], name + "_status": metric["status"],
+                                name + "_matched": metric.get("matched"), name + "_total": metric.get("total")})
                 writer.writerow(row)
         for name in ("summary.md", "details.json", "per_question.csv"):
             os.replace(stage / name, directory / name)
     return metrics
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--restart", action="store_true")
     parser.add_argument("--calibrate", action="store_true", help="Run only the five synthetic judge checks.")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if (args.limit is not None and args.limit < 1) or (args.resume and args.restart):
         parser.error("Use a positive limit and choose either --resume or --restart.")
     config = yaml.safe_load((ROOT / "config.yml").read_text())
@@ -451,6 +474,9 @@ def main():
     if type(settings["validation_retries"]) is not int or settings["validation_retries"] < 0:
         raise ValueError("validation_retries must be nonnegative.")
     input_path = ROOT / settings["input_path"]
+    directory = ROOT / config["document_qa_evaluation"]["results_dir"]
+    if input_path.resolve() == (directory/"details.json").resolve():
+        raise ValueError("Saved predictions must use a separate input file so reports cannot overwrite them.")
     saved = json.loads(input_path.read_text())
     selected = saved["questions"][:args.limit] if args.limit else saved["questions"]
     if not selected or len({q["id"] for q in selected}) != len(selected):
@@ -469,7 +495,6 @@ def main():
                     code_sha256=digest(__file__), judge_settings=settings,
                     azure_settings={key:config["llm"]["azure"][key] for key in
                                     ("base_url", "api_key_env", "reasoning_effort", "max_retries")}, limit=args.limit)
-    directory = ROOT / settings["results_dir"]
     checkpoint_path = directory / ".checkpoint" / "answers.json"
     checkpoint = json.loads(checkpoint_path.read_text()) if checkpoint_path.exists() and not args.restart else None
     if checkpoint and not args.resume and not checkpoint.get("complete"):
@@ -486,7 +511,7 @@ def main():
     if args.calibrate:
         return
     run = dict(timestamp_utc=datetime.now(timezone.utc).isoformat(), input_path=settings["input_path"],
-               source_run={key:saved["run"][key] for key in ("timestamp_utc", "model_id", "llm_provider", "answer_max_new_tokens")},
+               source_run=dict(saved["run"]), evaluation_target="generated_answers",
                **identity, judge_validation=validation_status(config))
     pending = [q for q in selected if q["id"] not in checkpoint["questions"]]
     print(f"Judging {len(pending)} saved answers, reusing {len(selected)-len(pending)}, workers={settings['max_workers']}.", flush=True)

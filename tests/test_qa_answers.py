@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import yaml
 
@@ -246,6 +246,8 @@ class JudgeTests(unittest.TestCase):
             reference_evidence=[dict(evidence_id="e1", exact_quote="The lifetime is ten seconds.")],
             final_context="Items expire after ten seconds.", allowed_sources=["sample.pdf"],
             answerability=dict(label="answerable"), errors=[])
+        question["metrics"]={"evidence_text_precision":{"score":0}}
+        question["final_chunks"]=[{"text":"A chunk that must not be evaluated."}]
         original = copy.deepcopy(question)
         judge = evaluation.AnswerJudge(self.config, Mock())
         judge.ask = Mock(side_effect=[valid({"facts": [fact()]}), valid({"claims": [claim()]})])
@@ -255,6 +257,10 @@ class JudgeTests(unittest.TestCase):
         self.assertIn("reference_answer", coverage_payload)
         self.assertEqual(set(grounding_payload), {"question", "generated_answer", "retrieved_context"})
         self.assertEqual(result["judgments"]["coverage"]["result"]["facts"][0]["fact_id"], "f1")
+        self.assertNotIn("metrics",result)
+        self.assertNotIn("final_chunks",result)
+        self.assertEqual(result["final_context"],question["final_context"])
+        self.assertEqual(evaluation.question_scores(result)["fact_coverage"]["score"],1)
         self.assertEqual(question, original)
 
     def test_failed_pipeline_is_not_a_zero_score_or_successful_abstention(self):
@@ -278,8 +284,21 @@ class JudgeTests(unittest.TestCase):
             details = json.loads((directory / "details.json").read_text())
             self.assertEqual(details["metric_summaries"], metrics)
             self.assertEqual(details["questions"][0]["metrics"], evaluation.question_scores(question))
+            self.assertEqual(details["evaluation_target"],"generated_answers")
+            self.assertEqual(set(details["metric_summaries"]),{"fact_coverage","grounding_rate",
+                "reference_contradiction_rate","context_contradiction_rate","abstention_accuracy"})
             self.assertIn("Fact coverage", (directory / "summary.md").read_text())
+            self.assertNotIn("evidence_text_precision",(directory/"details.json").read_text())
             self.assertIn("grounding_rate_score", (directory / "per_question.csv").read_text())
+            self.assertIn("grounding_rate_total", (directory / "per_question.csv").read_text())
+
+    def test_report_cannot_overwrite_saved_predictions(self):
+        config=copy.deepcopy(self.config)
+        config["qa_answer_evaluation"]["input_path"]=config["document_qa_evaluation"]["results_dir"]+"/details.json"
+        with patch.object(evaluation.yaml,"safe_load",return_value=config), patch.object(evaluation,"AnswerJudge") as judge:
+            with self.assertRaisesRegex(ValueError,"separate input file"):
+                evaluation.main(["--limit","1"])
+        judge.assert_not_called()
 
 
 if __name__ == "__main__":

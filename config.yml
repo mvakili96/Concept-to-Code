@@ -559,8 +559,7 @@ document_qa_evaluation:
   results_dir: "evaluation-results/document-qa"
 
 qa_answer_evaluation:
-  input_path: "evaluation-results/document-qa/details.json"
-  results_dir: "evaluation-results/document-qa/answers"
+  input_path: "evaluation-results/document-qa/predictions.json"
   model_id: "gpt-5.1"  # Judge deployment. Endpoint/key settings come from llm.azure.
   max_workers: 2
   max_new_tokens: 4000
