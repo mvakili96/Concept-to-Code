@@ -2,7 +2,7 @@
 
 [Benchmark structure and sample contents](README.md) · [Document-QA evaluator](../evaluate_document_qa.py) · [LeetCode evaluator](../evaluate_leetcode_recommendation.py)
 
-The current metrics are deterministic comparisons against saved references. Production LLMs still generate expansions, answers, and recommendation judgments, but their own opinions are not the evaluation ground truth. Answer correctness and faithfulness are not scored.
+Retrieval metrics are deterministic comparisons against saved references. Production LLMs generate expansions, answers, and recommendation judgments, but their own opinions are not the retrieval evaluation ground truth. Optional saved-answer evaluation uses a separate LLM judge and reports its estimates separately.
 
 ## Document QA: evidence text precision and recall
 
@@ -59,6 +59,48 @@ The reported corpus value is a **macro average**: calculate each question's scor
 Scored zeroes remain in averages. N/A and unscored cases are excluded and counted separately. In the current 50-question dataset, three controlled unanswerable questions normally receive N/A rather than retrieval-quality scores.
 
 These are annotated-text overlap metrics, not semantic correctness. A valid alternative explanation or supporting passage can receive no overlap credit if it was not annotated.
+
+## Optional QA answer evaluation
+
+`python evaluate_qa_answers.py` judges the saved answers in `evaluation-results/document-qa/details.json` without rerunning RAG. New results go to `evaluation-results/document-qa/answers/`. Settings and the coverage, claim-extraction, grounding, and abstention prompts are in `qa_answer_evaluation` in `config.yml`.
+
+Coverage sees the question, full original answer, reference answer, ordered atomic facts, and reference evidence. Labels are `covered`, `missing_or_incomplete`, `contradicted`, or `uncertain`. A covered fact must preserve its conditions and numerical details, allowing paraphrases.
+
+Grounding uses two calls without reference facts or reference evidence. Python first removes whole SOURCE/PAGE citation rows, keeping original text and offsets. Extraction sees only the question and answer, classifying statements as substantive, abstention, or context-insufficiency. Grounding then sees only the substantive quotes and exact saved context, assigning `supported`, `unsupported`, `contradicted`, or `uncertain`. Every extracted quote must receive exactly one judgment. Guesses and technical negations remain substantive. Exclusions are retained for inspection. Citation-only answers need no call, and pure abstention stops after extraction.
+
+```text
+fact coverage                = covered required facts / all required facts
+reference contradiction rate = contradicted required facts / all required facts
+grounding rate               = supported extracted claims / all extracted claims
+context contradiction rate   = contradicted extracted claims / all extracted claims
+```
+
+Scores are macro averages over scored questions. Any uncertain label or exhausted quote/format failure makes that question's affected metric unscored. N/A and unscored results are excluded from averages and counted explicitly. An answer with no substantive claims has N/A grounding, not perfect grounding. A failed saved pipeline execution is unscored.
+
+The three controlled unanswerable QA questions have N/A fact coverage. Their separate abstention judgment sees the complete answer and returns `appropriate_abstention`, `unsupported_answer`, `mixed`, or `uncertain`. It also identifies acknowledgment of insufficient evidence and provision of a substantive answer/guess. Both true requires `mixed`, which Python checks for consistency. Abstention accuracy is appropriate abstentions divided by validly judged unanswerable questions.
+
+Quotes must occur in the supplied answer/context after Unicode, whitespace, and line-break-hyphen normalization. One corrective retry is allowed by default. Literal matching checks provenance, not entailment. Contradiction requires an incompatible proposition about the same subject and conditions. Missing evidence alone is insufficient. Unsupported does not necessarily mean false. Both generator and judge use GPT-5.1, so correlated errors remain possible. These are model estimates, not objective correctness or human approval.
+
+Five synthetic checks run before answer judging. They are calibration controls, not benchmark accuracy. `--limit 1`, `--resume`, `--restart`, and `--calibrate` support subsets, compatible progress, fresh runs, and calibration-only execution. Original saved answers used a 400-token generation limit. Current generation settings may differ.
+
+## QA judge performance
+
+`python evaluate_qa_judge.py` evaluates the latest judge on [48 cases](qa-judge-validation/README.md) twice. The [report](../evaluation-results/document-qa/judge-validation/summary.md) presents both runs, their combined aggregate, and separate development/reserved counts. Thirty cases informed judge improvements. Eighteen were reserved from refinement. Combining them does not create an independent test estimate.
+
+```text
+exact case agreement = cases with every expected label and claim inventory matching
+                       / all attempted cases
+valid response rate  = judgments passing quote/format checks without uncertainty
+                       / all attempted cases
+```
+
+Unscored judgments remain in the exact-agreement denominator as failures. Coverage compares labels in fact order. Grounding aligns claims through normalized literal answer excerpts, with missing, extra, duplicate, or ambiguous mappings failing the inventory check. Expected labels are automatically audited against PDF prose and explicit inventory rules, not human approval or evaluated-model outputs. They never enter judge prompts.
+
+Task-specific confusion counts and per-label precision, recall, and macro F1 are stored in JSON. Extra claims contribute false positives, while missing/unscored items contribute false negatives. No-claim controls affect exact-case agreement but are not a semantic class in macro F1. Repeatability reports usable-and-identical decisions divided by all pairs and conditional agreement where both judgments are valid. Repetition does not double the independent case count, and consistent mistakes remain mistakes.
+
+There is no pass/fail qualification gate. Judge performance is reported with its observed errors and scope. Answer reports attach this measurement only with explicit protocol/data/model matching metadata. Inference code and prompt fingerprints are separate from report formatting, so reorganizing saved results does not imply new model calls. Dataset hashes, exact PDF quotes/pages/offsets, and original claim offsets are verified before paid inference. `--verify-only` performs these checks without API calls. `--resume` reuses compatible finished records, including failures, and `--restart` starts fresh. Checkpoints are ignored by Git.
+
+The saved 48-case report consolidates the latest completed judgments offline, with no relabeling or new API requests. Prior experiments and scores from older judges are kept outside the published tree. This is a small, automatically audited benchmark from the same source library, with no claim of human-level or unseen-topic generalization. Future tuning using reserved cases changes their interpretation to development examples.
 
 ## LeetCode relevance labels
 

@@ -9,6 +9,8 @@ The repository has two source-grounded benchmarks for comparing pipeline changes
 
 See [METRICS.md](METRICS.md) for formulas, denominators, relevance labels, and worked examples. LeetCode reports macro **Capped Recall@k**, with `k` taken from the configured recommendation limit. Full annotated-target recall remains a secondary coverage diagnostic. The two benchmarks use different units, so their precision and recall percentages are not directly comparable.
 
+The separate [QA judge benchmark](qa-judge-validation/) contains 48 cases, with 30 development and 18 reserved cases identified. It measures label agreement and consistency across two runs. Expected labels are automatically source-audited, not human-approved. Both RAG benchmarks are unchanged.
+
 ## Document QA: what one sample contains
 
 [`document-qa/rag_benchmark_v1.jsonl`](document-qa/rag_benchmark_v1.jsonl) has one JSON object per question. Despite the filename, its current benchmark version is `1.2.0` and its schema version is `1.1.0`.
