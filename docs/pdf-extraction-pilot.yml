@@ -1,0 +1,12 @@
+# Fifteen physical PDF pages. No LLM calls or index rebuilds.
+output_dir: "index-data/pdf-extraction-pilot"
+samples:
+  - source: "Computer Vision: Algorithms and Applications.pdf"
+    pages: [145, 146, 158, 489, 504]
+    focus: "Diagrams, mathematical prose, captions, and reading order"
+  - source: "Designing Data-Intensive Applications.pdf"
+    pages: [113, 175, 177, 178, 200]
+    focus: "Comparison table, replication diagrams, lists, and ordinary prose"
+  - source: "Speech and Language Processing.pdf"
+    pages: [33, 34, 49, 60, 85]
+    focus: "Prompt example, benchmark examples, Unicode and regex tables, and probability prose"

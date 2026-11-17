@@ -23,6 +23,7 @@ from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from rank_bm25 import BM25Okapi
 from transformers import GenerationConfig
+from pdf_ingestion import PDFExtractor, extraction_settings
 
 
 class AzureOpenAILLM:
@@ -136,6 +137,7 @@ class RAGPipeline:
             raise ValueError("conversation.max_history_turns must be at least 1.")
 
         self.page_texts = {}
+        self.structured_pages = {}
 
         if self.indexing_mode == "build":
             self.available_sources = [pdf_path.name for pdf_path in pdf_paths]
@@ -179,7 +181,7 @@ class RAGPipeline:
     def persisted_index_settings(self):
         # These settings affect the saved chunks, embeddings, BM25 index, or HNSW graph.
         # Query-time settings such as top-k and hnsw_ef_search may change without rebuilding.
-        return {
+        settings = {
             "chunking": self.config["chunking"],
             "embedding": self.config["embedding"],
             "text_normalization": {
@@ -200,6 +202,11 @@ class RAGPipeline:
                 "hnsw_ef_construction": self.config["retrieval"]["hnsw_ef_construction"],
             },
         }
+        extraction = extraction_settings(self.config["documents"])
+        # Existing pypdf indexes remain compatible. A structured-parser change requires a rebuild.
+        if "docling_options" in extraction:
+            settings["pdf_extraction"] = extraction
+        return settings
 
     def dense_index_path(self, dense_index_type, source):
         return (
@@ -218,6 +225,7 @@ class RAGPipeline:
             "documents": self.documents,
             "chunks": self.chunks,
             "page_texts": self.page_texts,
+            "structured_pages": self.structured_pages,
             "global_bm25": self.global_bm25,
             "subset_bm25_cache": self.subset_bm25_cache,
         }
@@ -256,7 +264,7 @@ class RAGPipeline:
 
         if manifest.get("index_settings") != self.persisted_index_settings():
             raise ValueError(
-                "Chunking, text normalization, embedding, BM25, or HNSW construction settings changed "
+                "PDF extraction, chunking, text normalization, embedding, BM25, or HNSW construction settings changed "
                 "after the indexes were built. Set indexing.mode to \"build\" to rebuild them."
             )
 
@@ -282,6 +290,7 @@ class RAGPipeline:
         self.documents = persisted_data["documents"]
         self.chunks = persisted_data["chunks"]
         self.page_texts = persisted_data["page_texts"]
+        self.structured_pages = persisted_data.get("structured_pages", {})
         self.global_bm25 = persisted_data["global_bm25"]
         self.subset_bm25_cache = persisted_data["subset_bm25_cache"]
         self.source_chunks = self.group_chunks_by_source()
@@ -301,25 +310,17 @@ class RAGPipeline:
 
     def load_documents(self):
         documents = []
+        extractor = PDFExtractor(self.config["documents"])
 
         for pdf_path in self.pdf_paths:
-            reader = pypdf.PdfReader(pdf_path)
-
-            for page_number, page in enumerate(reader.pages):
-
-                # the following text totally ignores figures. Object type is a string.
-                text = page.extract_text() or ""
-                self.page_texts[(pdf_path.name, page_number + 1)] = text
-
-                doc = Document(
-                    page_content=text,
-                    metadata={
-                        "source": pdf_path.name,
-                        "page": page_number + 1
-                    }
-                )
-
-                documents.append(doc)
+            # the following text totally ignores figures. Object type is a string.
+            # The pypdf baseline is retained verbatim, even when Docling supplies indexed prose.
+            extracted = extractor.extract(pdf_path)
+            self.page_texts.update({(pdf_path.name, page): text
+                                   for page, text in extracted["raw_pages"].items()})
+            self.structured_pages.update({(pdf_path.name, page): data
+                                          for page, data in extracted["structured_pages"].items()})
+            documents.extend(extracted["documents"])
 
         print(200*"#")
         print("DONE with parsing the reference files!")
@@ -344,9 +345,16 @@ class RAGPipeline:
         # This ID is stored in both retrieval systems so the same chunk can be
         # recognized and deduplicated after dense and sparse retrieval.
         for chunk in chunks:
+            # Structured offsets refer to Docling's page text, never to the raw pypdf text.
+            if chunk.metadata.get("parser") == "docling":
+                start = chunk.metadata["start_index"]
+                end = start + len(chunk.page_content)
+                chunk.metadata["elements"] = [element for element in chunk.metadata["elements"]
+                    if element["start"] is not None and element["start"] < end and element["end"] > start]
             chunk.metadata["chunk_id"] = (
                 f"{chunk.metadata['source']}::"
                 f"page={chunk.metadata['page']}::"
+                + ("parser=docling::" if chunk.metadata.get("parser") == "docling" else "") +
                 f"start={chunk.metadata['start_index']}"
             )
 
@@ -1050,6 +1058,8 @@ class RAGPipeline:
                     "page": page,
                     "start_index": doc.metadata["start_index"],
                     "text": doc.page_content,
+                    **{key: doc.metadata[key] for key in
+                       ("parser", "source_sha256", "offset_basis", "elements") if key in doc.metadata},
                 }
             )
 

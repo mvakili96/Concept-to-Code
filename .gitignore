@@ -7,3 +7,5 @@ __pycache__/
 diagnostics/
 .checkpoint/
 .vscode/
+# Keep new Markdown files under docs local. Existing tracked files remain tracked.
+/docs/**/*.md

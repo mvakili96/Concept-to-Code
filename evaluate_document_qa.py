@@ -117,6 +117,7 @@ def main(argv=None):
         ablation=dict(config["ablation"]), embedding_model=config["embedding"]["model_name"],
         reranker_model=config["reranking"]["model_name"], reranker_include_source_name=config["reranking"]["include_source_name"],
         text_normalization=pipeline.persisted_index_settings()["text_normalization"],
+        pdf_extraction=dict(config["documents"].get("extraction", {"parser": "pypdf"})),
         query_expansion_settings=dict(config["query_expansion"]), chunk_size=config["chunking"]["chunk_size"],
         chunk_overlap=config["chunking"]["chunk_overlap"], dense_index_type=config["retrieval"]["dense_index_type"],
         dense_top_k=config["retrieval"]["dense_top_k"], bm25_top_k=config["retrieval"]["bm25_top_k"],
