@@ -28,7 +28,7 @@ flowchart LR
 flowchart TD
     subgraph SOURCES["Indexing & source preparation"]
         PDF["PDF library"]
-        INGEST["Extract prose & create overlapping chunks<br/>pypdf · LangChain"]
+        INGEST["Extract PDF content & chunk prose/tables<br/>Docling · pypdf · LangChain"]
         BUILD["Embed normalized chunks & build indexes<br/>MiniLM · FAISS Flat + HNSW · BM25"]
         STORE[("Persisted corpus & indexes<br/>index-data/")]
         CATALOGUE[("LeetCode catalogue<br/>4,000 problem identities & statements")]
