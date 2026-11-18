@@ -9,7 +9,7 @@ from langchain_core.documents import Document
 from pdf_tables import extract_table, table_document
 
 
-EXTRACTION_SCHEMA_VERSION = 2
+EXTRACTION_SCHEMA_VERSION = 3
 # Stage one indexes native prose only. Table reconstruction, OCR, and vision come later.
 # Stage two optionally adds separate table Documents, preserving the original prose path.
 TEXT_LABELS = {"text", "paragraph", "title", "section_header", "list_item", "code"}
@@ -132,6 +132,12 @@ def structured_pages(document, source, fingerprint, selected, tables_enabled=Fal
         label = getattr(item.label, "value", item.label)
         provenance = list(getattr(item, "prov", []))
         item_pages = {prov.page_no for prov in provenance}
+        fragments, mapping_error = {}, None
+        if label in TEXT_LABELS:
+            try:
+                fragments = text_fragments(item, provenance)
+            except ValueError as error:
+                mapping_error = str(error)
         for prov in provenance:
             page = prov.page_no
             if page not in pages:
@@ -139,15 +145,22 @@ def structured_pages(document, source, fingerprint, selected, tables_enabled=Fal
             bbox = prov.bbox.to_top_left_origin(document.pages[page].size.height)
             bounds = [float(bbox.l), float(bbox.t), float(bbox.r), float(bbox.b)]
             text = getattr(item, "text", "") or ""
-            anchor = json.dumps([fingerprint, page, label, bounds, text], ensure_ascii=False)
+            span = None
+            if id(prov) in fragments:
+                text, span = fragments[id(prov)]
+            anchor = json.dumps([fingerprint, page, label, bounds, text, span], ensure_ascii=False)
             identifier = hashlib.sha256(anchor.encode("utf-8")).hexdigest()[:20]
             element = {"element_id": f"{source}::page={page}::element={identifier}",
                        "content_type": label, "bbox": bounds, "bbox_origin": "TOPLEFT",
                        "bbox_units": "PDF points", "start": None, "end": None,
-                       "_text": text, "_single_page": len(item_pages) == 1}
+                       "_text": text, "_text_mapped": mapping_error is None}
+            if span is not None:
+                element.update(docling_charspan=list(span), docling_text_basis="item.orig")
             # Multi-page items need finer span mapping in a later stage, not guessed page assignments.
-            if len(item_pages) > 1:
-                pages[page]["warnings"].append(f"Multi-page element excluded from indexed text: {element['element_id']}")
+            # Those page-specific spans are now used above; invalid mappings remain explicit.
+            if mapping_error is not None:
+                element["excluded_reason"] = "invalid_text_provenance"
+                pages[page]["warnings"].append(f"Text span excluded: {element['element_id']}: {mapping_error}")
             if label == "table" and tables_enabled:
                 # Table extraction failures remain explicit. Flattened cell text stays excluded below.
                 try:
@@ -165,8 +178,8 @@ def structured_pages(document, source, fingerprint, selected, tables_enabled=Fal
                           if element["content_type"] in {"table", "picture"}]
         seen_text = set()
         for element in data["elements"]:
-            text, single_page = element.pop("_text"), element.pop("_single_page")
-            if element["content_type"] not in TEXT_LABELS or not text.strip() or not single_page:
+            text, mapped = element.pop("_text"), element.pop("_text_mapped")
+            if element["content_type"] not in TEXT_LABELS or not text.strip() or not mapped:
                 continue
             # With table reconstruction disabled, Docling may emit cell text as TextItems.
             # Detect it geometrically so flattened cells do not masquerade as ordinary prose.
@@ -183,6 +196,33 @@ def structured_pages(document, source, fingerprint, selected, tables_enabled=Fal
         if not data["text"].strip():
             data["warnings"].append("No indexable native prose. OCR is disabled in this stage.")
     return pages
+
+
+def text_fragments(item, provenance):
+    """Use Docling's original item string for per-region spans, not normalized item.text."""
+    if len(provenance) <= 1:
+        return {id(prov): (item.text, None) for prov in provenance}
+    original = getattr(item, "orig", None)
+    if not isinstance(original, str):
+        raise ValueError("Multi-region text has no original string for its character spans.")
+    spans = []
+    for prov in provenance:
+        span = getattr(prov, "charspan", None)
+        if (not isinstance(span, (tuple, list)) or len(span) != 2
+                or any(type(value) is not int for value in span)
+                or not 0 <= span[0] < span[1] <= len(original)):
+            raise ValueError("Missing or out-of-range Docling character span.")
+        spans.append((span[0], span[1], prov))
+    end = 0
+    for start, stop, _prov in sorted(spans, key=lambda value: (value[0], value[1])):
+        if start < end:
+            raise ValueError("Overlapping character spans have ambiguous region attribution.")
+        if original[end:start].strip():
+            raise ValueError("Character spans leave source text without a page/region assignment.")
+        end = stop
+    if original[end:].strip():
+        raise ValueError("Character spans leave trailing source text without a page/region assignment.")
+    return {id(prov): (original[start:stop], (start, stop)) for start, stop, prov in spans}
 
 
 def region_contains_text(text, region):

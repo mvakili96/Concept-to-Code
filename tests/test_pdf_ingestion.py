@@ -89,6 +89,72 @@ class ExtractionTests(unittest.TestCase):
         pages = structured_pages(document([value], (7, 8)), "book.pdf", "a" * 64, {7, 8})
         self.assertTrue(all(not page["text"] and page["warnings"] for page in pages.values()))
 
+    def test_multi_page_prose_uses_original_string_and_correct_physical_pages(self):
+        value = item("text", "Normalized text with different character positions")
+        value.orig = "First page: ﬁltering. Second page: continuation."
+        boundary = value.orig.index("Second")
+        value.prov[0].charspan = (0, boundary - 1)
+        continuation = item("text", page=8).prov[0]
+        continuation.charspan = (boundary, len(value.orig))
+        value.prov.append(continuation)
+        pages = structured_pages(document([value], (7, 8)), "book.pdf", "hash", {7, 8})
+        self.assertEqual(pages[7]["text"], "First page: ﬁltering.")
+        self.assertEqual(pages[8]["text"], "Second page: continuation.")
+        self.assertEqual(pages[8]["elements"][0]["docling_charspan"], [boundary, len(value.orig)])
+        self.assertEqual(pages[8]["elements"][0]["docling_text_basis"], "item.orig")
+        self.assertFalse(pages[7]["warnings"] or pages[8]["warnings"])
+        # A subset must not receive the full paragraph or the neighboring page's prose.
+        selected = structured_pages(document([value], (7, 8)), "book.pdf", "hash", {8})
+        self.assertEqual(selected[8]["text"], "Second page: continuation.")
+
+    def test_same_page_multiple_regions_do_not_repeat_the_entire_item(self):
+        value = item("text", "Left column. Right column.")
+        value.orig = value.text
+        value.prov[0].charspan = (0, 12)
+        right = item("text", bounds=(100, 20, 190, 50)).prov[0]
+        right.charspan = (13, len(value.orig))
+        value.prov.append(right)
+        page = structured_pages(document([value]), "book.pdf", "hash", {7})[7]
+        self.assertEqual(page["text"], "Left column.\n\nRight column.")
+        self.assertEqual(len({element["element_id"] for element in page["elements"]}), 2)
+
+    def test_invalid_multi_page_spans_are_flagged_without_guessing(self):
+        for spans in ([(0, 5), (4, 10)], [(0, 5), (6, 20)], [(0, 3), (7, 10)], [(0, 3), (3, 7)]):
+            with self.subTest(spans=spans):
+                value = item("text", "abcdefghij")
+                value.orig = value.text
+                value.prov[0].charspan = spans[0]
+                continuation = item("text", page=8).prov[0]
+                continuation.charspan = spans[1]
+                value.prov.append(continuation)
+                pages = structured_pages(document([value], (7, 8)), "book.pdf", "hash", {7, 8})
+                self.assertTrue(all(not page["text"] and page["warnings"] for page in pages.values()))
+                self.assertTrue(all(page["elements"][0]["excluded_reason"] == "invalid_text_provenance" for page in pages.values()))
+
+    def test_a_word_split_at_a_page_boundary_keeps_both_exact_fragments(self):
+        value = item("text", "representations")
+        value.orig = value.text
+        value.prov[0].charspan = (0, 5)
+        continuation = item("text", page=8).prov[0]
+        continuation.charspan = (5, len(value.orig))
+        value.prov.append(continuation)
+        pages = structured_pages(document([value], (7, 8)), "book.pdf", "hash", {7, 8})
+        self.assertEqual(pages[7]["text"], "repre")
+        self.assertEqual(pages[8]["text"], "sentations")
+        self.assertFalse(pages[7]["warnings"] or pages[8]["warnings"])
+
+    def test_cross_page_fragments_still_respect_visual_region_exclusions(self):
+        value = item("text", "Table cells. Actual prose.")
+        value.orig = value.text
+        value.prov[0].charspan = (0, 12)
+        continuation = item("text", page=8).prov[0]
+        continuation.charspan = (13, len(value.orig))
+        value.prov.append(continuation)
+        table = item("table")
+        pages = structured_pages(document([table, value], (7, 8)), "book.pdf", "hash", {7, 8})
+        self.assertEqual(pages[7]["text"], "")
+        self.assertEqual(pages[8]["text"], "Actual prose.")
+
     def test_docling_uses_original_page_range_and_keeps_raw_text(self):
         reader = SimpleNamespace(pages=[Mock() for _ in range(8)])
         for page in reader.pages:
@@ -123,6 +189,8 @@ class PipelineIntegrationTests(unittest.TestCase):
     def pipeline(self):
         pipeline = RAGPipeline.__new__(RAGPipeline)
         pipeline.config = copy.deepcopy(yaml.safe_load((ROOT / "config.yml").read_text()))
+        # The compatibility fixture is pypdf regardless of the user's live parser choice.
+        pipeline.config["documents"]["extraction"]["parser"] = "pypdf"
         return pipeline
 
     def test_chunk_offsets_and_element_regions_survive_context_assembly(self):
@@ -144,9 +212,7 @@ class PipelineIntegrationTests(unittest.TestCase):
     def test_parser_switch_requires_rebuild_and_default_keeps_existing_settings(self):
         pipeline = self.pipeline()
         settings = pipeline.persisted_index_settings()
-        existing = ROOT / "index-data/manifest.json"
-        if existing.exists():
-            self.assertEqual(settings, json.loads(existing.read_text())["index_settings"])
+        self.assertEqual(set(settings), {"chunking", "embedding", "text_normalization", "bm25", "hnsw_construction"})
         self.assertNotIn("pdf_extraction", settings)
         pipeline.config["documents"]["extraction"]["parser"] = "docling"
         structured = pipeline.persisted_index_settings()
@@ -187,6 +253,19 @@ class PipelineIntegrationTests(unittest.TestCase):
             other.config["documents"]["extraction"]["parser"] = "docling"
             with self.assertRaisesRegex(ValueError, "rebuild"):
                 other.load_index_data()
+
+    def test_pre_fix_docling_indexes_require_a_rebuild(self):
+        pipeline = self.pipeline()
+        pipeline.config["documents"]["extraction"]["parser"] = "docling"
+        old_settings = pipeline.persisted_index_settings()
+        old_settings["pdf_extraction"]["schema_version"] = 2
+        with tempfile.TemporaryDirectory() as temp:
+            pipeline.persist_directory = Path(temp)
+            (Path(temp) / "manifest.json").write_text(json.dumps({
+                "format_version": pipeline.PERSISTENCE_FORMAT_VERSION, "index_settings": old_settings}))
+            (Path(temp) / "corpus.pkl").touch()
+            with self.assertRaisesRegex(ValueError, "rebuild"):
+                pipeline.load_index_data()
 
 
 if __name__ == "__main__":
