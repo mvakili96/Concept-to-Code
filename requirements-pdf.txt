@@ -1,0 +1,2 @@
+# Optional layout extraction. Install after requirements.txt.
+docling==2.150.1

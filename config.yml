@@ -3,6 +3,13 @@ query: "What is Hough transform in the context of computer vision?"
 
 documents:
   pdf_glob: "documents/*.pdf"
+  extraction:
+    parser: "docling"  # "docling": optional layout-aware native prose. Rebuild after switching.
+    source_overrides:
+      # The LeetCode catalogue and legacy problem isolation still use raw pypdf offsets.
+      LeetCode_4000_Problem_Reference.pdf: "pypdf"
+    tables:
+      enabled: true  # Docling only. Keep rows intact and repeat headers/linked notes using chunk_size.
 
 indexing:
   mode: "load"  # First use "build"; then switch to "load" to reuse the persisted indexes.

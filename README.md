@@ -14,10 +14,12 @@ I developed this project for my own interview preparation: I wanted grounded exp
 
 | Workflow | Pipeline |
 |---|---|
-| **Document QA** | PDF extraction and chunking → dense + BM25 retrieval → candidate deduplication → cross-encoder reranking → cited answers |
+| **Document QA** | PDF text/table extraction and chunking → dense + BM25 retrieval → candidate deduplication → cross-encoder reranking → cited answers |
 | **LeetCode practice** | Grounded QA answer → shortlist from all 4,000 problem titles → verify up to 20 full statements → recommend up to three cited problems |
 
-Built with **pypdf**, **LangChain**, **Sentence Transformers/MiniLM**, **FAISS**, and **rank-bm25**. Generation defaults to **Azure OpenAI GPT-5.1**. Local **Qwen2.5-7B-Instruct** remains available for QA and the legacy recommendation workflow.
+Built with **Docling**, **pypdf**, **LangChain**, **Sentence Transformers/MiniLM**, **FAISS**, and **rank-bm25**. Generation defaults to **Azure OpenAI GPT-5.1**. Local **Qwen2.5-7B-Instruct** remains available for QA and the legacy recommendation workflow.
+
+Docling preserves layout metadata and indexes supported tables with complete rows, repeated headers, and linked captions/footnotes. Cross-page prose keeps page-specific source references. The parser is configurable, and the LeetCode catalogue uses pypdf.
 
 Features include **IndexFlat (exact k-nearest neighbors)** or **HNSW (approximate nearest neighbors, ANN)**, optional LLM query expansion, persistent BM25/Flat/HNSW indexes, conversational QA, and dense/BM25/expansion ablations. Exact quoted filenames restrict technical sources. Citations use one-based physical PDF pages.
 
@@ -50,7 +52,7 @@ flowchart LR
 flowchart TD
     subgraph SOURCES["Indexing & source preparation"]
         PDF["PDF library"]
-        INGEST["Extract prose & create overlapping chunks<br/>pypdf · LangChain"]
+        INGEST["Extract PDF content & chunk prose/tables<br/>Docling · pypdf · LangChain"]
         BUILD["Embed normalized chunks & build indexes<br/>MiniLM · FAISS Flat + HNSW · BM25"]
         STORE[("Persisted corpus & indexes<br/>index-data/")]
         CATALOGUE[("LeetCode catalogue<br/>4,000 problem identities & statements")]
@@ -123,7 +125,7 @@ flowchart TD
 
 ## Run
 
-1. Place the source PDFs in `documents/` and install [requirements.txt](requirements.txt): `pip install -r requirements.txt`.
+1. Place the source PDFs in `documents/` and install [requirements.txt](requirements.txt). The configured Docling parser also needs [requirements-pdf.txt](requirements-pdf.txt): `pip install -r requirements.txt -r requirements-pdf.txt`.
 2. Copy [.env.example](.env.example) to `.env` and set `AZURE_OPENAI_API_KEY` for Azure generation. Calls use your Azure quota and send the supplied passages to Azure.
 3. In [config.yml](config.yml), use `indexing.mode: build` for the first run, then `load` to reuse `index-data/`. Models, prompts, chunking, retrieval, and ablations are configured there.
 
@@ -159,7 +161,7 @@ Both scripts use the production pipeline. Optional command-line arguments:
 
 For example, `python evaluate_leetcode_recommendation.py --limit 5` evaluates five questions. Add `--resume` to continue that same run after an interruption. Completed reports replace files in their configured results directories.
 
-Document QA generates answers with the production pipeline, then judges fact coverage, grounding, contradictions, and abstention. Use `python evaluate_qa_answers.py` to judge the saved answers in `predictions.json` without rerunning RAG. Both commands update the main Document QA report. Judge settings and prompts are in `config.yml`. These are LLM estimates.
+Document QA generates answers with the production pipeline, then judges fact coverage, grounding, contradictions, and abstention. Use `python evaluate_qa_answers.py` to judge the saved answers in `predictions.json` without rerunning RAG. Both commands update the main Document QA report. Judge settings and prompts are in `config.yml`. These are LLM estimates. The QA benchmark currently covers prose evidence only.
 
 `python evaluate_qa_judge.py` measures that judge on [48 source-audited cases](evaluation-data/qa-judge-validation/) twice. The [performance report](evaluation-results/document-qa/judge-validation/summary.md) includes agreement, consistency, and errors, with 30 development and 18 reserved cases identified. `--verify-only` checks sources without API calls.
 
@@ -167,4 +169,4 @@ QA evaluates final answers, using the retrieved context only to judge whether th
 
 ## Limitations
 
-Figures, tables, layout, and scanned content are unsupported. BM25 scores every chunk rather than using an inverted index. Recommendation relationships remain model judgments. Source checks validate identities and quotes. Azure quota errors and answer truncation remain possible. Conversation sessions are not persisted, and no conversational benchmark is included.
+Figure interpretation and OCR/scanned content are unsupported. Reading order and table reconstruction can be imperfect, and ambiguous text spans or table structures are flagged and excluded. BM25 scores every chunk rather than using an inverted index. Recommendation relationships remain model judgments. Source checks validate identities and quotes. Azure quota errors and answer truncation remain possible. Conversation sessions are not persisted, and no conversational benchmark is included.

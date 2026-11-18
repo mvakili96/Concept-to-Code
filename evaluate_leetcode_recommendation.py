@@ -721,7 +721,7 @@ def input_fingerprints(config, questions, root=None):
     normalized["indexing"].pop("mode", None)  # Resume reuses artifacts; it never rebuilds.
     files = {name: digest(Path(root) / config["leetcode_recommendation_evaluation"][key]) for name, key in (
         ("questions", "dataset_path"), ("references", "references_path"), ("manifest", "manifest_path"))}
-    files.update({name: digest(Path(root) / name) for name in ("main.py", "evaluate_leetcode_recommendation.py")})
+    files.update({name: digest(Path(root) / name) for name in ("main.py", "pdf_ingestion.py", "pdf_tables.py", "evaluate_leetcode_recommendation.py")})
     manifest = json_read(Path(root) / config["leetcode_recommendation_evaluation"]["manifest_path"])
     corpus = {doc["source"]: digest(Path(root) / doc["relative_path"]) for doc in manifest["documents"]}
     return dict(config_sha256=hashlib.sha256(json.dumps(safe_metadata(normalized), sort_keys=True).encode()).hexdigest(),

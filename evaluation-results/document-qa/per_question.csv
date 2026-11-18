@@ -2,609 +2,557 @@ question_id,question,generated_answer,reference_answer,fact_coverage_score,fact_
 ragbench-v1-001,"According to ""Computer Vision: Algorithms and Applications.pdf"", how does the original Hough transform use edge points, and what orientation-aware alternative is suggested for non-punctate points?","According to *Computer Vision: Algorithms and Applications.pdf*:
 
 - **Original Hough transform use of edge points:**
-  In its original formulation, each edge point votes for **all possible lines passing through it**, and then lines that correspond to high accumulator (bin) values are examined for potential line fits.
-  **Source and page:** *Computer Vision: Algorithms and Applications.pdf*, p. 504 (Figure 7.46 and accompanying text).
+  In its original formulation, *each edge point votes for all possible lines passing through it*, and then lines corresponding to high accumulator (bin) values are examined for potential line fits.
+  **Source:** Computer Vision: Algorithms and Applications.pdf, **Page 504**
 
 - **Orientation-aware alternative for non-punctate points:**
-  When the points on a line are not truly punctate, the text suggests using the **local orientation information at each edgel so that it votes for a single accumulator cell** in the Hough space, rather than a whole family of lines. This is illustrated as the “oriented Hough transform” in Figure 7.47.
-  **Source and page:** *Computer Vision: Algorithms and Applications.pdf*, p. 504 (Figure 7.47 and accompanying text).","In the original Hough transform, each edge point votes for every possible line through it, and high accumulator/bin values identify candidate line fits. For non-punctate line points, the book recommends using each edgel’s local orientation to vote for one accumulator cell.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,3,3,0.0,scored,0,3,,not_applicable,,
-ragbench-v1-002,"How is the raw SIFT descriptor constructed, and what normalization and clipping steps make it less sensitive to photometric changes?","The raw SIFT descriptor is constructed by:
+  For points on a line that are not truly punctate, a better approach is to **use the local orientation information at each edgel so that it votes for a single accumulator cell** rather than for all possible lines through the point.
+  **Source:** Computer Vision: Algorithms and Applications.pdf, **Page 504**","In the original Hough transform, each edge point votes for every possible line through it, and high accumulator/bin values identify candidate line fits. For non-punctate line points, the book recommends using each edgel’s local orientation to vote for one accumulator cell.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
+ragbench-v1-002,"How is the raw SIFT descriptor constructed, and what normalization and clipping steps make it less sensitive to photometric changes?","The raw SIFT descriptor is constructed by forming a 4×4 spatial grid of cells around the keypoint, and in each cell accumulating an 8‑bin orientation histogram of local image gradients. Using trilinear interpolation in (x, y, θ) space, gradient contributions are softly distributed to adjacent histogram bins. This 4×4 array of 8‑bin histograms yields 4×4×8 = 128 non‑negative values, which form the raw 128‑D SIFT descriptor vector.
 
-- Forming a **4×4 spatial grid of cells** around the keypoint.
-- In each cell, building an **8-bin orientation histogram** of gradient magnitudes.
-- Gradients are **softly distributed** into neighboring bins in the 3D \((x,y,\theta)\) space using **trilinear interpolation**.
+To reduce sensitivity to photometric changes (contrast, gain, other variations), the descriptor then undergoes:
 
-This yields a **4×4 array of 8-bin histograms**, i.e., **128 non‑negative values** that form the raw SIFT descriptor vector.
-[Source: *Computer Vision: Algorithms and Applications.pdf*, Page 462]
+1. **L2 normalization:** The 128‑D vector is normalized to unit length.
+2. **Value clipping:** Each component is clipped to a maximum of 0.2.
+3. **Renormalization:** The clipped vector is again normalized to unit length.
 
-To make the descriptor less sensitive to photometric changes (e.g., contrast or gain):
+These steps make the descriptor more robust to photometric variations.
 
-1. The **128‑D vector is normalized to unit length** to reduce the effect of contrast/gain changes.
-2. Each component is then **clipped to a maximum value of 0.2**.
-3. The **clipped vector is renormalized to unit length** again to further improve robustness to photometric variations.
-
-[Source: *Computer Vision: Algorithms and Applications.pdf*, Page 462]","SIFT computes gradients in a 16×16 window around a keypoint. Each 4×4 subregion contributes an eight-bin orientation histogram, producing 128 non-negative descriptor values. The vector is normalized to unit length, values are clipped to 0.2, and it is normalized again.",0.6666666666666666,scored,2,3,0.0,scored,0,3,0.5,scored,1,2,0.0,scored,0,2,,not_applicable,,
-ragbench-v1-003,What does hysteresis thresholding allow a contour tracker to do when an edge temporarily becomes weak?,"The provided document context does not contain enough information to directly describe what hysteresis thresholding allows a *contour tracker* to do when an edge temporarily becomes weak. It only explains hysteresis in the context of edge linking and thresholding:
-
-- SOURCE: *Computer Vision: Algorithms and Applications.pdf*, PAGE: 489
-- SOURCE: *Computer Vision: Algorithms and Applications.pdf*, PAGE: 523",It uses two thresholds and lets a curve that is being tracked above the higher threshold temporarily fall as low as the lower threshold.,0.0,scored,0,1,0.0,scored,0,1,0.0,scored,0,1,0.0,scored,0,1,,not_applicable,,
-ragbench-v1-004,"Why can a straight edge not fully determine patch motion in the aperture problem, and which component remains reliable?","According to the provided context, a straight (slanted) edge in a patch does not provide sufficient two-dimensional texture. This causes the matching/flow estimation system to be poorly conditioned or rank-deficient, so motion **along the edge direction cannot be reliably recovered**.
-
-The only component of motion that remains reliable is the **normal component of the velocity (displacement)**, i.e., the motion **perpendicular to the edge**.
+**Sources:**
+- *Computer Vision: Algorithms and Applications*, PAGE 462 (description of histogram construction, normalization, and clipping for SIFT).","SIFT computes gradients in a 16×16 window around a keypoint. Each 4×4 subregion contributes an eight-bin orientation histogram, producing 128 non-negative descriptor values. The vector is normalized to unit length, values are clipped to 0.2, and it is normalized again.",0.6666666666666666,scored,2,3,0.0,scored,0,3,0.875,scored,7,8,0.0,scored,0,8,,not_applicable,,
+ragbench-v1-003,What does hysteresis thresholding allow a contour tracker to do when an edge temporarily becomes weak?,"The provided document context explains that hysteresis thresholding allows a contour (edge) being tracked above a higher threshold to *temporarily dip in strength down to a lower threshold* without being discarded. In other words, the tracker can continue following an edge even when it becomes weak, as long as its strength stays above the lower threshold and it remains connected to stronger edge segments.
 
 **Sources and pages:**
-- *Computer Vision: Algorithms and Applications*, PAGE 594: explains that for a slanted edge moving to the right “Only the normal component of the velocity (displacement) can be reliably recovered…,” and that this appears as a rank-deficient matrix where the tangential component is poorly conditioned.
-- *Computer Vision: Algorithms and Applications*, PAGE 448: notes that “straight line segments at a single orientation suffer from the aperture problem … i.e., it is only possible to align the patches along the direction normal to the edge direction.”",A straight segment at a single orientation suffers from the aperture problem: the patch can be aligned reliably only in the direction normal to the edge.,1.0,scored,2,2,0.0,scored,0,2,1.0,scored,6,6,0.0,scored,0,6,,not_applicable,,
-ragbench-v1-005,"For RANSAC-based correspondence fitting, how are hypotheses generated and scored, what inlier tolerance is described as common, and how do Preemptive RANSAC and PROSAC reduce work?","In RANSAC-based correspondence fitting:
+- *Computer Vision: Algorithms and Applications.pdf*, **Page 489**
+- *Computer Vision: Algorithms and Applications.pdf*, **Page 523**",It uses two thresholds and lets a curve that is being tracked above the higher threshold temporarily fall as low as the lower threshold.,1.0,scored,1,1,0.0,scored,0,1,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
+ragbench-v1-004,"Why can a straight edge not fully determine patch motion in the aperture problem, and which component remains reliable?","A straight edge cannot fully determine patch motion because the image patch lacks two-dimensional texture: intensity varies only in one direction. This makes the motion estimation matrix rank-deficient and the component of displacement **along** the edge very poorly conditioned, leading to unstable estimates.
 
-**How hypotheses are generated and scored**
+The only reliably recoverable component is the motion **normal to (perpendicular to) the edge**.
 
-- A *minimal random subset* of measurements (e.g., pairs of edgels for a line, or minimal point correspondences for geometry) is randomly selected to form a **parameter hypothesis** (e.g., a line, motion model, etc.).
-  - Example: “RANSAC randomly chooses pairs of edgels to form a line hypothesis and then tests how many other edgels fall onto this line.”
-    — **SOURCE: Computer Vision: Algorithms and Applications.pdf, PAGE: 506**
+**Sources and pages:**
+- Computer Vision: Algorithms and Applications.pdf, Page 594
+- Computer Vision: Algorithms and Applications.pdf, Page 448",A straight segment at a single orientation suffers from the aperture problem: the patch can be aligned reliably only in the direction normal to the edge.,1.0,scored,2,2,0.0,scored,0,2,1.0,scored,3,3,0.0,scored,0,3,,not_applicable,,
+ragbench-v1-005,"For RANSAC-based correspondence fitting, how are hypotheses generated and scored, what inlier tolerance is described as common, and how do Preemptive RANSAC and PROSAC reduce work?","For RANSAC-based correspondence fitting:
 
-- For each hypothesis, all (or many) measurements are evaluated by computing their **residual** with respect to the model; measurements whose residuals fall below a chosen tolerance are counted as **inliers** or used in robust scoring:
-  - “Least median of squares finds the median value of the ‖ri‖² values. The random selection process is repeated S times and the sample set with the largest number of inliers (or with the smallest median residual) is kept as the final solution.”
-    — **SOURCE: Computer Vision: Algorithms and Applications.pdf, PAGE: 537**
+1. **How hypotheses are generated and scored**
 
-**Common inlier tolerance**
+   - In the correspondence-matching panorama example, **pairs of matches** are used to hypothesize the motion model:
+     - “pairs of matches are used to hypothesize similarity motion models that are then used to count the number of inliers”
+       — *Computer Vision: Algorithms and Applications, p. 559 (SOURCE: 559)*
+   - More generally (for lines), RANSAC:
+     - “randomly chooses pairs of edgels to form a line hypothesis and then tests how many other edgels fall onto this line”
+       — *Computer Vision: Algorithms and Applications, p. 506 (SOURCE: 506)*
+   - Hypotheses are thus **generated from minimal random samples** (e.g., pairs of matches/edgels) and **scored by counting the number of inliers** that are consistent with the hypothesized model.
 
-- The document mentions an inlier tolerance “around 1–3 pixels” for correspondence-based residuals:
-  - “(around 1–3 pixels.) Least median of squares finds the median value of the ‖ri‖² values.”
-    — **SOURCE: Computer Vision: Algorithms and Applications.pdf, PAGE: 537**
+2. **Common inlier tolerance**
 
-**How Preemptive RANSAC and PROSAC reduce work**
+   - The provided document context does not contain enough information about the specific numeric or qualitative inlier tolerance (e.g., pixel/metric threshold) that is commonly used for RANSAC-based correspondence fitting.
 
-- **Preemptive RANSAC** reduces work by *initially scoring only a subset* of the measurements for each hypothesis to quickly select promising candidates, and then performing more detailed scoring only on these:
-  - “When the number of measurements is quite large","RANSAC randomly selects k correspondences to estimate parameters, scores a hypothesis by counting predicted locations within an application-dependent tolerance often around 1–3 pixels, repeats the sampling, and keeps the sample with the most inliers. Preemptive RANSAC initially scores only a subset of measurements, while PROSAC initially samples from the most confident matches.",,unscored,,,,unscored,,,0.6666666666666666,scored,4,6,0.0,scored,0,6,,not_applicable,,
-ragbench-v1-006,"When object scale is unknown, why does the book prefer scale-stable feature extraction over matching every pyramid scale, and how does Lowe's approach locate such features?","The book prefers **scale-stable feature extraction** because:
+3. **How Preemptive RANSAC and PROSAC reduce work**
 
-- When the object’s scale in the image is unknown, matching features independently at every level of a multi-resolution pyramid is inefficient: you must extract and compare many separate sets of features across scales.
-- Instead, extracting **features that are stable in both location and scale** lets you work with a single, scale-normalized set of interest points, avoiding exhaustive multi-scale matching and reducing computation while still handling large scale changes in object appearance.
+   - **Preemptive RANSAC**:
+     - “When the number of measurements is quite large, it may be preferable to only score a subset of the measurements in an initial round that selects the most plausible hypotheses for additional scoring and selection. This modification of RANSAC, which can significantly speed up its performance, is called Preemptive RANSAC (Nistér 2003).”
+       — *Computer Vision: Algorithms and Applications, p. 537 (SOURCE: 537)*
+     - It reduces work by **partially scoring hypotheses on a subset of measurements first**, keeping","RANSAC randomly selects k correspondences to estimate parameters, scores a hypothesis by counting predicted locations within an application-dependent tolerance often around 1–3 pixels, repeats the sampling, and keeps the sample with the most inliers. Preemptive RANSAC initially scores only a subset of measurements, while PROSAC initially samples from the most confident matches.",0.25,scored,1,4,0.0,scored,0,4,1.0,scored,7,7,0.0,scored,0,7,,not_applicable,,
+ragbench-v1-006,"When object scale is unknown, why does the book prefer scale-stable feature extraction over matching every pyramid scale, and how does Lowe's approach locate such features?","According to the provided context, the book prefers scale-stable feature extraction because:
 
-This is explicitly discussed in:
+- When object scale in the image is unknown, naively extracting and matching features at *every* scale in a multi-resolution pyramid is less efficient. It requires computing features at many scales and then matching across all of them.
+- Instead, it is “more efficient to extract features that are stable in both location and scale” (i.e., features whose position and characteristic scale are well-defined and repeatable), so that you only need to match those scale-stable keypoints rather than all pyramid levels.
+  **Source & page:** Computer Vision: Algorithms and Applications.pdf, p. 455.
 
-- **Computer Vision: Algorithms and Applications, p. 455 (second excerpt)**:
-  “However, for most object recognition applications, the scale of the object in the image is unknown. Instead of extracting features at many different scales and then matching all of them, it is more efficient to extract features that are stable in both location and scale (Lowe 2004; Mikolajczyk and Schmid 2004).”
+Regarding how Lowe’s approach locates such features:
 
-Lowe’s approach (SIFT) locates such scale-stable features by:
+- Lowe’s Scale Invariant Feature Transform (SIFT) finds keypoints that are stable in scale by searching for extrema of a scale-space function.
+- Specifically, SIFT constructs a multi-scale representation and detects keypoints at scales where a response function (based on differences of Gaussians approximating the Laplacian) is extremal, thereby selecting points that are stable in both location and scale.
+- The text notes that while SIFT “performs well in practice,” it is not based on the same maximum spatial stability theory as auto-correlation-based detectors, and its detection locations are often complementary to them.
+  **Source & page:** Computer Vision: Algorithms and Applications.pdf, p. 455.","Matching features across many extracted scales is inefficient when object scale is unknown, so features stable in both location and scale are preferred. Lowe's method finds 3D space-plus-scale maxima across Difference-of-Gaussian sub-octave filters and refines the space-scale location with a quadratic fit; the cited implementation uses three sub-octave levels.",0.6666666666666666,scored,2,3,0.0,scored,0,3,0.6,scored,3,5,0.0,scored,0,5,,not_applicable,,
+ragbench-v1-007,How does MOPS reduce sensitivity to detector-position errors and affine photometric changes?,"According to the provided context, MOPS (Multi-Scale Oriented Patches) reduces sensitivity to:
 
-1. **Building sub-octave Difference of Gaussian (DoG) filters** that approximate the Laplacian of Gaussian across scale.
-2. **Searching for 3D extrema (maxima/minima) in space + scale** inside this DoG “scale-space” structure.
-3. **Refining the location in both space and scale** with a quadratic fit to achieve sub-pixel, sub-scale accuracy.
+1. **Detector-position errors (location, orientation, scale):**
+   It samples patches at a spacing of five pixels relative to the detection scale, using a coarser level of the image pyramid to avoid aliasing. This multi-scale, oriented sampling makes the descriptor less sensitive to small inaccuracies in where and how the feature point is detected.
 
-This is described in:
+2. **Affine photometric changes (bias and gain):**
+   Patch intensities are re-scaled so that their mean is zero and their variance is one, which compensates for linear exposure changes (bias and gain).
 
-- **Computer Vision: Algorithms and Applications, p. 455 (first excerpt)**:
-  “Lowe (2004) proposed computing a set of sub-octave Difference of Gaussian filters (Figure 7.11a), looking for 3D (space+scale) maxima in the resulting structure (Figure 7.11b), and then computing a sub-pixel space+scale location using a quadratic fit (","Matching features across many extracted scales is inefficient when object scale is unknown, so features stable in both location and scale are preferred. Lowe's method finds 3D space-plus-scale maxima across Difference-of-Gaussian sub-octave filters and refines the space-scale location with a quadratic fit; the cited implementation uses three sub-octave levels.",0.6666666666666666,scored,2,3,0.0,scored,0,3,0.7142857142857143,scored,5,7,0.0,scored,0,7,,not_applicable,,
-ragbench-v1-007,How does MOPS reduce sensitivity to detector-position errors and affine photometric changes?,"MOPS (Multi-scale Oriented Patches) reduces sensitivity to detector-position errors and affine photometric changes in two ways:
+**Sources and pages:**
+- *Computer Vision: Algorithms and Applications.pdf*, **PAGE: 461**","MOPS samples patches at five-pixel spacing relative to detection scale from a coarser pyramid level, reducing aliasing and sensitivity to location, orientation, and scale errors. It rescales intensities to zero mean and unit variance to compensate for linear exposure bias and gain.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
+ragbench-v1-008,How should edge-detector scale be chosen differently for sharp-edge detection versus detecting edges at multiple resolutions?,"For sharp-edge detection, the scale is chosen directly from the image’s noise characteristics, so the filter width (σ) is set just large enough to suppress noise while still detecting sharp edges reliably. This is based on analyses such as those by Canny (1986) and Elder and Zucker (1998).
+(Source: *Computer Vision: Algorithms and Applications.pdf*, Page 485)
 
-1. **Reducing sensitivity to position, orientation, and scale errors**
-   - MOPS descriptors are formed using an **8×8 sampling** of intensity values with a **sample spacing of five pixels relative to the detection scale**, and they are sampled from a **coarser level of the image pyramid**.
-   - This low-frequency sampling from a higher pyramid level makes the descriptor more robust to slight inaccuracies in the **feature point location, orientation, and scale** (i.e., detector-position errors).
-
-   **Source and page:**
-   - *Computer Vision: Algorithms and Applications.pdf*, PAGE: 461 (both excerpts; including the Figure 7.15 description)
-
-2. **Reducing sensitivity to affine photometric variations (bias and gain)**
-   - To compensate for affine photometric variations such as **linear exposure changes or bias and gain**, the **patch intensities are rescaled so that their mean is zero and their variance is one** (bias and gain normalization).
-   - This normalization step makes the descriptor invariant to linear brightness and contrast changes.
-
-   **Source and page:**
-   - *Computer Vision: Algorithms and Applications.pdf*, PAGE: 461 (first excerpt discussing “Bias and gain normalization (MOPS)”)","MOPS samples patches at five-pixel spacing relative to detection scale from a coarser pyramid level, reducing aliasing and sensitivity to location, orientation, and scale errors. It rescales intensities to zero mean and unit variance to compensate for linear exposure bias and gain.",1.0,scored,2,2,0.0,scored,0,2,0.8,scored,4,5,0.0,scored,0,5,,not_applicable,,
-ragbench-v1-008,How should edge-detector scale be chosen differently for sharp-edge detection versus detecting edges at multiple resolutions?,"For **sharp-edge detection** (single, fine scale):
-
-- The filter’s spatial scale parameter \( \sigma \) can be **directly determined from the image noise characteristics**.
-- The goal is to tune the derivative/Laplacian/DoG filter to detect **only sharp edges**, using a scale small enough to preserve detail but large enough to suppress noise.
-
-> “…If we are only interested in detecting sharp edges, the width of the filter can be determined from image noise characteristics (Canny 1986; Elder and Zucker 1998).”
-> — *Computer Vision: Algorithms and Applications.pdf, p. 485*
-
-For **detecting edges at multiple resolutions** (scale-space approach):
-
-- A **scale-space approach** is needed that **detects and then selects edges at different scales**.
-- Instead of a single noise-based scale, the method evaluates edges across multiple \( \sigma \) values to capture both fine and coarse structures (e.g., mannequin vs. shadow in Fig. 7.33b–c).
-- Elder and Zucker (1998) give a principled method:
-  - Compute gradient estimates at several scales and pick, for each pixel, the **minimum scale at which an edge can be reliably detected** (Fig. 7.33d).
-  - Similarly, estimate a minimum reliable scale for second derivatives and use **zero crossings** of this directed second derivative to robustly select edges (Fig. 7.33e–f).
-
-> “…if we want to detect edges that occur at different resolutions (Figures 7.33b–c), a scale-space approach that detects and then selects edges at different scales may be necessary (Witkin 1983; Lindeberg 1994, 1998a; Nielsen, Florack, and Deriche 1997).”
-> — *Computer Vision: Algorithms and","For sharp edges, filter width can be selected from the image-noise characteristics. To detect edges occurring at different resolutions, a scale-space method that detects and selects edges across scales may be required.",1.0,scored,2,2,0.0,scored,0,2,0.6666666666666666,scored,6,9,0.0,scored,0,9,,not_applicable,,
+For detecting edges that occur at multiple resolutions, a scale-space approach is used: edges are detected at several different scales (different σ values), and then appropriate scales are selected for each edge. This allows capturing both fine and coarse structures in the image. This need for multi-scale edge detection and scale selection is discussed in the context of work by Witkin (1983), Lindeberg (1994, 1998a), and Nielsen, Florack, and Deriche (1997).
+(Source: *Computer Vision: Algorithms and Applications.pdf*, Page 485)","For sharp edges, filter width can be selected from the image-noise characteristics. To detect edges occurring at different resolutions, a scale-space method that detects and selects edges across scales may be required.",1.0,scored,2,2,0.0,scored,0,2,0.8,scored,4,5,0.0,scored,0,5,,not_applicable,,
 ragbench-v1-009,"According to ""Designing Data-Intensive Applications.pdf"", what usually limits a data-intensive application, and which standard building blocks support search and asynchronous handling?","According to *Designing Data-Intensive Applications*:
 
-- What usually limits a data-intensive application:
-  Raw CPU power is **rarely** the limiting factor; instead, the limits are “the amount of data, the complexity of data, and the speed at which it is changing.”
+- What usually limits a data‑intensive application:
+  Raw CPU power is **rarely** the limiting factor; instead, the limiting issues are **the amount of data, the complexity of data, and the speed at which it is changing**.
   **Source: Designing Data-Intensive Applications.pdf, Page 25**
 
 - Standard building blocks that support search and asynchronous handling:
-  - Search: “Allow users to search data by keyword or filter it in various ways (**search indexes**).”
-  - Asynchronous handling: “Send a message to another process, to be handled asynchronously (**stream processing**).”
+  - **Search indexes** allow users to search data by keyword or filter it in various ways.
+  - **Stream processing** systems send a message to another process to be handled asynchronously.
   **Source: Designing Data-Intensive Applications.pdf, Page 25**","Raw CPU power is rarely the main limit; the amount, complexity, and rate of change of data are usually bigger problems. Search indexes support keyword/filter search, while stream-processing systems send work to another process for asynchronous handling.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,3,3,0.0,scored,0,3,,not_applicable,,
-ragbench-v1-010,"What is the book's distinction between a fault and a failure, and why can deliberately triggering faults improve confidence in a system?","According to the book, a **fault** and a **failure** differ as follows:
+ragbench-v1-010,"What is the book's distinction between a fault and a failure, and why can deliberately triggering faults improve confidence in a system?","The book defines:
 
-- A **fault** is when **one component** of the system deviates from its specification.
-- A **failure** is when **the system as a whole** stops providing the required service to the user.
+- **Fault**: “one component of the system deviating from its spec”
+- **Failure**: “when the system as a whole stops providing the required service to the user”
 
-Because it is impossible to reduce the probability of faults to zero, the book emphasizes designing **fault-tolerance mechanisms** that prevent faults from turning into failures. It further explains that deliberately triggering faults—such as randomly killing individual processes—can actually improve confidence in the system:
+Because you can’t reduce the probability of faults to zero, the book argues it’s “best to design fault-tolerance mechanisms that prevent faults from causing failures” (SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 29).
 
-- Many critical bugs are due to **poor error handling**, and may remain hidden unless faults occur.
-- By **inducing faults on purpose**, the fault-tolerance machinery is **continually exercised and tested**, which increases confidence that natural faults will be handled correctly when they occur.
+Deliberately triggering faults (for example, “randomly killing individual processes without warning”) improves confidence because:
 
-This deliberate fault injection approach is exemplified by Netflix’s **Chaos Monkey**.
+- “Many critical bugs are actually due to poor error handling”
+- By “deliberately inducing faults, you ensure that the fault-tolerance machinery is continually exercised and tested, which can increase your confidence that faults will be handled correctly when they occur naturally.”
+Netflix’s Chaos Monkey is given as an example of this approach (SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 29; also referenced in SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 302).","A fault is one component deviating from its specification; a failure is the whole system stopping the required user service. Deliberately inducing faults continually exercises error-handling and fault-tolerance machinery, increasing confidence that naturally occurring faults will be handled.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,7,7,0.0,scored,0,7,,not_applicable,,
+ragbench-v1-011,What makes a partial failure in a distributed system especially difficult to reason about?,"A partial failure is especially difficult to reason about because it is **nondeterministic**: operations that involve multiple nodes and the network may sometimes succeed and sometimes unpredictably fail, and due to the nondeterministic time it takes for messages to travel across the network, you may not even know whether an operation actually succeeded or not. This unpredictability of both failures and message delivery is what makes distributed systems hard to work with.
 
-**Sources and pages:**
-- Designing Data-Intensive Applications, p. 29 (distinction between fault and failure; deliberate fault triggering and confidence)
-- Designing Data-Intensive Applications, p. 29 (Chaos Monkey example and rationale for inducing faults)","A fault is one component deviating from its specification; a failure is the whole system stopping the required user service. Deliberately inducing faults continually exercises error-handling and fault-tolerance machinery, increasing confidence that naturally occurring faults will be handled.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,8,8,0.0,scored,0,8,,not_applicable,,
-ragbench-v1-011,What makes a partial failure in a distributed system especially difficult to reason about?,"The provided document context says that partial failures are especially difficult to reason about because:
-
-1. **They are inherent and unpredictable in distributed systems**: Any interaction with other nodes may *occasionally fail, randomly go slow, or not respond at all (and eventually time out)*, and nodes can be *declared dead by other nodes, and then come back to life again without realizing that it was paused* (SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 332).
-
-2. **We must build reliable behavior from unreliable components**: Distributed systems must *accept the possibility of partial failure and build fault-tolerance mechanisms into the software*, i.e., *build a reliable system from unreliable components*, and there are limits to what reliability we can realistically promise (SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 298).
-
-3. **Concurrency and partial failure are counterintuitive and hard to handle correctly in application code**: When we avoid expensive distributed transactions, we *end up having to reimplement fault-tolerance mechanisms in application code*, but *reasoning about concurrency and partial failure is difficult and counterintuitive*, so most such mechanisms *do not work correctly*, leading to *lost or corrupted data* (SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 542).
-
-4. **Unlike single-node systems, behavior isn’t deterministic and “all-or-nothing”**: On a single computer, when hardware is working, behavior is deterministic—*the same operation always produces the same result* and hardware faults usually cause *total system failure*. Distributed systems instead exhibit partial failures where some components fail while others continue working, which complicates understanding system state and what has actually happened (SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 296).","Only some components may be broken while others work, and the behavior is nondeterministic: an operation across nodes and the network may sometimes work and sometimes fail, and message-delay uncertainty can leave success itself unknown.",,unscored,,,,unscored,,,0.6666666666666666,scored,6,9,0.0,scored,0,9,,not_applicable,,
+**Sources:**
+- Designing Data-Intensive Applications.pdf, **page 297**
+- Designing Data-Intensive Applications.pdf, **page 576**","Only some components may be broken while others work, and the behavior is nondeterministic: an operation across nodes and the network may sometimes work and sometimes fail, and message-delay uncertainty can leave success itself unknown.",0.5,scored,1,2,0.0,scored,0,2,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
 ragbench-v1-012,"For Dynamo-style leaderless replication, what does w + r > n mean, and how many unavailable nodes can the cited n=5, w=3, r=3 setup tolerate?","For Dynamo-style leaderless replication:
 
-- The condition **w + r > n** is the *quorum condition*: it ensures that any read quorum and any write quorum overlap on at least one replica, so that a successful read is guaranteed to see at least one replica that has the most recent successful write. This also allows the system to continue operating when some nodes are unavailable.
+- The condition **w + r > n** is the **quorum condition**. It means that the number of replicas required to acknowledge a write (**w**) plus the number required to respond to a read (**r**) is greater than the total number of replicas (**n**). This ensures that every read and write operation overlap on at least one replica, so a read is likely to see the latest written value.
   **Source: Designing Data-Intensive Applications.pdf, Page 202**
 
-- With **n = 5, w = 3, r = 3**, the system can tolerate **two unavailable nodes** while still being able to process reads and writes.
-  **Source: Designing Data-Intensive Applications.pdf, Page 202**","With n replicas, a write must be confirmed by w nodes and a read must query at least r nodes. If w + r > n, the read and write sets overlap in at least one up-to-date replica. For n=5 and w=r=3, the system can tolerate two unavailable nodes.",0.6666666666666666,scored,2,3,0.0,scored,0,3,1.0,scored,3,3,0.0,scored,0,3,,not_applicable,,
-ragbench-v1-013,Why can a Dynamo-style system still return stale data even when w + r > n? Give the two edge cases identified in the text.,"A Dynamo-style system can still return stale data even when the quorum condition \(w + r > n\) is met because of these two edge cases:
+- With **n = 5, w = 3, r = 3**, the system can tolerate **two unavailable nodes** while still processing both reads and writes.
+  **Source: Designing Data-Intensive Applications.pdf, Page 202**","With n replicas, a write must be confirmed by w nodes and a read must query at least r nodes. If w + r > n, the read and write sets overlap in at least one up-to-date replica. For n=5 and w=r=3, the system can tolerate two unavailable nodes.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
+ragbench-v1-013,Why can a Dynamo-style system still return stale data even when w + r > n? Give the two edge cases identified in the text.,"A Dynamo-style system can still return stale data even when **w + r > n** because quorum is not a strict guarantee. The text identifies these two edge cases:
 
-1. **Sloppy quorums/hinted handoff mismatch**
-   If a sloppy quorum is used, the \(w\) writes may be sent to a different set of nodes than the \(r\) reads. In that case, the read may not include any node that actually processed the latest write, so there is no guaranteed overlap between the write nodes and the read nodes, and stale values can be returned.
+1. **Sloppy quorums:**
+   When using sloppy quorums, the **w** writes may be stored on a different set of nodes than the **r** reads, so there is no guaranteed overlap between the read nodes and the write nodes, and a read can miss the latest value.
    **Source: Designing Data-Intensive Applications.pdf, Page 203**
 
-2. **Concurrent writes with last-write-wins and clock skew**
-   When two writes occur concurrently, it is unclear which one happened first. If the system resolves this by choosing a “winner” based on timestamps (last-write-wins), clock skew between nodes can cause a more recent write to be overwritten by an older one. This can result in lost writes and stale data being read.
-   **Source: Designing Data-Intensive Applications.pdf, Page 203**","A sloppy quorum can place the w writes on different nodes from the r reads, eliminating guaranteed overlap. Also, concurrent writes have no clear first-write ordering; timestamp-based last-write-wins can lose writes because of clock skew.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,6,6,0.0,scored,0,6,,not_applicable,,
-ragbench-v1-014,"How do serializability and linearizability differ, and what is the name for a database that provides both?","Serializability and linearizability differ in two main ways:
+2. **Concurrent writes with last‑write‑wins:**
+   When two writes occur concurrently, it is unclear which came first. If the system resolves this by picking a winner based on timestamps (last write wins), writes can be lost due to clock skew, causing stale or incorrect data to be returned. The fully safe solution would be to merge concurrent writes instead.
+   **Source: Designing Data-Intensive Applications.pdf, Page 203**","A sloppy quorum can place the w writes on different nodes from the r reads, eliminating guaranteed overlap. Also, concurrent writes have no clear first-write ordering; timestamp-based last-write-wins can lose writes because of clock skew.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,5,5,0.0,scored,0,5,,not_applicable,,
+ragbench-v1-014,"How do serializability and linearizability differ, and what is the name for a database that provides both?","Serializability and linearizability differ in scope and what they guarantee:
 
-- **Serializability** is an *isolation property of transactions* that may read and write **multiple objects**. It guarantees that all transactions behave as if they executed one after another in some serial order, even if the actual execution was concurrent. The serial order does not have to match real-time order.
-  *(SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 351)*
+- **Serializability** is an *isolation property of transactions*. Each transaction can read and write multiple objects, and serializability guarantees that the outcome is the same as if all transactions had executed one after another in some serial order, even if that order is different from the real-time order in which they ran.
+  - Source: *Designing Data-Intensive Applications.pdf*, **page 351** (definition and distinction)
+  - Source: *Designing Data-Intensive Applications.pdf*, **page 274** (strongest isolation level, “same as if they had executed one at a time”)
 
-- **Linearizability** is a *recency guarantee on reads and writes of a single object (register)*. It is not about multi-object transactions; instead, it makes the system appear as if there is only one copy of the data and all operations on that object are atomic and respect real-time order (no one can read an older value than a value already observed by another client).
-  *(SOURCE: Designing Data-Intensive Applications.pdf, PAGES: 346, 351)*
+- **Linearizability** is a *recency guarantee for individual objects* (a register). It applies to reads and writes of a single object, not to multi-object transactions, and thus does not by itself prevent multi-object anomalies like write skew.
+  - Source: *Designing Data-Intensive Applications.pdf*, **page 351** (definition as a recency guarantee, not grouping operations into transactions)
 
-A database that provides **both** serializability and linearizability is said to have:
+When a database provides **both serializability and linearizability**, this combination is called:
 
-- **strict serializability** or **strong one-copy serializability (strong-1SR)**.
-  *(SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 351)*","Serializability is a transaction-isolation property: multi-object transactions behave as if run in some serial order, which need not match real time. Linearizability is a recency guarantee for reads and writes of one object and does not group operations into transactions. Providing both is called strict serializability or strong one-copy serializability (strong-1SR).",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,8,8,0.0,scored,0,8,,not_applicable,,
-ragbench-v1-015,"What concrete performance penalty is reported for MySQL distributed transactions, and which two mechanisms account for much of two-phase commit's inherent cost?","The context reports that:
+- **Strict serializability** or **strong one-copy serializability (strong-1SR)**.
+  - Source: *Designing Data-Intensive Applications.pdf*, **page 351**","Serializability is a transaction-isolation property: multi-object transactions behave as if run in some serial order, which need not match real time. Linearizability is a recency guarantee for reads and writes of one object and does not group operations into transactions. Providing both is called strict serializability or strong one-copy serializability (strong-1SR).",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,5,5,0.0,scored,0,5,,not_applicable,,
+ragbench-v1-015,"What concrete performance penalty is reported for MySQL distributed transactions, and which two mechanisms account for much of two-phase commit's inherent cost?","The provided document context states that:
 
 - **Concrete performance penalty for MySQL distributed transactions:**
   Distributed transactions in MySQL are reported to be **over 10 times slower than single-node transactions**.
-  **Source:** Designing Data-Intensive Applications.pdf, **page 382**
+  — *Designing Data-Intensive Applications.pdf, page 382*
 
-- **Two mechanisms accounting for much of two-phase commit’s inherent cost:**
-  Much of the performance cost of two-phase commit is due to:
+- **Two mechanisms that account for much of two-phase commit’s inherent cost:**
   1. **Additional disk forcing (fsync) required for crash recovery**
   2. **Additional network round-trips**
-  **Source:** Designing Data-Intensive Applications.pdf, **page 382**",Distributed transactions in MySQL are reported to be more than 10 times slower than single-node transactions. Much of 2PC's cost comes from extra disk forcing (fsync) needed for crash recovery and extra network round trips.,1.0,scored,2,2,0.0,scored,0,2,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
-ragbench-v1-016,"If an XA transaction coordinator crashes after participants prepare, why can the transaction block other transactions that need the same data until recovery?","The transaction blocks other transactions because:
+  — *Designing Data-Intensive Applications.pdf, page 382*",Distributed transactions in MySQL are reported to be more than 10 times slower than single-node transactions. Much of 2PC's cost comes from extra disk forcing (fsync) needed for crash recovery and extra network round trips.,1.0,scored,2,2,0.0,scored,0,2,,unscored,,,,unscored,,,,not_applicable,,
+ragbench-v1-016,"If an XA transaction coordinator crashes after participants prepare, why can the transaction block other transactions that need the same data until recovery?","The transaction can block others because the participants must keep their locks *while the transaction is in doubt* and cannot unilaterally decide to abort or commit:
 
-1. **After “prepare,” participants must hold locks.**
-   Once a participant has received a prepare request and voted “yes,” it cannot unilaterally decide to commit or abort. It must wait for the coordinator’s commit/abort decision, so it keeps locks on the data to preserve atomicity.
-   **Source: Designing Data-Intensive Applications.pdf, Page 380**
+- After a participant receives a **prepare** request and votes “yes,” it **cannot abort unilaterally** and must wait for the coordinator’s decision (commit or abort). If the coordinator crashes or the network fails at this point, the participant can do nothing but wait; its transaction is **in doubt or uncertain** and remains active with its locks held [Designing Data-Intensive Applications.pdf, PAGE: 380].
 
-2. **If the coordinator crashes, the transaction becomes in doubt but the locks remain.**
-   With the coordinator down (or its log lost/corrupted), participants have an in‑doubt transaction and no way to know whether to commit or abort. A correct 2PC/XA implementation must preserve the locks of an in‑doubt transaction even across restarts, otherwise atomicity could be violated. Those locks prevent other transactions from accessing the same data.
-   **Source: Designing Data-Intensive Applications.pdf, Page 381**
-   **Source: Designing Data-Intensive Applications.pdf, Page 385**
+- When the coordinator crashes, the **in-doubt transactions** stay in the database, **holding locks and blocking other transactions** that need the same data. A correct 2PC implementation must **preserve these locks even across database restarts** to avoid violating atomicity, so other transactions remain blocked until the coordinator recovers and resolves the outcome [Designing Data-Intensive Applications.pdf, PAGE: 385].
 
-Thus, until the coordinator recovers and can resolve the in‑doubt transaction, its held locks can block other transactions that need the same data.","Prepared participants remain in doubt until the application server restarts and the coordinator recovers the commit/abort outcome from its local log. A two-phase-commit transaction retains its locks while in doubt, so transactions needing the same rows can be blocked. If the coordinator log is lost, the locks may remain until an administrator resolves the transaction manually.",0.75,scored,3,4,0.0,scored,0,4,0.6666666666666666,scored,6,9,0.0,scored,0,9,,not_applicable,,
-ragbench-v1-017,Why do microbatching or checkpointing alone stop providing exactly-once effects once stream output reaches an external system?,"Microbatching and checkpointing provide exactly-once *within* the stream processing framework because the system can roll back state and discard any output produced after the last checkpoint when a task crashes.
-
-Once output leaves the framework and hits an external system (like a database, external message broker, or email service), the stream processor no longer controls or can retract those side effects. If a task fails after producing external output but before its checkpoint is committed, restarting the task from the last checkpoint will cause it to reprocess the same events and re‑emit the same external effects, making them happen twice. Since the framework cannot discard or roll back those external effects, microbatching and checkpointing alone cannot guarantee exactly-once behavior for external outputs.
-
-**Sources and pages:**
-- Designing Data-Intensive Applications.pdf, p. 498
-- Designing Data-Intensive Applications.pdf, p. 499
-- Designing Data-Intensive Applications.pdf, p. 547","Inside the stream processor, failed output can be discarded and work restarted. Once output has reached an external database, broker, or email system, the framework cannot discard it; retrying the failed task may repeat the external side effect. Exactly-once appearance then requires all outputs, state changes, and input acknowledgments to succeed or fail atomically.",,unscored,,,,unscored,,,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
-ragbench-v1-018,"For the URL-shortening design, how many strings does a six-character base64 key provide, and why can truncating an MD5-derived base64 string still cause trouble?","A six-character base64 key provides about **68.7 billion unique strings**, because base64 has 64 possible characters per position, so:
-
-- \(64^6 \approx 68.7 \text{ billion}\)
-  **Source: Grokking-the-system-design-interview-free.pdf, PAGE: 17**
-
-Truncating an MD5-derived base64 string (which is more than 21 characters long) to just the first 6 or 8 characters can still cause trouble because:
-
-- Different URLs can produce MD5 hashes whose base64 encodings **share the same first few characters**, so truncating to 6–8 characters can cause **key duplication/collisions**.
-- The document notes that taking the first 6 or 8 letters “could result in key duplication,” requiring ad-hoc fixes like choosing other characters or swapping characters.
-  **Source: Grokking-the-system-design-interview-free.pdf, PAGE: 18**","A six-character base64 key provides about 68.7 billion strings. MD5 produces a 128-bit value whose base64 form exceeds 21 characters; taking only the first six or eight characters can create duplicate keys, requiring another character selection or swap.",,unscored,,,,unscored,,,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
-ragbench-v1-019,"How does the proposed offline Key Generation Service prevent two application servers from receiving the same short key, and what loss is accepted if the service dies?","The offline Key Generation Service (KGS) prevents two application servers from receiving the same short key by synchronizing access to the key storage: it **locks the data structure holding the keys before removing keys and giving them to a server**, ensuring that no two servers can read the same key concurrently.
-(Source: Grokking-the-system-design-interview-free.pdf, Page 22)
-
-The system accepts the loss of any **pre-generated but unused keys cached on application servers** if a server dies before consuming them, considering this acceptable because there are about **68.7 billion unique six-letter keys** available.
-(Sources: Grokking-the-system-design-interview-free.pdf, Pages 22, 35)","KGS keeps unused and used key tables, moves keys to the used table as soon as it hands or loads them into memory, and synchronizes or locks its in-memory key structure before removal. If KGS dies before assigning every loaded key, those keys are wasted, which the design accepts because the keyspace is huge.",0.3333333333333333,scored,1,3,0.0,scored,0,3,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
-ragbench-v1-020,"What storage size is estimated for all six-character base64 keys, and how does the design address KGS being a single point of failure?","The estimated storage size for all possible six-character base64 keys is **412 GB**:
-
-- Calculation:
-  - 68.7 billion unique six-character keys
-  - 6 characters per key, 1 byte per character
-  - 6 × 68.7B = **412 GB**
-  *(SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 22)*
-
-To address **KGS (Key Generation Service)** being a single point of failure, the design proposes:
-
-- Having a **standby replica** of KGS.
-- When the **primary** KGS server dies, the **standby** server takes over to generate and provide keys.
-  *(SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 22)*",The estimated key database size is 412 GB for 68.7 billion six-character keys at one byte per character. A standby KGS replica takes over if the primary dies.,1.0,scored,2,2,0.0,scored,0,2,,unscored,,,,unscored,,,,not_applicable,,
-ragbench-v1-021,How does the distributed URL frontier enforce politeness toward each web server?,"According to **Grokking-the-system-design-interview-free.pdf, PAGE 124**, the distributed URL frontier enforces politeness as follows:
-
-1. **One worker per web server (hostname)**
-   - Each server running the crawler has multiple worker threads, each with its own **distinct FIFO sub-queue**.
-   - When a new URL is added, the sub-queue is chosen based on the URL’s **canonical hostname**.
-   - A hash function maps each hostname to a specific thread number, so **at most one worker thread will download documents from a given web server**, preventing multiple machines/threads from connecting to the same server simultaneously.
-
-2. **FIFO queues to avoid overloading**
-   - Since each worker thread pulls URLs from its own **FIFO sub-queue**, requests to each web server are processed in order and paced, which helps ensure the crawler **does not overload a server by downloading too many pages too quickly**.
-
-These mechanisms together implement the politeness constraints for the distributed URL frontier.
-
-**Sources:** Grokking-the-system-design-interview-free.pdf, **PAGE 124**.","Each crawler server maintains distinct FIFO subqueues, one per worker. A URL's canonical hostname is hashed to a thread/subqueue, so at most one worker contacts a given web server, while FIFO ordering prevents that server from being overloaded.",1.0,scored,2,2,0.0,scored,0,2,,unscored,,,,unscored,,,,not_applicable,,
-ragbench-v1-022,"According to ""Grokking-the-system-design-interview-free.pdf"", what are the main read/write tradeoffs of feed fan-out, and how does the hybrid design treat celebrity accounts?","According to *Grokking-the-system-design-interview-free.pdf*, the main read/write tradeoffs and the treatment of celebrity accounts are:
-
-**Read/Write tradeoffs of feed fan-out**
-
-1. **Pull model (fan-out-on-load)**
-   - Users pull recent feed data from memory when needed.
-   - Tradeoffs (read-heavy, write-light):
-     - New data is not visible until the user pulls.
-     - Hard to choose a good pull frequency; many pulls return no new data, wasting resources.
-   - Source: *Grokking-the-system-design-interview-free.pdf*, **Page 134**.
-
-2. **Push model (fan-out-on-write)**
-   - When a user publishes a post, the system immediately pushes it to all followers.
-   - Tradeoffs (write-heavy, read-light):
-     - Fetching the feed is cheap, since updates are already pushed.
-     - Requires long-poll connections for receiving updates.
-     - Extremely expensive for users with millions of followers (celebrity users), because the server must push to a huge number of people.
-   - Source: *Grokking-the-system-design-interview-free.pdf*, **Page 134**.
-
-3. **General issues with push/live updates**
-   - Live updates can cause high backlogs and heavy loads when the server pushes or notifies followers, especially for accounts with many followers.
-   - Source: *Grokking-the-system-design-interview-free.pdf*, **Page 133**.
-
-**Hybrid design for celebrity accounts**
-
-- The hybrid approach combines fan-out-on-write and fan-out-on-load:
-  - **Non-celebrity users (few hundred/thousand followers):**
-    - Their posts are still **pushed** to followers (fan-out-on-write).
-  - **Celebrity users (very high follower counts):**
-    -","Fan-out-on-load lets clients pull recent feed data but can delay new items and waste empty polling requests. Fan-out-on-write reduces feed-read work by pushing a new post immediately, but is expensive for accounts with millions of followers. The hybrid pushes ordinary users' posts but makes followers pull celebrity updates.",1.0,scored,3,3,0.0,scored,0,3,0.8,scored,4,5,0.0,scored,0,5,,not_applicable,,
-ragbench-v1-023,Which client-side typeahead behaviors are recommended to avoid needless requests while a user is still typing?,"The document recommends these client-side behaviors to avoid needless requests while the user is still typing:
-
-1. **Debounce before sending requests:**
-   - Only send a request if the user has not pressed any key for **50 ms**.
-   **Source: Grokking-the-system-design-interview-free.pdf, Page 99**
-
-2. **Cancel in-progress requests during continuous typing:**
-   - If the user keeps typing, the client should **cancel any in-progress requests** to the server.
-   **Source: Grokking-the-system-design-interview-free.pdf, Page 99**
-
-3. **Wait for initial characters before starting requests:**
-   - Initially, the client can **wait until the user enters a couple of characters** before hitting the server.
-   **Source: Grokking-the-system-design-interview-free.pdf, Page 99**","The client should wait until no key has been pressed for 50 ms before contacting the server, cancel an in-progress request if typing continues, and initially wait for a couple of characters.",1.0,scored,3,3,0.0,scored,0,3,,unscored,,,,unscored,,,,not_applicable,,
-ragbench-v1-024,"Once a relational database is sharded, why are cross-shard joins and foreign-key enforcement difficult, and what workarounds are proposed?","Cross-shard joins and foreign-key enforcement are difficult because once a relational database is sharded, related rows and tables are no longer on the same server, so operations that assume local, co-located data become expensive or infeasible.
-
-**Joins (cross-shard):**
-- When the database is partitioned across multiple machines, joins that span shards are “often not feasible” and “will not be performance efficient since data has to be compiled from multiple servers.”
-- This distributed nature breaks the assumption that a join can be executed locally on one machine.
-
-**Workaround for joins:**
-- A “common workaround” is **denormalization**: restructure the schema so that queries that previously required joins can be answered from a single table on one shard.
-- This reduces the need for cross-shard joins, but introduces “all the perils of denormalization such as data inconsistency.”
-
-**Foreign-key enforcement (referential integrity):**
-- “Most of RDBMS do not support foreign keys constraints across databases on different database servers.”
-- This makes it “extremely difficult” to enforce referential integrity in a sharded database, because foreign-key constraints can’t span shards.
-
-**Workarounds for referential integrity:**
-- Applications that require referential integrity on sharded databases “have to enforce it in application code.”
-- They “have to run regular SQL jobs to clean up dangling references” to compensate for the lack of cross-shard foreign-key constraints.
+Thus, the blocking happens because prepared participants must keep their locks until the coordinator tells them to commit or abort, and they cannot safely release those locks on their own.","Prepared participants remain in doubt until the application server restarts and the coordinator recovers the commit/abort outcome from its local log. A two-phase-commit transaction retains its locks while in doubt, so transactions needing the same rows can be blocked. If the coordinator log is lost, the locks may remain until an administrator resolves the transaction manually.",0.5,scored,2,4,0.0,scored,0,4,1.0,scored,6,6,0.0,scored,0,6,,not_applicable,,
+ragbench-v1-017,Why do microbatching or checkpointing alone stop providing exactly-once effects once stream output reaches an external system?,"Microbatching and checkpointing can roll back or discard the output of a failed batch **only inside the stream processing framework**. Once the output is sent to an external system (database, message broker, email, etc.), the framework cannot retract or hide those side effects. If a task fails and is restarted, the same external write is performed again, causing duplicated effects. Thus, microbatching or checkpointing alone cannot prevent external side effects from happening twice, and they no longer guarantee exactly-once behavior once output leaves the processor.
 
 **Sources:**
-- Grokking the System Design Interview, page 180 (joins and denormalization; referential integrity and foreign-key constraints in sharded databases).
-- Designing Data-Intensive Applications, pages 59 and 425 (explanation of foreign keys, joins, and denormalization’s role in reducing the need for joins).","Cross-shard joins require collecting data from multiple servers and are inefficient, so denormalization can move formerly joined data into one table, at the cost of possible inconsistency. Cross-database foreign keys are often unsupported, so applications enforce referential integrity themselves and may run cleanup SQL jobs for dangling references.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,11,11,0.0,scored,0,11,,not_applicable,,
-ragbench-v1-025,"In the Add Two Numbers entry, how are digits ordered in each input list, what form must the sum take, and which extra-digit and leading-zero conditions are stated?","According to **LeetCode_4000_Problem_Reference.pdf, PAGE 1** (the *Add Two Numbers* entry):
+- *Designing Data-Intensive Applications*, p.499 (“Within the confines of the stream processing framework, the microbatching and checkpointing approaches provide the same exactly-once semantics… However, as soon as output leaves the stream processor… the framework is no longer able to discard the output of a failed batch. In this case, restarting a failed task causes the external side effect to happen twice…”)
+- *Designing Data-Intensive Applications*, p.499 (“In order to give the appearance of exactly-once processing… all outputs and side effects… either all need to happen atomically, or none of them must happen…”)","Inside the stream processor, failed output can be discarded and work restarted. Once output has reached an external database, broker, or email system, the framework cannot discard it; retrying the failed task may repeat the external side effect. Exactly-once appearance then requires all outputs, state changes, and input acknowledgments to succeed or fail atomically.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,6,6,0.0,scored,0,6,,not_applicable,,
+ragbench-v1-018,"For the URL-shortening design, how many strings does a six-character base64 key provide, and why can truncating an MD5-derived base64 string still cause trouble?","A six-character base64 key provides approximately 68.7 billion unique strings:
+
+- From base64 encoding: \(64^6 \approx 68.7\) billion possible strings.
+  (SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 17)
+
+Truncating an MD5-derived base64 string to fit in the short key (e.g., taking only the first 6 or 8 characters) can still cause trouble because:
+
+- MD5 produces a 128-bit hash, which after base64 encoding is over 21 characters.
+- If we only take the first 6–8 characters for the key, different URLs can end up with the same truncated prefix, leading to key duplication (collisions).
+- The document notes this explicitly: taking only the first 6 or 8 letters “could result in key duplication,” requiring ad‑hoc fixes like choosing other characters from the encoding string or swapping characters.
+  (SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 18)","A six-character base64 key provides about 68.7 billion strings. MD5 produces a 128-bit value whose base64 form exceeds 21 characters; taking only the first six or eight characters can create duplicate keys, requiring another character selection or swap.",1.0,scored,3,3,0.0,scored,0,3,0.8333333333333334,scored,5,6,0.0,scored,0,6,,not_applicable,,
+ragbench-v1-019,"How does the proposed offline Key Generation Service prevent two application servers from receiving the same short key, and what loss is accepted if the service dies?","The offline Key Generation Service (KGS) prevents two application servers from receiving the same short key by synchronizing/locking the data structure holding the keys before removing keys and handing them out to servers, ensuring each key is only given once and marked as used in the key-DB so it cannot be reused (SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 21; SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 22).
+
+The system accepts the loss of any pre-fetched but unused keys cached on an application server if that server dies, considering this acceptable because there are roughly 68.7 billion unique six-letter keys available (SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 22; SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 35).","KGS keeps unused and used key tables, moves keys to the used table as soon as it hands or loads them into memory, and synchronizes or locks its in-memory key structure before removal. If KGS dies before assigning every loaded key, those keys are wasted, which the design accepts because the keyspace is huge.",0.3333333333333333,scored,1,3,0.3333333333333333,scored,1,3,0.5,scored,1,2,0.0,scored,0,2,,not_applicable,,
+ragbench-v1-020,"What storage size is estimated for all six-character base64 keys, and how does the design address KGS being a single point of failure?","The estimated storage size for all possible six-character base64 keys is **412 GB**:
+
+- From *Grokking-the-system-design-interview-free.pdf*, **Page 22**:
+  > “With base64 encoding, we can generate 68.7B unique six letters keys. If we need one byte to store one alpha-numeric character, we can store all these keys in: 6 (characters per key) * 68.7B (unique keys) = 412 GB.”
+
+The KGS (Key Generation Service) being a single point of failure is addressed by adding a standby replica:
+
+- From *Grokking-the-system-design-interview-free.pdf*, **Page 22**:
+  > “Isn't KGS a single point of failure? Yes, it is. To solve this, we can have a standby replica of KGS. Whenever the primary server dies, the standby server can take over to generate and provide keys.”",The estimated key database size is 412 GB for 68.7 billion six-character keys at one byte per character. A standby KGS replica takes over if the primary dies.,1.0,scored,2,2,0.0,scored,0,2,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
+ragbench-v1-021,How does the distributed URL frontier enforce politeness toward each web server?,"The distributed URL frontier enforces politeness with two main mechanisms:
+
+1. **Hostname-based partitioning to a single worker thread**
+   - Each server has multiple worker threads and a collection of distinct FIFO sub-queues.
+   - When a new URL is added, it is placed into a sub-queue determined by the URL’s canonical hostname.
+   - A hash function maps each hostname to a specific thread number, so **at most one worker thread will download documents from a given web server**, ensuring that multiple machines/threads do not simultaneously connect to the same server.
+   *(SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 124)*
+
+2. **FIFO queuing to avoid overloading servers**
+   - Because each hostname’s URLs are processed in a FIFO sub-queue, the crawler downloads pages from that server in order, which helps avoid issuing too many requests in a short time.
+   - This design ensures the crawler **does not overload a server by downloading a lot of pages from it at once**.
+   *(SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 124)*","Each crawler server maintains distinct FIFO subqueues, one per worker. A URL's canonical hostname is hashed to a thread/subqueue, so at most one worker contacts a given web server, while FIFO ordering prevents that server from being overloaded.",,unscored,,,,unscored,,,,unscored,,,,unscored,,,,not_applicable,,
+ragbench-v1-022,"According to ""Grokking-the-system-design-interview-free.pdf"", what are the main read/write tradeoffs of feed fan-out, and how does the hybrid design treat celebrity accounts?","According to *Grokking-the-system-design-interview-free.pdf*, the main read/write tradeoffs of feed fan-out and the hybrid treatment of celebrity accounts are:
+
+1. **Push model (fan-out-on-write) read/write tradeoff**
+   - When a user publishes a post, it is **immediately pushed to all followers**, so fetching the feed later does not require going through the friend list and aggregating posts.
+   - This **significantly reduces read operations** because followers’ timelines are precomputed.
+   - However, it **increases write cost**, especially for users with many followers; pushing updates for a “celebrity user” with millions of followers is very expensive and can create heavy server load.
+   - Source: *Grokking-the-system-design-interview-free.pdf*, **Page 134**
+
+2. **Hybrid design and celebrity accounts**
+   - The hybrid approach combines **fan-out-on-write** and **fan-out-on-load**:
+     - For users with a **low or moderate number of followers**, posts are still **pushed** to followers’ feeds.
+     - For **celebrity users** (high follower count), the system **stops pushing their posts** and instead lets followers **pull updates** when loading the feed.
+   - This avoids the extremely costly push operations for celebrity accounts and **saves a huge number of resources**.
+   - Additional variant: limit fan-out to only a user’s **online friends**, and use a combination of **“push to notify”** and **“pull for serving”** to balance versatility and load.
+   - Source: *Grokking-the-system-design-interview-free.pdf*, **Page 135**","Fan-out-on-load lets clients pull recent feed data but can delay new items and waste empty polling requests. Fan-out-on-write reduces feed-read work by pushing a new post immediately, but is expensive for accounts with millions of followers. The hybrid pushes ordinary users' posts but makes followers pull celebrity updates.",0.6666666666666666,scored,2,3,0.0,scored,0,3,0.8888888888888888,scored,8,9,0.0,scored,0,9,,not_applicable,,
+ragbench-v1-023,Which client-side typeahead behaviors are recommended to avoid needless requests while a user is still typing?,"The recommended client-side behaviors are:
+
+1. **Wait briefly before sending a request**
+   - The client should only hit the server if the user has not pressed any key for **50 ms**.
+   *(SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 99)*
+
+2. **Cancel in-progress requests while the user continues typing**
+   - If the user is constantly typing, the client should **cancel any in-progress typeahead requests**.
+   *(SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 99)*
+
+3. **Wait for a minimum number of characters**
+   - Initially, the client can **wait until the user enters a couple of characters** before sending requests.
+   *(SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 99)*","The client should wait until no key has been pressed for 50 ms before contacting the server, cancel an in-progress request if typing continues, and initially wait for a couple of characters.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,7,7,0.0,scored,0,7,,not_applicable,,
+ragbench-v1-024,"Once a relational database is sharded, why are cross-shard joins and foreign-key enforcement difficult, and what workarounds are proposed?","Cross-shard joins and foreign-key enforcement are difficult because once a relational database is partitioned across multiple machines, operations that span tables or rows no longer run on a single server. Compiling data from multiple shards makes cross-shard joins performance-inefficient, and enforcing referential integrity (foreign keys) across different database servers becomes extremely hard, since most RDBMSs do not support foreign key constraints across databases on different servers.
+
+The proposed workarounds are:
+- **Denormalization** so that queries that previously required joins can be answered from a single table on one shard, accepting the risk of data inconsistency.
+- **Application-level referential integrity**, where the application enforces foreign key constraints in code and runs regular SQL jobs to clean up dangling references.
+
+**Sources:**
+- Grokking-the-system-design-interview-free.pdf, Page 180","Cross-shard joins require collecting data from multiple servers and are inefficient, so denormalization can move formerly joined data into one table, at the cost of possible inconsistency. Cross-database foreign keys are often unsupported, so applications enforce referential integrity themselves and may run cleanup SQL jobs for dangling references.",,unscored,,,,unscored,,,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
+ragbench-v1-025,"In the Add Two Numbers entry, how are digits ordered in each input list, what form must the sum take, and which extra-digit and leading-zero conditions are stated?","From **SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 1** (Add Two Numbers):
 
 - **Digit order in each input list:**
-  Each node holds one decimal digit, and **the first node contains the least significant digit** of its number. So the lists store digits in *reverse* numerical order (least significant first).
+  Each node holds one decimal digit, and *the first node contains the least significant digit* of its number; digits are stored in *reverse* order (least significant first).
 
 - **Form the sum must take:**
-  You must **compute the sum of the two represented nonnegative integers and return a linked list using the same digit order** (least significant digit first).
+  Compute the sum of the two represented nonnegative integers and *return a linked list using the same digit order* (least significant digit first).
 
 - **Extra-digit condition:**
-  You must **include any additional digit needed by the sum** (i.e., if there is a carry that creates a new most significant digit, it must be added as a new node).
+  *Include any additional digit needed by the sum* (i.e., if there is a carry that creates a new most significant digit, it must be represented as an extra node).
 
 - **Leading-zero condition:**
-  **Neither input represents a number with a leading zero, except zero itself.**
+  *Neither input represents a number with a leading zero, except zero itself.*","Each nonempty input list stores one decimal digit per node, with the least significant digit first. The sum must be returned as a linked list in the same digit order, including any additional digit needed by the sum. Inputs have no leading zero except when the represented number is zero.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
+ragbench-v1-026,"For Longest Substring Without Repeating Characters, what makes a segment eligible, which character types count, and what should be returned for an empty string?","According to **LeetCode_4000_Problem_Reference.pdf, PAGE 2** (Problem 3. Longest Substring Without Repeating Characters):
 
-All of this is specified in **SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 1**.","Each nonempty input list stores one decimal digit per node, with the least significant digit first. The sum must be returned as a linked list in the same digit order, including any additional digit needed by the sum. Inputs have no leading zero except when the represented number is zero.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,5,5,0.0,scored,0,5,,not_applicable,,
-ragbench-v1-026,"For Longest Substring Without Repeating Characters, what makes a segment eligible, which character types count, and what should be returned for an empty string?","For **Longest Substring Without Repeating Characters**:
+- **Segment eligibility:** A segment must be a contiguous substring of `s` (it uses consecutive positions; characters cannot be skipped), and **every character in the segment must occur at most once** (no repeats).
+- **Character types that count:** **All characters** are counted, including **spaces, digits, and punctuation**, as well as letters and other symbols.
+- **Return value for an empty string:** When `s` is empty, the function should **return 0**.
 
-- **Segment eligibility:** It must be a *contiguous* segment of the string where **every character occurs at most once** (no repeats). The segment must use **consecutive positions**; characters cannot be skipped.
-- **Character types counted:** **All characters** in the string count toward uniqueness, including **spaces, digits, and punctuation**, as well as letters.
-- **Empty string behavior:** If the input string `s` is empty, the function should **return 0**.
+**SOURCE:** LeetCode_4000_Problem_Reference.pdf, PAGE 2","The result is the greatest length of a contiguous segment in which every character occurs at most once; characters cannot be skipped. Spaces, digits, and punctuation all count, and an empty string produces zero.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,3,3,0.0,scored,0,3,,not_applicable,,
+ragbench-v1-027,"For Median of Two Sorted Arrays, how is the median defined for odd and even combined counts, what empty-array case is allowed, and what running time is required?","From **LeetCode_4000_Problem_Reference.pdf, PAGE 2**:
 
-**Source:** LeetCode_4000_Problem_Reference.pdf, **Page 2**.","The result is the greatest length of a contiguous segment in which every character occurs at most once; characters cannot be skipped. Spaces, digits, and punctuation all count, and an empty string produces zero.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,3,3,0.0,scored,0,3,,not_applicable,,
-ragbench-v1-027,"For Median of Two Sorted Arrays, how is the median defined for odd and even combined counts, what empty-array case is allowed, and what running time is required?","From the provided context:
+- **Median definition (odd total count):** The median is the **middle value** of all values from both arrays considered together.
+- **Median definition (even total count):** The median is the **arithmetic mean of the two middle values**.
+- **Empty-array case allowed:** **Either array may be empty**, but their **combined collection must be nonempty**.
+- **Required running time:** **O(log(m + n))**, where *m* and *n* are the array lengths.
 
-- **Median definition (odd count):** When the total number of values from both arrays is odd, the median is **the middle value** of the combined collection.
-- **Median definition (even count):** When the total number of values from both arrays is even, the median is **the arithmetic mean of the two middle values** of the combined collection.
-- **Empty-array case:** **Either array may be empty**, but their **combined collection must be nonempty**.
-- **Required running time:** The algorithm must run in **O(log(m + n))**, where *m* and *n* are the lengths of the two arrays.
+**Source:** LeetCode_4000_Problem_Reference.pdf, PAGE 2","For an odd combined count, the median is the middle value; for an even count, it is the arithmetic mean of the two middle values. Either array may be empty as long as their combined collection is nonempty. The required running time is O(log(m+n)).",1.0,scored,3,3,0.0,scored,0,3,,unscored,,,,unscored,,,,not_applicable,,
+ragbench-v1-028,"When reversing a signed integer, how are the sign and newly leading zeros handled, what happens on 32-bit overflow, and which wider storage is forbidden?","The provided document context does not contain enough information to fully answer this question as asked. It only states:
 
-**Source:** LeetCode_4000_Problem_Reference.pdf, **Page 2**.","For an odd combined count, the median is the middle value; for an even count, it is the arithmetic mean of the two middle values. Either array may be empty as long as their combined collection is nonempty. The required running time is O(log(m+n)).",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
-ragbench-v1-028,"When reversing a signed integer, how are the sign and newly leading zeros handled, what happens on 32-bit overflow, and which wider storage is forbidden?","According to **Reverse Integer** in **LeetCode_4000_Problem_Reference.pdf, PAGE 4**:
+From **SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 4** (Problem 7. Reverse Integer):
+- “For a signed 32-bit integer x, reverse the order of its decimal digits while retaining its sign.”
+- “Zeros that become leading digits are omitted from the numeric result.”
+- “Return zero if the reversed value is outside the signed 32-bit range.”
+- “The computation must work without storing values in a signed or unsigned 64-bit integer type.”
+- “Constraints. Input and valid output range: -2^31 to 2^31 - 1.”
 
-- The original sign of the 32-bit signed integer is retained when reversing the decimal digits.
-- Any zeros that become leading digits after reversal are omitted from the numeric result.
-- If the reversed value falls outside the signed 32-bit range \(-2^{31}\) to \(2^{31} - 1\), you must return zero.
-- The computation must be performed **without** storing values in any signed or unsigned 64-bit integer type.","The decimal digits are reversed while the sign is retained, and zeros that would become leading digits are omitted. If the reversed value is outside the signed 32-bit range, the result is zero. The computation may not store values in a signed or unsigned 64-bit integer type.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
-ragbench-v1-029,"For Regular Expression Matching, is the match partial or complete, and what exact behavior does the reference assign to the period and asterisk operators?","From the provided context:
+So, based on this context:
+- The sign is retained when reversing: **SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 4**.
+- Newly leading zeros are omitted in the result: **SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 4**.
+- On 32-bit overflow, the function must return zero: **SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 4**.
+- It is forbidden to store values in a signed or unsigned 64-bit integer type during the computation: **SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 4**.","The decimal digits are reversed while the sign is retained, and zeros that would become leading digits are omitted. If the reversed value is outside the signed 32-bit range, the result is zero. The computation may not store values in a signed or unsigned 64-bit integer type.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,8,8,0.0,scored,0,8,,not_applicable,,
+ragbench-v1-029,"For Regular Expression Matching, is the match partial or complete, and what exact behavior does the reference assign to the period and asterisk operators?","For Regular Expression Matching, the match must be **complete**: the pattern must match **all of** the text, with **no unmatched prefix or suffix** left in the string (SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 5).
 
-- The match must be **complete**, not partial:
-  - *“Given text s and pattern p, return whether p matches all of s… No unmatched prefix or suffix may remain in s.”*
-  (**SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 5**)
+The operators behave as follows (SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 5):
 
-- Behavior of the **period (`.`)** operator:
-  - *“a period matches one arbitrary character.”*
-  (**SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 5**)
+- **Period (`.`)**: matches **one arbitrary character**.
+- **Asterisk (`*`)**: modifies the **immediately preceding letter or period** and allows **zero or more occurrences** of that preceding element. It **does not act as an independent wildcard**.","The pattern must match all of the text, leaving no unmatched prefix or suffix. A period matches one arbitrary character. An asterisk modifies the immediately preceding letter or period and allows zero or more occurrences of that element; it is not an independent wildcard.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
+ragbench-v1-030,"For 4Sum, what makes a returned combination valid and distinct, how are equal values handled, and are values or indices returned?","For 4Sum:
 
-- Behavior of the **asterisk (`*`)** operator:
-  - *“An asterisk modifies the immediately preceding letter or period and permits zero or more occurrences of that element. It does not act as an independent wildcard.”*
-  (**SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 5**)","The pattern must match all of the text, leaving no unmatched prefix or suffix. A period matches one arbitrary character. An asterisk modifies the immediately preceding letter or period and allows zero or more occurrences of that element; it is not an independent wildcard.",1.0,scored,3,3,0.0,scored,0,3,0.6666666666666666,scored,4,6,0.0,scored,0,6,,not_applicable,,
-ragbench-v1-030,"For 4Sum, what makes a returned combination valid and distinct, how are equal values handled, and are values or indices returned?","From the 4Sum description:
+- **Validity of a combination**:
+  A combination is valid if four values from the array (taken from **four different input positions**) sum to the given target.
+  *(Source: LeetCode_4000_Problem_Reference.pdf, Page 9)*
 
-- **Validity of a combination:**
-  A combination is valid if the four selected values **sum to the target** and come from **four different input positions**.
+- **Distinctness requirement**:
+  You must remove duplicates where combinations differ **only** in:
+  - ordering of the four values, or
+  - which position was chosen among equal-valued elements.
+  In other words, quadruplets that have the same multiset of values are returned only once.
+  *(Source: LeetCode_4000_Problem_Reference.pdf, Page 9)*
 
-- **Distinctness / duplicate handling:**
-  You must **remove duplicates** where combinations differ only by
-  - the **ordering** of the four values, or
-  - which **equal-valued positions** were chosen in the array.
-  Such equivalent quadruplets should appear only once in the result.
+- **Handling of equal values**:
+  Equal values are allowed in a quadruplet as long as they come from **different positions** in the input array.
+  *(Source: LeetCode_4000_Problem_Reference.pdf, Page 9)*
 
-- **Equal values:**
-  Equal values are **allowed**, as long as they are taken from **separate positions** in the input array.
-
-- **Return values vs indices:**
-  The function must return **quadruplets of values**, **not their indices**.
-
-**Sources:** LeetCode_4000_Problem_Reference.pdf, PAGE 9",Each result is a distinct four-value combination summing to the target and must use four different input positions. Equal values are allowed when they come from separate positions. The output contains values rather than indices and removes duplicates caused only by ordering or choices among equal-valued positions.,,unscored,,,,unscored,,,1.0,scored,5,5,0.0,scored,0,5,,not_applicable,,
+- **Return type (values vs indices)**:
+  The function returns **quadruplets of values**, **not** their indices.
+  *(Source: LeetCode_4000_Problem_Reference.pdf, Page 9)*",Each result is a distinct four-value combination summing to the target and must use four different input positions. Equal values are allowed when they come from separate positions. The output contains values rather than indices and removes duplicates caused only by ordering or choices among equal-valued positions.,1.0,scored,3,3,0.0,scored,0,3,1.0,scored,5,5,0.0,scored,0,5,,not_applicable,,
 ragbench-v1-031,"For Remove Nth Node From End of List, how is n counted, what must be preserved and returned, and what happens when the original head or only node is removed?","For **Remove Nth Node From End of List**:
 
 - **How n is counted:**
-  n is counted *backward from the tail*, where the tail is position 1. So the last node is 1st from the end, the second-to-last is 2nd from the end, etc.
-  (SOURCE: *LeetCode_4000_Problem_Reference.pdf*, PAGE: 10)
+  n is counted **backward from the tail**, where the **tail is position one**. So the tail node is 1st from the end, the node before it is 2nd from the end, etc.
+  *(SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 10)*
 
 - **What must be preserved and returned:**
-  The order of all remaining nodes must be preserved, and you must return the resulting head of the list after the removal.
-  (SOURCE: *LeetCode_4000_Problem_Reference.pdf*, PAGE: 10)
+  You must **preserve the order of the other nodes** and **return the resulting head** of the list after removal.
+  *(SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 10)*
 
 - **What happens when the original head or only node is removed:**
-  - If the original head is removed, the returned head will change to the next node.
-  - If the only node in the list is removed, the result is an empty list.
-  (SOURCE: *LeetCode_4000_Problem_Reference.pdf*, PAGE: 10)","The tail is position one and n is counted backward from it. The remaining nodes keep their order and the resulting head is returned. Removing the original head can change the returned head, while removing the only node produces an empty list.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
+  - **Removing the original head** may change the returned head (it becomes the next node).
+  - **Removing the only node** produces an **empty list**.
+  *(SOURCE: LeetCode_4000_Problem_Reference.pdf, PAGE: 10)*","The tail is position one and n is counted backward from it. The remaining nodes keep their order and the resulting head is returned. Removing the original head can change the returned head, while removing the only node produces an empty list.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
 ragbench-v1-032,"What question does a posterior predictive check ask, and how does it use synthetic datasets and test statistics to diagnose a poor model?","A posterior predictive check asks:
 
-> **“How typical is our observed data, compared to data that our fitted model would plausibly generate?”**
+**“Is the observed dataset typical of what my model would generate, given what it has learned from the data?”**
 
-More concretely, it evaluates **how good a candidate model \(M\) is after seeing data \(D\)** by comparing the real data to synthetic data drawn from the **posterior predictive distribution**.
+It answers this by:
 
-From the context:
+1. **Generating synthetic datasets from the posterior predictive distribution**
+   - For a fitted model \(M\) and observed data \(D\), we draw synthetic future datasets \(\tilde D_s\) from the model.
+   - These are described as “plausible hallucinations” of the model.
+   *(SOURCE: Probabilistic Machine Learning.pdf, PAGE: 162)*
 
-1. **Generate synthetic (“hallucinated”) datasets**
-   We draw synthetic future datasets \(\tilde D_s\) from the posterior predictive distribution:
-   \[
-   \tilde D_s \sim p(\tilde D \mid M, D) = \{ y^{s}_{1:N} \sim p(\cdot \mid M, \theta^s),\ \theta^s \sim p(\theta \mid D, M)\}
-   \]
-   These \(\tilde D_s\) are “plausible hallucinations” of what the model believes future data should look like.
-   **Source: Probabilistic Machine Learning.pdf, Page 162**
+2. **Computing scalar test statistics on both synthetic and real data**
+   - For each synthetic dataset \(\tilde D_s\), we compute a scalar test statistic \(\text{test}(\tilde D_s)\).
+   - We also compute the same statistic on the observed data, \(\text{test}(D)\).
+   - The test statistics are chosen to measure features of interest in the data, since no single model can capture every aspect.
+   *(SOURCE: Probabilistic Machine Learning.pdf, PAGE: 162)*
 
-2. **Compute scalar test statistics on real and synthetic data**
-   We define one or more scalar **test statistics** \( \text{test}(\tilde D_s) \) that measure features of interest in the data, and compare them to the statistic on the actual data \( \text{test}(D) \).
-   **Source: Probabilistic Machine Learning.pdf, Page 162**
+3. **Comparing the distribution of synthetic statistics to the observed statistic**
+   - If the distribution of \(\text{test}(\tilde D_s)\) across different \(s\) is very different from \(\text{test}(D)\)—for example, if \(\text{test}(D)\) lies in the tails—this indicates that the observed data is not typical under the model.
+   - A large discrepancy suggests the model is not a good one, even if it has high posterior probability relative to other candidate models.
+   *(SOURCE: Probabilistic Machine Learning.pdf, PAGE: 162; see also the Bayesian p-value discussion on PAGE: 164)*","It asks whether observed data look typical of data expected under the fitted model. Synthetic future datasets are drawn from the posterior predictive distribution, selected scalar test statistics are computed for them and the observed data, and a large discrepancy indicates that the model may be poor.",1.0,scored,4,4,0.0,scored,0,4,,unscored,,,,unscored,,,,not_applicable,,
+ragbench-v1-033,Why does minimizing forward KL tend to cover modes while minimizing reverse KL tends to select modes?,"The provided document context does not contain enough information to fully explain *why* minimizing the forward KL tends to cover modes while minimizing the reverse KL tends to select modes. It only states these properties and gives high-level descriptions:
 
-3. **Diagnose a poor model**
-   If there is a **large difference** between the distribution of \( \text{test}(\tilde D_s) \) over \(s\) and the single value \( \text{test}(D) \), this suggests that the observed data are not typical under the model’s own posterior predictive distribution, and therefore **the model is not a good one**. This","It asks whether observed data look typical of data expected under the fitted model. Synthetic future datasets are drawn from the posterior predictive distribution, selected scalar test statistics are computed for them and the observed data, and a large discrepancy indicates that the model may be poor.",1.0,scored,4,4,0.0,scored,0,4,1.0,scored,5,5,0.0,scored,0,5,,not_applicable,,
-ragbench-v1-033,Why does minimizing forward KL tend to cover modes while minimizing reverse KL tends to select modes?,"Minimizing forward KL \(D_{\text{KL}}(p \Vert q)\) vs reverse KL \(D_{\text{KL}}(q \Vert p)\) leads to different behavior because of how each objective penalizes the support mismatch between \(p\) and \(q\).
+- SOURCE: Probabilistic Machine Learning.pdf, PAGE: 259
+  Mentions that minimizing \(D_{\mathrm{KL}}(p \,\|\, q)\) (forwards/inclusive KL) versus \(D_{\mathrm{KL}}(q \,\|\, p)\) (reverse/exclusive KL) leads to different behavior, illustrated with a bimodal \(p\) and unimodal \(q\).
+
+- SOURCE: Probabilistic Machine Learning.pdf, PAGE: 1215
+  States that the forwards KL-divergence is “mode-covering,” while the reverse KL-divergence used by MERL is “mode-seeking,” and references prior discussion in Section 2.7.1 for explanation.
+
+- SOURCE: Probabilistic Machine Learning.pdf, PAGE: 261
+  Notes that minimizing the reverse KL is called information projection (I‑projection) and is often easier to compute, but does not elaborate on the mode-seeking vs mode-covering reason.
+
+These passages assert the mode-covering vs mode-seeking behavior but do not provide the underlying explanation within the given pages, so the answer cannot be fully determined from the provided context.","Forward/inclusive KL, DKL(p∥q), becomes infinite unless q is positive wherever p is positive, encouraging q to cover p's modes (zero-avoiding). Reverse/exclusive KL, DKL(q∥p), becomes infinite unless q is zero wherever p is zero, encouraging q to select modes and avoid unsupported regions (zero-forcing).",0.0,scored,0,3,0.0,scored,0,3,0.75,scored,3,4,0.0,scored,0,4,,not_applicable,,
+ragbench-v1-034,"In reparameterized variational inference, how is randomness separated from the variational parameters, and what does that enable?","ANSWER:
 
 From the provided context:
 
-- **Forward KL is mode-covering**:
-  When we minimize \(D_{\text{KL}}(p \Vert q)\), the approximation \(q\) is pressured to place non‑negligible probability mass wherever \(p\) has mass. If \(q(x)\) is very small in a region where \(p(x)\) is non‑zero, the ratio \(p(x)/q(x)\) becomes large and the KL cost blows up. Hence, to avoid large penalties, \(q\) tends to **cover all modes of \(p\)**, even if that means spreading mass more broadly.
+- In fixed-form variational inference, we often choose a **reparameterizable** approximate posterior, such as a Gaussian \(q_\psi(\theta) = \mathcal{N}(\theta \mid \mu, \Sigma)\) (SOURCE: Probabilistic Machine Learning.pdf, PAGE: 687).
+- Reparameterization means we express the random variable as a deterministic function of the **variational parameters** and a separate **noise variable**:
+  \[
+  \tilde{\theta} = g(\psi, \varepsilon), \quad \varepsilon \sim q_0
+  \]
+  where \(\varepsilon\) carries all the randomness, and \(\psi\) are the variational parameters (SOURCE: Probabilistic Machine Learning.pdf, PAGE: 485, Algorithm 10.2; PAGE: 486, Algorithm 10.3).
 
-  This behavior is illustrated in Figure 5.1, where:
-  > “When we minimize \(D_{\text{KL}}(p \Vert q)\), then \(q\) covers the modes of \(p\) (orange).”
-  (SOURCE: *Probabilistic Machine Learning.pdf*, PAGE: 260)
+This separation enables:
 
-- **Reverse KL is mode-seeking**:
-  When we minimize \(D_{\text{KL}}(q \Vert p)\), the penalty is large where \(q(x)\) is large but \(p(x)\) is small, because of the term \(\log \frac{q(x)}{p(x)}\) weighted by \(q(x)\). This encourages \(q\) to avoid assigning probability mass to regions not strongly supported by \(p\). But if \(q\) assigns zero or tiny mass to some mode of \(p\), that region barely contributes to the objective (since it is weighted by","Forward/inclusive KL, DKL(p∥q), becomes infinite unless q is positive wherever p is positive, encouraging q to cover p's modes (zero-avoiding). Reverse/exclusive KL, DKL(q∥p), becomes infinite unless q is zero wherever p is zero, encouraging q to select modes and avoid unsupported regions (zero-forcing).",0.6666666666666666,scored,2,3,0.0,scored,0,3,0.4,scored,4,10,0.0,scored,0,10,,not_applicable,,
-ragbench-v1-034,"In reparameterized variational inference, how is randomness separated from the variational parameters, and what does that enable?","According to **Probabilistic Machine Learning.pdf, Page 480**, reparameterized variational inference separates randomness from the variational parameters by expressing the latent variable \(z\) as a deterministic function of the variational parameters \(\phi\), the data \(x\), and an auxiliary noise variable \(\varepsilon\) drawn from a fixed distribution:
-\[
-z = g(\phi, x, \varepsilon), \quad \varepsilon \sim p(\varepsilon).
-\]
+- **Pushing gradients inside the expectation** (SOURCE: PAGE 485) because \(\tilde{\theta}\) is a differentiable function of \(\psi\).
+- As a result, we can obtain **low-variance Monte Carlo estimators of the gradient of the ELBO** and efficiently update the variational parameters using stochastic gradient methods (SOURCE: PAGE 687, PAGE 485).","A draw from the parameterized latent distribution is rewritten as a differentiable, invertible transformation of noise whose distribution does not depend on the variational parameters. This enables gradients to propagate back through the transformation and is called reparameterized variational inference (RVI).",0.5,scored,1,2,0.0,scored,0,2,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
+ragbench-v1-035,"Why must HMC resample momentum on every iteration, and what problem does NUTS solve?","HMC must resample the momentum at every iteration to ensure ergodicity and full exploration of the state space.
 
-This moves the stochasticity into \(\varepsilon\), making the rest of the computation graph (from \(\phi\) through \(z\) to the objective \(f\)) deterministic. As a result, we can backpropagate the gradient of the scalar objective \(f\) with respect to \(\phi\) through \(z\), enabling gradient-based optimization of the variational parameters via standard backpropagation.
+From the Hamiltonian
+\(H(\theta, v) = E(\theta) + \tfrac{1}{2} v^T \Sigma v\),
+the dynamics keep \(H(\theta, v)\) approximately constant along a trajectory. This implies \(E(\theta) \le H(\theta, v) = h\) for all positions \(\theta\) along that path, so the sampler cannot reach states where \(E(\theta) > h\). By drawing a new random momentum at the start of each iteration, we change the energy level \(h\) and allow the chain to explore different regions of the space, which is necessary for ergodicity.
+
+NUTS (the No-U-Turn Sampler) solves the problem of choosing the number of leapfrog steps \(L\) in HMC. We want \(L\) large enough to explore the constant-energy level set, but not so large that trajectories double back on themselves and produce highly correlated samples (wasting computation). NUTS adaptively selects \(L\) so the trajectory does not make a “U-turn,” avoiding inefficient backtracking while still exploring effectively.
 
 **Sources:**
-- Probabilistic Machine Learning.pdf, Page 480","A draw from the parameterized latent distribution is rewritten as a differentiable, invertible transformation of noise whose distribution does not depend on the variational parameters. This enables gradients to propagate back through the transformation and is called reparameterized variational inference (RVI).",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,3,3,0.0,scored,0,3,,not_applicable,,
-ragbench-v1-035,"Why must HMC resample momentum on every iteration, and what problem does NUTS solve?","HMC must resample momentum on every iteration because the Hamiltonian
-\(H(\theta, v) = E(\theta) + \tfrac{1}{2} v^T \Sigma v\) stays approximately constant along a trajectory in phase space. For a given trajectory with energy level \(h\),
+- Probabilistic Machine Learning.pdf, Page 554
+- Probabilistic Machine Learning.pdf, Page 554 (section 12.5.4.1 on NUTS)","HMC approximately preserves Hamiltonian energy along a trajectory, so fixed momentum would keep the sampler from reaching states above that energy; new random momentum is needed for ergodicity and full-space exploration. NUTS adaptively chooses the number of leapfrog steps L so exploration is long enough without doubling back and wasting computation through correlated samples.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,7,7,0.0,scored,0,7,,not_applicable,,
+ragbench-v1-036,"What happens when HMC's step size is too large or too small, and what acceptance-rate tuning range is recommended for the stated L=1, identity-mass setup?","When the HMC step size η is:
 
-\[
-E(\theta) \le H(\theta, v) = h \quad \text{for all locations } \theta \text{ along the trajectory.}
-\]
+- **Too large**: Proposed moves tend to increase the potential energy too much, so they are likely to be rejected, leading to poor exploration.
+  - *Source: Probabilistic Machine Learning.pdf, Page 554*
 
-Therefore the sampler cannot reach states where \(E(\theta) > h\). If we kept the same momentum, the chain would be confined to the same energy level set and fail to explore the full space. Randomly resampling the momentum at the start of each iteration changes \(H\) and allows the sampler to reach different regions of the state space.
+- **Too small**: The proposal distribution moves very little from the starting position, so the chain explores the space very slowly.
+  - *Source: Probabilistic Machine Learning.pdf, Page 554*
 
-**SOURCE:** Probabilistic Machine Learning.pdf, PAGE: 554
+For tuning η with **L = 1** and **Σ = I** (identity mass), the recommended heuristic is to adjust η until the **acceptance rate is between 40% and 80%**.
+- *Source: Probabilistic Machine Learning.pdf, Page 555*","A too-large step size proposes moves that raise potential energy and are likely to be rejected; a too-small step size barely moves and makes sampling slow. With Σ=I and L=1, the cited heuristic varies η until acceptance is between 40% and 80%.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,3,3,0.0,scored,0,3,,not_applicable,,
+ragbench-v1-037,Which structural property lets a normalizing flow both sample and evaluate exact likelihood efficiently?,"The provided document context states that the key structural property is the use of **flexible invertible transformations with efficiently computable Jacobian determinants**:
 
-NUTS (the No-U-Turn Sampler) solves the problem of choosing the number of leapfrog steps \(L\) in HMC. We want \(L\) large enough for good exploration of the constant-energy level set, but not so large that the trajectory “doubles back” on itself, which wastes computation and produces highly correlated samples. NUTS adaptively chooses \(L\) to avoid these wasteful U-turns.
+- From **SOURCE: Probabilistic Machine Learning.pdf, PAGE: 864**:
+  “So, if one can use **flexible invertible transformations f whose Jacobian determinant det J(f)(u) can be computed efficiently**, then one can construct complex densities p(x) that allow **exact sampling and efficient exact likelihood computation**.”
 
-**SOURCE:** Probabilistic Machine Learning.pdf, PAGE: 554","HMC approximately preserves Hamiltonian energy along a trajectory, so fixed momentum would keep the sampler from reaching states above that energy; new random momentum is needed for ergodicity and full-space exploration. NUTS adaptively chooses the number of leapfrog steps L so exploration is long enough without doubling back and wasting computation through correlated samples.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,8,8,0.0,scored,0,8,,not_applicable,,
-ragbench-v1-036,"What happens when HMC's step size is too large or too small, and what acceptance-rate tuning range is recommended for the stated L=1, identity-mass setup?","When the HMC step size η is poorly chosen:
+Thus, the structural property is: **invertibility of the transformation together with a tractable (efficiently computable) Jacobian determinant**.","A normalizing flow maps a sample from a simple base distribution through a nonlinear, invertible transformation. The forward transformation makes sampling straightforward, and invertibility enables efficient exact-density evaluation.",0.0,scored,0,3,0.0,scored,0,3,1.0,scored,3,3,0.0,scored,0,3,,not_applicable,,
+ragbench-v1-038,How do the tractability requirements for a normalizing flow differ between density estimation and variational inference?,"The tractability requirements differ because the two applications optimize different objectives and therefore need different flow operations to be efficient:
 
-- **η too large:** the numerical integration of the Hamiltonian dynamics becomes inaccurate, the energy can change too much, and HMC may **diverge**, so proposed samples are often rejected. This is discussed where divergence and the MH acceptance test are described (SOURCE: Probabilistic Machine Learning.pdf, PAGE: 553).
+**Density estimation**
 
-- **η too small:** the integration is very accurate but exploration is slow; the chain takes many tiny steps, leading to highly correlated samples and inefficient sampling. This tradeoff is part of the general tuning discussion for step size (SOURCE: Probabilistic Machine Learning.pdf, PAGE: 554).
+For density estimation, we fit a flow-based model \(p_\theta(x)\) directly to observed data. This requires:
 
-For the specific heuristic with **L = 1** and **Σ = I** (identity mass matrix), the recommended **acceptance-rate tuning range** is:
+- Efficient evaluation of the **inverse flow** \(u = f^{-1}(x)\) for arbitrary data points \(x\).
+- Efficient computation of the **Jacobian determinant** \(\det J(f^{-1})(x)\) for those \(x\).
+- If we also want to **generate new samples** from \(p_\theta(x)\), we additionally need the **forward mapping** \(f\) to be tractable.
 
-- Vary η until the **acceptance rate is between 40% and 80%** (SOURCE: Probabilistic Machine Learning.pdf, PAGE: 555).","A too-large step size proposes moves that raise potential energy and are likely to be rejected; a too-small step size barely moves and makes sampling slow. With Σ=I and L=1, the cited heuristic varies η until acceptance is between 40% and 80%.",1.0,scored,3,3,0.0,scored,0,3,,unscored,,,,unscored,,,,not_applicable,,
-ragbench-v1-037,Which structural property lets a normalizing flow both sample and evaluate exact likelihood efficiently?,"The structural property is that the transformation \(f\) used in the flow is **nonlinear but invertible with an efficiently computable Jacobian determinant**. This makes both exact sampling and exact likelihood evaluation tractable.
+This is explicitly stated in:
 
-**Sources and pages:**
-- *Probabilistic Machine Learning.pdf*, **Page 863** (invertible transformation \(f\))
-- *Probabilistic Machine Learning.pdf*, **Page 864** (flexible invertible transformations with efficiently computable Jacobian determinant)","A normalizing flow maps a sample from a simple base distribution through a nonlinear, invertible transformation. The forward transformation makes sampling straightforward, and invertibility enables efficient exact-density evaluation.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
-ragbench-v1-038,How do the tractability requirements for a normalizing flow differ between density estimation and variational inference?,"From the provided context, the tractability requirements differ as follows:
+- **SOURCE: Probabilistic Machine Learning.pdf, PAGE: 865** (23.1.2 and 23.1.2.1)
 
-- **Density estimation:**
-  For density estimation, we must be able to efficiently compute the **inverse flow** and its **Jacobian determinant**:
-  - Specifically, we need to evaluate \( u = f^{-1}(x) \) and \(\det J(f^{-1})(x)\) for any given data point \(x\).
-  - This is required to maximize the likelihood \(p_\theta(x)\).
-  (SOURCE: *Probabilistic Machine Learning.pdf*, PAGE: 865: “Density estimation requires maximizing the likelihood… This requires that we can efficiently evaluate the inverse flow \(u=f^{-1}(x)\) and its Jacobian determinant \(\det J(f^{-1})(x)\) for any given \(x\)…”.)
+> ""Density estimation requires maximizing the likelihood function ... This requires that we can efficiently evaluate the inverse flow \(u = f^{-1}(x)\) and its Jacobian determinant \(\det J(f^{-1})(x)\) for any given \(x\). After optimizing the model, we can optionally use it to generate new data. To sample new points, we require that the forwards mapping \(f\) be tractable.""
 
-- **Variational inference:**
-  For variational inference, normalizing flows are used to parameterize the approximate posterior \(q_\theta(z\mid x)\). The context indicates that this is a different application with **different computational constraints**, but does not spell out the specific tractability requirements in detail:
-  - It states that density estimation and variational inference “optimize different objectives and impose different computational constraints on the flow model,” and then describes the density estimation requirements explicitly.
-  - For variational inference, it only notes that flows are used to parameterize \(q_\theta(z\mid x)\) and refers to other sections for details.
-  (SOURCE: *Probabilistic Machine Learning.pdf*, PAGE: 865: “These applications optimize different objectives and impose different computational constraints on the flow model. 23.1.2.1 Density estimation… 23.1.2.2 Variational inference Normalizing flows are commonly used for variational inference to parameterize the approximate posterior distribution…”.)
+**Variational inference**
 
-Therefore, based on the provided context:
+For variational inference, the flow parameterizes an approximate posterior \(q_\theta(z\mid x)\) in a latent variable model. The ELBO is maximized with respect to \(\theta\), and the flow must support:
 
-- **We","Density estimation requires efficient evaluation of the inverse flow and its Jacobian determinant; generating samples additionally requires a tractable forward map. Variational inference uses a flow to parameterize an approximate posterior, trains it by maximizing the ELBO, and uses reparameterization to optimize with stochastic gradients.",0.0,scored,0,3,0.0,scored,0,3,0.875,scored,7,8,0.0,scored,0,8,,not_applicable,,
-ragbench-v1-039,"For Gaussian-process time-series forecasting, how can inference cost change for suitable stationary kernels, and which kernel families permit exact versus approximate conversion?","For suitable stationary kernels, Gaussian‑process time‑series forecasting can be reformulated as a linear‑Gaussian state‑space model, allowing the use of the Kalman smoother and reducing inference cost from \(O(T^3)\) to \(O(T)\) in the number of time steps \(T\) (and even to \(O(\log T)\) using parallel prefix scans on GPUs).
+- **Sampling from** \(q_\theta(z\mid x)\), typically via the **forward mapping** from a base distribution to \(z\).
+- **Evaluation of** \(q_\theta(z\mid x)\), which involves the flow transformations and Jacobians, under the ELBO objective.
 
-This conversion:
+The context states that variational inference with flows uses a","Density estimation requires efficient evaluation of the inverse flow and its Jacobian determinant; generating samples additionally requires a tractable forward map. Variational inference uses a flow to parameterize an approximate posterior, trains it by maximizing the ELBO, and uses reparameterization to optimize with stochastic gradients.",0.6666666666666666,scored,2,3,0.0,scored,0,3,1.0,scored,7,7,0.0,scored,0,7,,not_applicable,,
+ragbench-v1-039,"For Gaussian-process time-series forecasting, how can inference cost change for suitable stationary kernels, and which kernel families permit exact versus approximate conversion?","For Gaussian-process time-series forecasting, the naive inference cost scales as \(O(T^3)\) in the number of time points \(T\). For certain **stationary kernels**, the GP can be reformulated as a **linear-Gaussian state space model**, allowing use of the Kalman smoother and reducing the cost to **\(O(T)\)** (SOURCE: Probabilistic Machine Learning.pdf, PAGE: 766).
 
-- **Can be done exactly** for **Matérn kernels**.
-- **Can be done approximately** for **Gaussian (RBF) kernels**.
+Regarding kernel families:
 
-**Sources and pages:** Probabilistic Machine Learning.pdf, pages 766–767.",Naive GP forecasting costs O(T^3). For certain stationary kernels it can be reformulated as a linear-Gaussian state-space model and solved with a Kalman smoother in O(T). The conversion is exact for Matérn kernels and approximate for Gaussian/RBF kernels.,1.0,scored,2,2,0.0,scored,0,2,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
+- **Matérn kernels** permit an **exact** conversion to a linear-Gaussian state space model.
+- **Gaussian (RBF) kernels** permit an **approximate** conversion to a linear-Gaussian state space model (SOURCE: Probabilistic Machine Learning.pdf, PAGE: 766).",Naive GP forecasting costs O(T^3). For certain stationary kernels it can be reformulated as a linear-Gaussian state-space model and solved with a Kalman smoother in O(T). The conversion is exact for Matérn kernels and approximate for Gaussian/RBF kernels.,1.0,scored,2,2,0.0,scored,0,2,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
 ragbench-v1-040,"What failure of raw likelihood is reported for unsupervised out-of-distribution detection, what replacement is proposed, and what invariance advantage does it have?","The provided document context does not contain enough information to determine:
 
-- what specific failure of raw likelihood is reported for unsupervised out-of-distribution detection,
-- what replacement method is proposed, or
-- what invariance advantage that replacement has.
+- What specific failure of raw likelihood is reported for unsupervised OOD detection,
+- What replacement is proposed for raw likelihood, or
+- What invariance advantage that replacement has.
 
-These details are not described on the cited pages; they only list references related to out-of-distribution detection and deep generative models (e.g., Poplin et al. 2019 on likelihood ratios, Zhang et al. 2021 on failures of OOD detection with generative models), but do not explain the failure mode, the proposed replacement, or the invariance property in the visible text.
+The pages mentioning OOD detection and related references (e.g., [Ren+19], [ZGR21]) list bibliographic entries but do not describe the failure mode, the proposed replacement, or its invariance properties in the text provided.
 
-Therefore, the answer cannot be determined from the given context.","A deep density model can assign lower likelihood to samples from its source distribution than to samples from a novel target distribution. A log-likelihood ratio against a baseline density is proposed instead of raw likelihood, and the ratio is invariant to transformations of the data.",0.0,scored,0,3,0.0,scored,0,3,,not_applicable,,,,not_applicable,,,,not_applicable,,
-ragbench-v1-041,"How does BPE training grow its vocabulary, and what is the stopping parameter described in the text?","BPE training starts with a vocabulary that contains only individual characters. It then:
+Therefore, this information cannot be answered from the given context.","A deep density model can assign lower likelihood to samples from its source distribution than to samples from a novel target distribution. A log-likelihood ratio against a baseline density is proposed instead of raw likelihood, and the ratio is invariant to transformations of the data.",0.0,scored,0,3,0.0,scored,0,3,,not_applicable,,,,not_applicable,,,,not_applicable,,
+ragbench-v1-041,"How does BPE training grow its vocabulary, and what is the stopping parameter described in the text?","BPE training starts with a vocabulary consisting only of individual characters, then:
 
-- Scans the training corpus to find the most frequent adjacent pair of tokens (initially characters).
-- Merges that pair into a new single token (e.g., ‘A B’ → ‘AB’), adds this new token to the vocabulary, and replaces all occurrences of that pair in the corpus.
-- Repeats this process iteratively, so the vocabulary grows by one new merged token at each step.
+- It scans the training corpus to find the most frequent *adjacent* pair of tokens (initially, characters).
+- It **merges** that most frequent neighboring pair into a single new token and **adds this merged token to the vocabulary**.
+- It replaces every occurrence of that pair in the corpus with the new merged token, then repeats this process iteratively, creating longer and longer tokens.
 
-The stopping parameter for BPE, as described in the text, is **the number of merges to perform**: training continues merging frequent pairs until this predefined number of merges is reached.
+The stopping parameter for BPE is the **number of merges to perform**. Training continues until this preset number of merge operations has been done, which indirectly determines the final vocabulary size (often tens of thousands of tokens, such as 50K–200K).
 
 **Sources:**
-- *Speech and Language Processing.pdf*, Page 51 (description of iterative merging and vocabulary growth in BPE training).
-- *Speech and Language Processing.pdf*, Page 290 (explicit statement that BPE requires specifying the number of merges to perform).","BPE begins with individual characters, repeatedly finds the most frequent adjacent token pair, merges it into a new longer token, and stops after k merges. Thus k controls how many new symbols are added beyond the original character set.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,5,5,0.0,scored,0,5,,not_applicable,,
-ragbench-v1-042,"How should language-model perplexity be interpreted, and why is it unsafe to compare perplexities from models with very different tokenizers?","Language-model perplexity is interpreted as:
+- Speech and Language Processing.pdf, p.51 (description of iterative merging to grow the vocabulary)
+- Speech and Language Processing.pdf, p.290 (explicit statement that “with BPE we had to specify the number of merges to perform”)
+- Speech and Language Processing.pdf, p.53 (discussion of typical large vocabulary sizes resulting from many merges)","BPE begins with individual characters, repeatedly finds the most frequent adjacent token pair, merges it into a new longer token, and stops after k merges. Thus k controls how many new symbols are added beyond the original character set.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,6,6,0.0,scored,0,6,,not_applicable,,
+ragbench-v1-042,"How should language-model perplexity be interpreted, and why is it unsafe to compare perplexities from models with very different tokenizers?","Language-model perplexity should be interpreted as:
 
-- A measure of how well a language model predicts a sequence of tokens: **lower perplexity means the model assigns higher probability to the test data and is therefore better at predicting it**. Minimizing perplexity is equivalent to maximizing the test set probability under the model.
-  - This is described on **SOURCE: Speech and Language Processing.pdf, PAGE: 84**, where perplexity is defined (for a unigram model) as the geometric mean of the inverse of the token probabilities and is noted to have an inverse relationship with probability.
-- It can also be viewed as the **weighted average branching factor** of a language (how many choices the model effectively has at each step), so again lower perplexity corresponds to fewer effective choices and better prediction.
-  - This interpretation appears on **SOURCE: Speech and Language Processing.pdf, PAGE: 85**.
+- **An evaluation metric for how well a language model predicts text.**
+  Lower perplexity means the model assigns higher probability to the observed word sequence; thus, the model is better at predicting the data. Minimizing perplexity is equivalent to maximizing the test-set probability under the language model.
+  *(SOURCE: Speech and Language Processing.pdf, PAGE: 211; PAGE: 35)*
 
-Regarding comparing perplexities:
+- **A way to compare different language models on the same text.**
+  Given a fixed test text \(W\), different language models will generally produce different perplexities, and these differences can be used to compare the models.
+  *(SOURCE: Speech and Language Processing.pdf, PAGE: 85)*
 
-- Perplexity depends on the **number and definition of tokens** used to represent the text, i.e., on the **tokenization algorithm**.
-- Because different tokenizers segment the same text differently (different number of tokens, different vocabulary units), **perplexity values from models with very different tokenizers are not directly comparable**: the measured quantity is tied to that tokenization.
-- Therefore, perplexity is best used to compare language models that **use the same tokenizer and identical vocabularies**.
-  - This caveat is stated on **SOURCE: Speech and Language Processing.pdf, PAGE: 211**, which notes that perplexity is “very sensitive to differences in the tokenization algorithm,” and on **SOURCE: Speech and Language Processing.pdf, PAGE: 85**, which says that perplexities of two language models are only comparable if they use identical vocabularies.","Perplexity is the inverse probability assigned to a test set, normalized by its token count; lower perplexity means higher test-set probability and a better predictive model on that data. Because the normalization depends on the number of tokens, different tokenization algorithms can change the value, so perplexity is best compared between models using the same tokenizer.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,5,5,0.0,scored,0,5,,not_applicable,,
-ragbench-v1-043,What role does self-attention play in building a token's contextual representation?,"Self-attention builds a token’s **contextual representation** by:
+- **Conceptually, a weighted average branching factor of the language.**
+  It can be thought of as the average number of likely next-word choices, weighted by their probabilities.
+  *(SOURCE: Speech and Language Processing.pdf, PAGE: 85)*
 
-- **Attending to surrounding tokens:** For a token at layer *k+1*, self-attention selectively weighs and combines the representations of other tokens from layer *k* (including neighboring and prior tokens) to form a contextualized representation for that token. Tokens with higher attention weights contribute more strongly to its final representation.
-  *(SOURCE: Speech and Language Processing.pdf, PAGE: 188)*
+It is unsafe to compare perplexities from models with very different tokenizers because:
 
-- **Moving information across positions:** It can be viewed as a mechanism that moves information from one residual stream (token position) to another, augmenting the representation at a given position with information from other positions over large spans, thereby encoding how tokens relate to each other.
-  *(SOURCE: Speech and Language Processing.pdf, PAGE: 186)*","Self-attention attends to and integrates information from surrounding tokens, moving information between token-position residual streams and enriching each token representation with long-range contextual relationships.",1.0,scored,1,1,0.0,scored,0,1,,unscored,,,,unscored,,,,not_applicable,,
-ragbench-v1-044,"In a transformer attention head, what are the query, key, and value roles, and why is the query-key dot product scaled?","ANSWER:
+- **Perplexity depends on the number of tokens \(n\) in the text.**
+  Different tokenization algorithms can produce different token counts and different token sequences for the same raw text. Since perplexity is a function of this tokenization, models with very different tokenizers are not directly comparable via perplexity.
+  *(SOURCE: Speech and Language Processing.pdf, PAGE: 211)*
 
-From the provided context, we can extract the roles of query, key, and value, but the reason for *scaling* the query-key dot product is **not** explained in the excerpts.
+Therefore, perplexity is best used to compare language models that use the **same tokenizer**.
+*(SOURCE: Speech and Language Processing.pdf, PAGE: 211)*","Perplexity is the inverse probability assigned to a test set, normalized by its token count; lower perplexity means higher test-set probability and a better predictive model on that data. Because the normalization depends on the number of tokens, different tokenization algorithms can change the value, so perplexity is best compared between models using the same tokenizer.",,unscored,,,,unscored,,,1.0,scored,11,11,0.0,scored,0,11,,not_applicable,,
+ragbench-v1-043,What role does self-attention play in building a token's contextual representation?,"Self-attention builds a token’s contextual representation by:
 
-**Roles in a transformer attention head**
+- Letting each token **attend to and integrate information from surrounding tokens**, so its representation reflects how it relates to others over possibly long spans.
+- **Weighing and combining representations from other tokens** in the context at layer *k* to form the updated representation at layer *k+1*.
+- Acting as a mechanism to **move information between token positions’ residual streams**, augmenting one position’s representation with information from others.
 
-According to **Speech and Language Processing.pdf, PAGE 190**:
+**Sources:**
+- *Speech and Language Processing.pdf*, **Page 186**
+- *Speech and Language Processing.pdf*, **Page 188**","Self-attention attends to and integrates information from surrounding tokens, moving information between token-position residual streams and enriching each token representation with long-range contextual relationships.",1.0,scored,1,1,0.0,scored,0,1,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
+ragbench-v1-044,"In a transformer attention head, what are the query, key, and value roles, and why is the query-key dot product scaled?","In a transformer attention head:
 
-- Each input embedding plays three distinct roles in an attention head:
-  - **Query**: the role of the *current element* being compared to the preceding inputs.
-  - **Key**: the role of the *preceding inputs* that are being compared to the current element to determine a similarity weight.
-  - (The value role is mentioned implicitly as part of the attention mechanism but not defined in detail on this page.)
+**Roles of query, key, and value**
 
-According to **Speech and Language Processing.pdf, PAGE 197**:
+- Each input embedding can play three distinct roles during attention:
 
-- For a single attention head, the input matrix \(X\) is projected into:
-  - \(Q = X W_Q\): matrix of queries.
-  - \(K = X W_K\): matrix of keys.
-  - \(V = X W_V\): matrix of values.
-- The query-key comparisons are computed via the matrix product \(Q K^\top\), producing an \(N \times N\) matrix of all \(q_i \cdot k_j\) dot products, which serve as the similarity scores used to weight values.
+  - **Query**:
+    The current element being compared to the preceding inputs. It represents “what this position is asking for” from the rest of the sequence.
+    (SOURCE: *Speech and Language Processing.pdf*, PAGE: 190)
 
-According to **Computer Vision: Algorithms and Applications.pdf, PAGE 349**:
+  - **Key**:
+    The role of a preceding input that is being compared to the current element to determine a similarity weight. Keys represent “what each other position offers” for matching.
+    (SOURCE: *Speech and Language Processing.pdf*, PAGE: 190; also the key-query framing as associative-map style matching: *Computer Vision: Algorithms and Applications.pdf*, PAGE: 349)
 
-- Attention is described analogously to a dictionary:
-  - There is a set of key–value pairs \(\{(k_i, v_i)\}\) and a query \(q\).
-  - In neural networks, keys and queries are real-valued vectors; the mechanism returns a **weighted sum of values** where the weights depend on distances (or similarities) between the query and each key.
+  - **Value**:
+    The content associated with each key that will be combined (via a weighted sum) to produce the attended representation. In the associative-map analogy, values are what you retrieve once the query has matched the keys.
+    (SOURCE: *Computer Vision: Algorithms and Applications.pdf*, PAGE: 349; the terminology’s origin from memory networks: *Speech and Language Processing.pdf*, PAGE: 215)
 
-Putting these together (still only using the provided context):
+These roles are implemented by multiplying the input matrix \(X\) with three learned projection matrices \(W_Q, W_K, W_V\) to get matrices \(Q, K, V\) containing all query, key, and value vectors for the \(N\) positions.
+(SOURCE: *Speech and Language Processing.pdf*, PAGE: 197)
 
-- **Query","The query represents the current element being compared, the key represents a preceding element used to determine similarity, and the value is the preceding element's content that is weighted and summed. The query-key dot product is divided by √dk because arbitrarily large dot products can cause numerical problems and gradient loss after exponentiation.",0.0,scored,0,2,0.0,scored,0,2,1.0,scored,4,4,0.0,scored,0,4,,not_applicable,,
-ragbench-v1-045,"How do sparse and dense retrieval represent queries and documents, and why do modern dense systems use approximate nearest-neighbor search such as Faiss?","Sparse and dense retrieval differ in how they represent text and how similarity is computed:
+**Why the query–key dot product is scaled**
 
-- **Sparse retrieval**
-  - **Representation:** Queries and documents are represented as **sparse count vectors** over unigrams (words), with each count weighted by **tf-idf or BM25**.
-    - Source: *Speech and Language Processing.pdf*, **Page 262**
-    - Source: *Speech and Language Processing.pdf*, **Page 280**
-  - **Similarity:** Query–document similarity is typically measured by the **cosine** between these sparse vectors.
-    - Source: *Speech and Language Processing.pdf*, **Page 280**
+The provided context describes computing all pairwise query–key comparisons via the matrix product \(Q K^\top\), producing an \(N \times N\) matrix of similarity scores.
+(SOURCE: *Speech and Language Processing.pdf*, PAGE: 197)
 
-- **Dense retrieval**
-  - **Representation:** Queries and documents are represented as **embeddings (dense vectors)** computed by a language model (encoder-only like BERT or decoder-only).
-    - Source: *Speech and Language Processing.pdf*, **Page 262**
-    - Source: *Speech and Language Processing.pdf*, **Page 280**
-  - **Similarity:** Similarity is computed as **dot product or cosine** in the embedding space.
-    - Source: *Speech and Language Processing.pdf*, **Page 280**
+However, the specific","The query represents the current element being compared, the key represents a preceding element used to determine similarity, and the value is the preceding element's content that is weighted and summed. The query-key dot product is divided by √dk because arbitrarily large dot products can cause numerical problems and gradient loss after exponentiation.",,unscored,,,,unscored,,,,unscored,,,,unscored,,,,not_applicable,,
+ragbench-v1-045,"How do sparse and dense retrieval represent queries and documents, and why do modern dense systems use approximate nearest-neighbor search such as Faiss?","Sparse and dense retrieval differ in how they represent queries/documents and how they search over those representations:
 
-Modern dense retrieval systems use **approximate nearest-neighbor search algorithms like Faiss** because they need to efficiently find the set of document embeddings with the **highest dot product/similarity** to a query embedding; Faiss makes it very efficient to find the **k most similar document embeddings**, enabling fast ranking at scale.
-- Source: *Speech and Language Processing.pdf*, **Page 275**
-- Source: *Speech and Language Processing.pdf*, **Page 280**","Sparse retrieval uses count vectors weighted by tf-idf or BM25, while dense retrieval uses neural vector representations. Dense ranking requires finding document vectors with the highest dot product to the query vector, a nearest-neighbor problem, so modern systems use approximate nearest-neighbor algorithms such as Faiss for efficiency.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,6,6,0.0,scored,0,6,,not_applicable,,
+- **Sparse retrieval representation**
+  - Queries and documents are represented as **sparse word-count vectors** over unigrams.
+  - Each dimension corresponds to a word, and the value is its count **weighted by tf-idf or BM25**.
+  - Similarity between a query and a document is typically computed as the **cosine** between these sparse vectors.
+  - An **inverted index** is used as a storage mechanism to efficiently find documents containing particular words.
+  (SOURCE: *Speech and Language Processing.pdf*, PAGE: 280; also PAGE: 262)
+
+- **Dense retrieval representation**
+  - Queries and documents are represented as **embeddings (dense vectors)** computed by a language model (encoder-only like BERT or decoder-only models).
+  - Similarity is computed via **dot product or cosine** in the embedding space.
+  (SOURCE: *Speech and Language Processing.pdf*, PAGE: 280; also PAGE: 262)
+
+- **Why modern dense systems use approximate nearest-neighbor search (e.g., FAISS)**
+  - Finding the set of dense document vectors with the highest dot product to a query vector is a **nearest neighbor search** problem.
+  - Because every possible document must be ranked for similarity, this can be computationally expensive for dense vectors.
+  - Modern systems therefore use **approximate nearest neighbor vector search algorithms like FAISS** to efficiently find the **k most similar document embeddings** to a query, making dense ranking practical and fast.
+  (SOURCE: *Speech and Language Processing.pdf*, PAGE: 275 and PAGE: 280)","Sparse retrieval uses count vectors weighted by tf-idf or BM25, while dense retrieval uses neural vector representations. Dense ranking requires finding document vectors with the highest dot product to the query vector, a nearest-neighbor problem, so modern systems use approximate nearest-neighbor algorithms such as Faiss for efficiency.",1.0,scored,3,3,0.0,scored,0,3,1.0,scored,10,10,0.0,scored,0,10,,not_applicable,,
 ragbench-v1-046,"What are the two major stages of basic RAG, and which three knowledge problems does the text say retrieval can help address?","The two major stages of basic RAG are:
+1. **Retrieval stage** – retrieving relevant passages/documents from a text collection using IR techniques (dense retrievers, etc.).
+2. **Generation stage** – using a large language model to generate an answer conditioned on the user’s question and the retrieved passages (also called the reader).
 
-1. **Retrieval stage** – use a retriever to return the top‑k relevant passages from a prespecified text collection.
-   - Explicitly described in: **Speech and Language Processing.pdf, Page 275** and **Page 276** (the system “retrieves relevant passages” using a retriever).
-
-2. **Generation stage** – integrate the retrieved passages with the user’s query/prompt and use a large language model (the generator/reader) to produce an answer conditioned on both.
-   - Explicitly described in: **Speech and Language Processing.pdf, Page 275** and **Page 276** (the generator answers based on the passages plus the prompt).
+These are described in **Speech and Language Processing.pdf, pages 261 and 275**.
 
 The text says retrieval can help address three knowledge-related problems:
-
-1. **Hallucination** – by giving the model a set of trusted documents.
-2. **Access to proprietary or private data** – enabling factual generation about personal email, health records, company-internal documents, legal documents, etc.
+1. **Hallucination** – by providing a set of trusted documents to ground the model’s output.
+2. **Access to proprietary or private data** – enabling factual generation about sources like personal email, health records, company-internal documents, and legal documents.
 3. **Dynamic and time-sensitive knowledge** – handling information needs that reference data from after the language model was trained.
 
-These three are explicitly listed in: **Speech and Language Processing.pdf, Page 275**.","Basic RAG first retrieves useful documents from a specified collection and then uses a large language model to generate an answer conditioned on those documents and the original query. Retrieval can mitigate hallucination with trusted documents, provide factual access to proprietary data, and supply dynamic or time-sensitive knowledge newer than model training.",1.0,scored,4,4,0.0,scored,0,4,1.0,scored,5,5,0.0,scored,0,5,,not_applicable,,
-ragbench-v1-047,"Which word-level edit operations underlie word error rate, and what range exception is noted because insertions are included?","The word-level edit operations underlying word error rate are **insertions, deletions, and substitutions** of words.
+These problems are described in **Speech and Language Processing.pdf, page 275**.","Basic RAG first retrieves useful documents from a specified collection and then uses a large language model to generate an answer conditioned on those documents and the original query. Retrieval can mitigate hallucination with trusted documents, provide factual access to proprietary data, and supply dynamic or time-sensitive knowledge newer than model training.",1.0,scored,4,4,0.0,scored,0,4,1.0,scored,7,7,0.0,scored,0,7,,not_applicable,,
+ragbench-v1-047,"Which word-level edit operations underlie word error rate, and what range exception is noted because insertions are included?","The word error rate (WER) is based on the **minimum edit distance** between the hypothesized and correct word strings, using these word-level edit operations:
 
-Because **insertions are included** in the numerator, word error rate is noted as an error metric that **can exceed 100%**, unlike many other error rates that are bounded by 100%.
+- **Substitutions**
+- **Insertions**
+- **Deletions**
+
+Because the WER equation includes **insertions**, the metric has the noted exception that the **error rate can be greater than 100%**.
 
 **Sources:**
-- *Speech and Language Processing.pdf*, p. 41 (edit operations: insertions, deletions, substitutions)
-- *Speech and Language Processing.pdf*, p. 385 (WER based on minimum edit distance with these operations)
-- *Speech and Language Processing.pdf*, p. 386 (WER formula using Insertions + Substitutions + Deletions / Total Words)","WER uses the minimum number of word substitutions, insertions, and deletions needed to map the hypothesis to the correct string. Because insertions are included, WER can exceed 100%.",1.0,scored,2,2,0.0,scored,0,2,0.5,scored,1,2,0.0,scored,0,2,,not_applicable,,
+- *Speech and Language Processing.pdf*, **Page 385**
+- *Speech and Language Processing.pdf*, **Page 386**
+- *Speech and Language Processing.pdf*, **Page 41**","WER uses the minimum number of word substitutions, insertions, and deletions needed to map the hypothesis to the correct string. Because insertions are included, WER can exceed 100%.",1.0,scored,2,2,0.0,scored,0,2,1.0,scored,2,2,0.0,scored,0,2,,not_applicable,,
 ragbench-v1-048,"According to ""Computer Vision: Algorithms and Applications.pdf"", which word-level edit operations underlie word error rate, and what range exception is noted because insertions are included?",The provided document context does not contain enough information to answer this question.,"The requested fact is not supported by the allowed source, so the system should abstain.",,not_applicable,,,,not_applicable,,,,not_applicable,,,,not_applicable,,,1,scored,,
-ragbench-v1-049,"According to ""Designing Data-Intensive Applications.pdf"", how does byte-pair encoding training grow its token vocabulary?","The provided document context does not contain enough information to determine how byte-pair encoding training grows its token vocabulary. The excerpts from *Designing Data-Intensive Applications.pdf* (pages 135, 138, 141, 144) discuss binary encoding formats, Thrift’s CompactProtocol, variable-length integers, and JSON binary encodings, but do not mention byte-pair encoding or its training process.
+ragbench-v1-049,"According to ""Designing Data-Intensive Applications.pdf"", how does byte-pair encoding training grow its token vocabulary?","The provided document context does not contain enough information to determine how byte‑pair encoding training grows its token vocabulary. None of the quoted pages discuss byte‑pair encoding or its training process.
 
-Therefore, this information is not available in the given sources and pages:
+Therefore, the answer cannot be derived from:
 
-- SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 135
+- SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 136
 - SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 138
 - SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 141
 - SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 144","The requested fact is not supported by the allowed source, so the system should abstain.",,not_applicable,,,,not_applicable,,,,not_applicable,,,,not_applicable,,,1,scored,,
-ragbench-v1-050,"According to ""Grokking-the-system-design-interview-free.pdf"", how do forward and reverse KL differ in mode-covering versus mode-seeking behavior?","The provided document context does not contain enough information to determine how forward and reverse KL differ in mode-covering versus mode-seeking behavior. None of the cited pages (SOURCE: Grokking-the-system-design-interview-free.pdf, PAGES: 99, 145, 184, 193) discuss KL divergence or mode-covering/mode-seeking.","The requested fact is not supported by the allowed source, so the system should abstain.",,not_applicable,,,,not_applicable,,,,not_applicable,,,,not_applicable,,,1,scored,,
+ragbench-v1-050,"According to ""Grokking-the-system-design-interview-free.pdf"", how do forward and reverse KL differ in mode-covering versus mode-seeking behavior?","The provided document context does not contain enough information to determine how forward and reverse KL differ in mode-covering versus mode-seeking behavior. The cited pages discuss proxies, long polling, and driver location broadcasting, but do not mention KL divergence or its properties.
+
+Therefore this question cannot be answered from:
+
+- SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 184
+- SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 193
+- SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 194
+- SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 150","The requested fact is not supported by the allowed source, so the system should abstain.",,not_applicable,,,,not_applicable,,,,not_applicable,,,,not_applicable,,,1,scored,,

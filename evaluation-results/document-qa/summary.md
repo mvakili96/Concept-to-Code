@@ -5,18 +5,42 @@ These are LLM judgments. Judge agreement and known limitations are reported sepa
 Fact coverage, grounding, contradictions, and abstention evaluate the generated answers. The saved context is used only as evidence for answer claims. No chunk precision or recall is calculated.
 
 - Judge: Azure OpenAI `gpt-5.1`. Same model family as the answering model.
-- Saved answer run: 2026-10-26T21:03:31.176546+00:00, `gpt-5.1`, answer limit 400 tokens.
-- Saved input: `evaluation-results/document-qa/predictions.json`, SHA-256 `c6c5c8cd1ceba4ed73435d82a2e93297b8655821a2aa5b5873bb009a13a6f6b4`.
-- Questions evaluated: 50. No retrieval, reranking or answer generation was rerun.
+- Saved answer run: 2026-11-18T02:11:51.059656+00:00, `gpt-5.1`, answer limit 400 tokens.
+- Saved input: `evaluation-results/document-qa/predictions.json`, SHA-256 `4f33cedcd4ca9e233f52bd4f9df7be7efae78917c6b1bb3334b7ec1da82e5b58`.
+- Questions evaluated: 50. Retrieval, reranking and answer generation were run once using the rebuilt indexes. The judge then evaluated those saved answers.
 - Synthetic calibration: 5/5 passed.
 
 | Metric | Macro average | Scored questions | N/A | Unscored |
 |---|---:|---:|---:|---:|
-| Fact coverage | 85.1% | 42 | 3 | 5 |
-| Reference contradiction rate | 0.0% | 42 | 3 | 5 |
-| Grounding rate | 87.6% | 41 | 4 | 5 |
+| Fact coverage | 83.1% | 43 | 3 | 4 |
+| Reference contradiction rate | 0.8% | 43 | 3 | 4 |
+| Grounding rate | 95.7% | 41 | 4 | 5 |
 | Context contradiction rate | 0.0% | 41 | 4 | 5 |
 | Abstention accuracy | 100.0% | 3 | 47 | 0 |
+
+## Cross-page prose fix and indexing comparison
+
+All 50 answers were freshly generated using extraction schema 3, then evaluated with the unchanged answer judge. The previous Docling indexes and reports were preserved locally. No reference labels or judge labels were edited.
+
+Both FAISS indexes and BM25 were rebuilt. The active corpus has 18,053 chunks, including 148 table chunks. All 2,476 indexed multi-region text fragments were checked against their native Docling character spans and physical page numbers. The original 6,059 raw page strings and 4,188 LeetCode chunks were unchanged. Invalid upstream spans remain explicitly excluded and flagged (226 region warnings).
+
+| Metric | Previous pypdf | Docling before fix | Docling after fix |
+|---|---:|---:|---:|
+| Fact coverage | 85.1% (42 scored) | 81.8% (44 scored) | 83.1% (43 scored) |
+| Grounding | 87.6% (41 scored) | 91.7% (38 scored) | 95.7% (41 scored) |
+| Reference contradiction rate | 0.0% (42 scored) | 2.3% (44 scored) | 0.8% (43 scored) |
+| Context contradiction rate | 0.0% (41 scored) | 0.0% (38 scored) | 0.0% (41 scored) |
+| Abstention accuracy | 100.0% (3 scored) | 100.0% (3 scored) | 100.0% (3 scored) |
+
+On jointly scored questions, fact coverage changed from 81.0% to 82.7% across 42 questions. Grounding changed from 91.0% to 96.9% across 35 questions. There were zero answer-generation execution failures.
+
+The Hough-transform case (`ragbench-v1-001`) recovered from 0/2 to 2/2 required facts, with 100% grounding and citations to physical page 504. Its prose is now retained using validated page-specific slices of Docling `item.orig`. Whole merged paragraphs are not copied onto neighboring pages. Same-page multi-region items also use separate fragments. Missing, overlapping, out-of-range or incomplete spans remain flagged rather than guessed.
+
+Answering and judging used the same GPT-5.1 deployment as the comparison runs, with 400-token answers, unchanged prompts, Flat dense retrieval plus BM25 and query expansion, the same candidate limits, 900-character prose chunks with 200-character overlap, and four final chunks. The current production configuration still allows 1,200-token answers.
+
+**Judge caveats:** On `ragbench-v1-033`, the judge missed terminology visibly present in the answer. On `ragbench-v1-019`, it marked a reference contradiction for an answer addressing app-server failure instead of KGS failure, even though the app-server statement is supported by context. The response misses the requested condition, but that is not proof of a factual contradiction. Raw labels and scores remain unchanged. The earlier pre-fix 2.3% reference contradiction rate also came from a refusal mislabeled as contradiction.
+
+**Interpretation:** The specific cross-page ingestion regression is fixed and the new run improves both raw metrics over the previous Docling run. Fact coverage remains below the older pypdf score, while grounding is higher. Different unscored subsets, generation/judging variability and known judge errors limit attribution. This is a fixed development comparison and does not establish table-answering quality or held-out generalization.
 
 ## Evaluated answer-generation settings
 
@@ -42,52 +66,52 @@ These are model estimates, not objective correctness or human approval. Fact cov
 | Question | Fact coverage | Grounding | Reference contradictions | Context contradictions | Abstention |
 |---|---:|---:|---:|---:|---|
 | ragbench-v1-001 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-002 | 66.7% | 50.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-003 | 0.0% | 0.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-002 | 66.7% | 87.5% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-003 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-004 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-005 | unscored | 66.7% | unscored | 0.0% | not_applicable |
-| ragbench-v1-006 | 66.7% | 71.4% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-007 | 100.0% | 80.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-008 | 100.0% | 66.7% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-005 | 25.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-006 | 66.7% | 60.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-007 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-008 | 100.0% | 80.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-009 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-010 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-011 | unscored | 66.7% | unscored | 0.0% | not_applicable |
-| ragbench-v1-012 | 66.7% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-011 | 50.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-012 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-013 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-014 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-015 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-016 | 75.0% | 66.7% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-017 | unscored | 100.0% | unscored | 0.0% | not_applicable |
-| ragbench-v1-018 | unscored | 100.0% | unscored | 0.0% | not_applicable |
-| ragbench-v1-019 | 33.3% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-020 | 100.0% | unscored | 0.0% | unscored | not_applicable |
-| ragbench-v1-021 | 100.0% | unscored | 0.0% | unscored | not_applicable |
-| ragbench-v1-022 | 100.0% | 80.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-023 | 100.0% | unscored | 0.0% | unscored | not_applicable |
-| ragbench-v1-024 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-015 | 100.0% | unscored | 0.0% | unscored | not_applicable |
+| ragbench-v1-016 | 50.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-017 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-018 | 100.0% | 83.3% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-019 | 33.3% | 50.0% | 33.3% | 0.0% | not_applicable |
+| ragbench-v1-020 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-021 | unscored | unscored | unscored | unscored | not_applicable |
+| ragbench-v1-022 | 66.7% | 88.9% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-023 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-024 | unscored | 100.0% | unscored | 0.0% | not_applicable |
 | ragbench-v1-025 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-026 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-027 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-027 | 100.0% | unscored | 0.0% | unscored | not_applicable |
 | ragbench-v1-028 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-029 | 100.0% | 66.7% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-030 | unscored | 100.0% | unscored | 0.0% | not_applicable |
+| ragbench-v1-029 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-030 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-031 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-032 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-033 | 66.7% | 40.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-034 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-032 | 100.0% | unscored | 0.0% | unscored | not_applicable |
+| ragbench-v1-033 | 0.0% | 75.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-034 | 50.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-035 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-036 | 100.0% | unscored | 0.0% | unscored | not_applicable |
-| ragbench-v1-037 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-038 | 0.0% | 87.5% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-036 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-037 | 0.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-038 | 66.7% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-039 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-040 | 0.0% | not_applicable | 0.0% | not_applicable | not_applicable |
 | ragbench-v1-041 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-042 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-043 | 100.0% | unscored | 0.0% | unscored | not_applicable |
-| ragbench-v1-044 | 0.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-042 | unscored | 100.0% | unscored | 0.0% | not_applicable |
+| ragbench-v1-043 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-044 | unscored | unscored | unscored | unscored | not_applicable |
 | ragbench-v1-045 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-046 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
-| ragbench-v1-047 | 100.0% | 50.0% | 0.0% | 0.0% | not_applicable |
+| ragbench-v1-047 | 100.0% | 100.0% | 0.0% | 0.0% | not_applicable |
 | ragbench-v1-048 | not_applicable | not_applicable | not_applicable | not_applicable | appropriate_abstention |
 | ragbench-v1-049 | not_applicable | not_applicable | not_applicable | not_applicable | appropriate_abstention |
 | ragbench-v1-050 | not_applicable | not_applicable | not_applicable | not_applicable | appropriate_abstention |
@@ -104,11 +128,11 @@ According to "Computer Vision: Algorithms and Applications.pdf", which word-leve
 
 According to "Designing Data-Intensive Applications.pdf", how does byte-pair encoding training grow its token vocabulary?
 
-> The provided document context does not contain enough information to determine how byte-pair encoding training grows its token vocabulary. The excerpts from *Designing Data-Intensive Applications.pdf* (pages 135, 138, 141, 144) discuss binary encoding formats, Thrift’s CompactProtocol, variable-length integers, and JSON binary encodings, but do not mention byte-pair encoding or its training process.
+> The provided document context does not contain enough information to determine how byte‑pair encoding training grows its token vocabulary. None of the quoted pages discuss byte‑pair encoding or its training process.
 >
-> Therefore, this information is not available in the given sources and pages:
+> Therefore, the answer cannot be derived from:
 >
-> - SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 135
+> - SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 136
 > - SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 138
 > - SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 141
 > - SOURCE: Designing Data-Intensive Applications.pdf, PAGE: 144
@@ -117,10 +141,17 @@ According to "Designing Data-Intensive Applications.pdf", how does byte-pair enc
 
 According to "Grokking-the-system-design-interview-free.pdf", how do forward and reverse KL differ in mode-covering versus mode-seeking behavior?
 
-> The provided document context does not contain enough information to determine how forward and reverse KL differ in mode-covering versus mode-seeking behavior. None of the cited pages (SOURCE: Grokking-the-system-design-interview-free.pdf, PAGES: 99, 145, 184, 193) discuss KL divergence or mode-covering/mode-seeking.
+> The provided document context does not contain enough information to determine how forward and reverse KL differ in mode-covering versus mode-seeking behavior. The cited pages discuss proxies, long polling, and driver location broadcasting, but do not mention KL divergence or its properties.
+>
+> Therefore this question cannot be answered from:
+>
+> - SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 184
+> - SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 193
+> - SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 194
+> - SOURCE: Grokking-the-system-design-interview-free.pdf, PAGE: 150
 
 
-Benchmark judging calls: 162. Recorded benchmark API tokens: `{'prompt_tokens': 190360, 'completion_tokens': 71854, 'total_tokens': 262214}`. Calibration calls: 6, tokens: `{'prompt_tokens': 3089, 'completion_tokens': 645, 'total_tokens': 3734}`. SDK retries may add requests not represented in call counts. Recorded usage is not an Azure bill.
+Benchmark judging calls: 163. Recorded benchmark API tokens: `{'prompt_tokens': 182155, 'completion_tokens': 63942, 'total_tokens': 246097}`. Calibration calls: 6, tokens: `{'prompt_tokens': 3089, 'completion_tokens': 648, 'total_tokens': 3737}`. SDK retries may add requests not represented in call counts. Recorded usage is not an Azure bill.
 
 ## Judge configuration
 
