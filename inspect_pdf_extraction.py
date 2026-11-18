@@ -10,6 +10,7 @@ import yaml
 import pypdf
 
 from pdf_ingestion import PDFExtractor, file_sha256
+from pdf_tables import chunk_table_document
 
 
 ROOT = Path(__file__).resolve().parent
@@ -25,7 +26,8 @@ def main(argv=None):
     plan = yaml.safe_load(args.plan.read_text())
     config = yaml.safe_load((ROOT / "config.yml").read_text())
     # This inspection chooses Docling without changing config.yml or the production indexes.
-    documents_config = {**config["documents"], "extraction": {"parser": "docling"}}
+    documents_config = {**config["documents"], "extraction": {
+        **config["documents"].get("extraction", {}), "parser": "docling", "source_overrides": {}}}
     extractor = PDFExtractor(documents_config)
     paths = {path.name: path for path in ROOT.glob(config["documents"]["pdf_glob"])}
     selected = []
@@ -52,7 +54,7 @@ def main(argv=None):
               "extraction_settings": extractor.settings, "llm_calls": 0,
               "review_status": "automated_extraction_only", "pages": []}
     markdown = ["# PDF extraction pilot", "",
-                "Native prose only. Tables and figures are detected regions, not interpreted evidence. OCR is disabled.", "",
+                "Structured native prose and optional table rows. Figure interpretation and OCR are disabled.", "",
                 "Compare each page image against both text views. Region coordinates are PDF points from the top-left.", ""]
     # Rendering is local and optional only outside the pilot dependency installation.
     import pypdfium2 as pdfium
@@ -62,6 +64,8 @@ def main(argv=None):
         tick = perf_counter()
         extracted = extractor.extract(paths[source], pages=[page])
         data = extracted["structured_pages"][page]
+        table_chunks = [chunk for doc in extracted["documents"] if doc.metadata.get("content_type") == "table"
+                        for chunk in chunk_table_document(doc, config["chunking"]["chunk_size"])]
         prefix = f"{index:02d}-page-{page}"
         # Render the original PDF. This is the visual reference, not an LLM-generated image.
         with pdfium.PdfDocument(paths[source]) as pdf:
@@ -72,16 +76,20 @@ def main(argv=None):
             pdf_page.close()
         (output / f"{prefix}-pypdf.txt").write_text(extracted["raw_pages"][page], encoding="utf-8")
         (output / f"{prefix}-docling.txt").write_text(data["text"], encoding="utf-8")
+        (output / f"{prefix}-tables.txt").write_text("\n\n".join(
+            f"CHUNK: {chunk.metadata['chunk_id']}\n{chunk.page_content}" for chunk in table_chunks), encoding="utf-8")
         item = {"source": source, "source_sha256": file_sha256(paths[source]), "page": page,
                 "focus": sample["focus"], "seconds": round(perf_counter() - tick, 3),
                 "raw_characters": len(extracted["raw_pages"][page]),
                 "structured_characters": len(data["text"]),
                 "element_counts": dict(Counter(element["content_type"] for element in data["elements"])),
-                "offset_basis": "docling_page_text", **data}
+                "offset_basis": "docling_page_text", **data,
+                "table_chunks": [{"text": chunk.page_content, **chunk.metadata} for chunk in table_chunks]}
         report["pages"].append(item)
         markdown.extend([f"## {source}, physical page {page}", "", sample["focus"], "",
                          f"![Original PDF page]({prefix}.png)", "",
                          f"[Raw pypdf text]({prefix}-pypdf.txt) · [Structured prose]({prefix}-docling.txt)", "",
+                         f"[Table chunks with repeated headers and linked notes]({prefix}-tables.txt)", "",
                          f"Detected elements: `{json.dumps(item['element_counts'])}`", "",
                          "| Type | Element ID | Bounding box | Indexed text span |",
                          "|---|---|---|---|"])
@@ -89,6 +97,11 @@ def main(argv=None):
             span = f"{element['start']}:{element['end']}" if element["start"] is not None else "Excluded"
             markdown.append(f"| {element['content_type']} | {element['element_id']} | {element['bbox']} | {span} |")
         markdown.extend(["", *data["warnings"], ""])
+        for chunk in table_chunks:
+            markdown.extend([f"### Table rows {chunk.metadata['row_start']}–{chunk.metadata['row_end']}", "",
+                             "```text", chunk.page_content, "```", ""])
+            if chunk.metadata["oversized_table_row"]:
+                markdown.extend(["This complete row and its headers/notes exceed chunk_size. Nothing was truncated.", ""])
     report["elapsed_seconds"] = round(perf_counter() - started, 3)
     (output / "report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     (output / "review.md").write_text("\n".join(markdown), encoding="utf-8")

@@ -24,6 +24,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from rank_bm25 import BM25Okapi
 from transformers import GenerationConfig
 from pdf_ingestion import PDFExtractor, extraction_settings
+from pdf_tables import chunk_table_document
 
 
 class AzureOpenAILLM:
@@ -340,7 +341,8 @@ class RAGPipeline:
 
         # chunks is a list of chunks. Each chunk has metadata such as page_content, source, page, start_index, and so on.
         # Here, start_index means the index of the first character of this chunk corresponds to character start_index of the original pagetext.
-        chunks = splitter.split_documents(documents)
+        # Tables are split between complete rows, with their headers/notes repeated separately.
+        chunks = splitter.split_documents([doc for doc in documents if doc.metadata.get("content_type") != "table"])
 
         # This ID is stored in both retrieval systems so the same chunk can be
         # recognized and deduplicated after dense and sparse retrieval.
@@ -357,6 +359,10 @@ class RAGPipeline:
                 + ("parser=docling::" if chunk.metadata.get("parser") == "docling" else "") +
                 f"start={chunk.metadata['start_index']}"
             )
+
+        for doc in documents:
+            if doc.metadata.get("content_type") == "table":
+                chunks.extend(chunk_table_document(doc, self.config["chunking"]["chunk_size"]))
 
         return chunks
 
@@ -1059,7 +1065,9 @@ class RAGPipeline:
                     "start_index": doc.metadata["start_index"],
                     "text": doc.page_content,
                     **{key: doc.metadata[key] for key in
-                       ("parser", "source_sha256", "offset_basis", "elements") if key in doc.metadata},
+                       ("parser", "source_sha256", "offset_basis", "elements", "content_type", "table_id",
+                        "row_start", "row_end", "table_header_rows", "table_cells", "table_notes",
+                        "oversized_table_row") if key in doc.metadata},
                 }
             )
 

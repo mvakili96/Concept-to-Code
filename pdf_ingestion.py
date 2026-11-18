@@ -6,10 +6,12 @@ from pathlib import Path
 
 import pypdf
 from langchain_core.documents import Document
+from pdf_tables import extract_table, table_document
 
 
-EXTRACTION_SCHEMA_VERSION = 1
+EXTRACTION_SCHEMA_VERSION = 2
 # Stage one indexes native prose only. Table reconstruction, OCR, and vision come later.
+# Stage two optionally adds separate table Documents, preserving the original prose path.
 TEXT_LABELS = {"text", "paragraph", "title", "section_header", "list_item", "code"}
 DOCLING_OPTIONS = {
     "do_ocr": False,
@@ -34,6 +36,10 @@ def extraction_settings(documents_config):
               "source_overrides": overrides}
     if "docling" in {parser, *overrides.values()}:
         result["docling_options"] = DOCLING_OPTIONS.copy()
+        tables = settings.get("tables", {}).get("enabled", False)
+        if type(tables) is not bool:
+            raise ValueError("documents.extraction.tables.enabled must be true or false.")
+        result["docling_options"]["do_table_structure"] = tables
     return result
 
 
@@ -64,7 +70,7 @@ class PDFExtractor:
                 raise RuntimeError(
                     "Docling extraction requires: pip install -r requirements-pdf.txt"
                 ) from error
-            options = PdfPipelineOptions(**DOCLING_OPTIONS)
+            options = PdfPipelineOptions(**self.settings["docling_options"])
             self.converter = DocumentConverter(format_options={
                 InputFormat.PDF: PdfFormatOption(pipeline_options=options)
             })
@@ -103,7 +109,8 @@ class PDFExtractor:
             if status != "success":
                 raise RuntimeError(f"Incomplete Docling conversion for {path.name}, pages {first}-{last}: {status}")
             converted = structured_pages(conversion.document, path.name, fingerprint,
-                                         set(range(first, last + 1)))
+                                         set(range(first, last + 1)),
+                                         tables_enabled=self.settings["docling_options"]["do_table_structure"])
             result["structured_pages"].update(converted)
         if file_sha256(path) != fingerprint:
             raise RuntimeError(f"PDF changed during extraction: {path.name}")
@@ -114,12 +121,13 @@ class PDFExtractor:
                 "source_sha256": fingerprint, "offset_basis": "docling_page_text",
                 "elements": data["elements"],
             }))
+            result["documents"].extend(table_document(table, path.name, fingerprint) for table in data["tables"])
         return result
 
 
-def structured_pages(document, source, fingerprint, selected):
+def structured_pages(document, source, fingerprint, selected, tables_enabled=False):
     """Adapt Docling reading-order elements without treating descriptions as source text."""
-    pages = {page: {"text": "", "elements": [], "warnings": []} for page in sorted(selected)}
+    pages = {page: {"text": "", "elements": [], "tables": [], "warnings": []} for page in sorted(selected)}
     for item, _level in document.iterate_items():
         label = getattr(item.label, "value", item.label)
         provenance = list(getattr(item, "prov", []))
@@ -140,6 +148,17 @@ def structured_pages(document, source, fingerprint, selected):
             # Multi-page items need finer span mapping in a later stage, not guessed page assignments.
             if len(item_pages) > 1:
                 pages[page]["warnings"].append(f"Multi-page element excluded from indexed text: {element['element_id']}")
+            if label == "table" and tables_enabled:
+                # Table extraction failures remain explicit. Flattened cell text stays excluded below.
+                try:
+                    table = extract_table(item, document, element)
+                    # Internal prose-construction fields are not source metadata.
+                    table["element"] = {key: value for key, value in element.items() if not key.startswith("_")}
+                    pages[page]["tables"].append(table)
+                    element["table_status"] = "extracted"
+                except ValueError as error:
+                    element["table_status"] = "excluded_invalid_structure"
+                    pages[page]["warnings"].append(f"Table excluded: {element['element_id']}: {error}")
             pages[page]["elements"].append(element)
     for page, data in pages.items():
         visual_regions = [element["bbox"] for element in data["elements"]
