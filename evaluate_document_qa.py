@@ -121,6 +121,7 @@ def main(argv=None):
         query_expansion_settings=dict(config["query_expansion"]), chunk_size=config["chunking"]["chunk_size"],
         chunk_overlap=config["chunking"]["chunk_overlap"], dense_index_type=config["retrieval"]["dense_index_type"],
         dense_top_k=config["retrieval"]["dense_top_k"], bm25_top_k=config["retrieval"]["bm25_top_k"],
+        bm25_backend=config["retrieval"].get("bm25_backend", "rank_bm25"),
         final_top_k=config["reranking"]["final_top_k"], answer_max_new_tokens=config["llm"]["generation"]["max_new_tokens"])
     counts = dict(total=len(records), eligible=len(eligible), excluded=len(records)-len(eligible),
                   quarantined=sum(record_is_quarantined(r) for r in records))

@@ -387,6 +387,7 @@ def write_reports(directory, run, questions, calibration):
                   "These settings describe the saved answers, which may differ from the current configuration.", "",
                   f"- Dense / BM25 / query expansion: `{source['ablation']}`.",
                   f"- Dense index: `{source.get('dense_index_type')}`. Candidate limits: dense `{source.get('dense_top_k')}`, BM25 `{source.get('bm25_top_k')}`.",
+                  f"- BM25 backend: `{source.get('bm25_backend', 'rank_bm25')}`.",
                   f"- Chunk size / overlap: `{source.get('chunk_size')}` / `{source.get('chunk_overlap')}` characters.",
                   f"- Reranker: `{source.get('reranker_model')}`. Context limit: `{source.get('final_top_k')}` chunks.",
                   f"- Embeddings: `{source.get('embedding_model')}`.",

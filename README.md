@@ -21,7 +21,7 @@ Built with **Docling**, **pypdf**, **LangChain**, **Sentence Transformers/MiniLM
 
 Docling preserves layout metadata and indexes supported tables with complete rows, repeated headers, and linked captions/footnotes. Cross-page prose keeps page-specific source references. The parser is configurable, and the LeetCode catalogue uses pypdf.
 
-Features include **IndexFlat (exact k-nearest neighbors)** or **HNSW (approximate nearest neighbors, ANN)**, optional LLM query expansion, persistent BM25/Flat/HNSW indexes, conversational QA, and dense/BM25/expansion ablations. Exact quoted filenames restrict technical sources. Citations use one-based physical PDF pages.
+Features include **IndexFlat (exact k-nearest neighbors)** or **HNSW (approximate nearest neighbors, ANN)**, **inverted-index BM25**, optional LLM query expansion, persistent BM25/Flat/HNSW indexes, conversational QA, and dense/BM25/expansion ablations. Exact quoted filenames restrict technical sources. Citations use one-based physical PDF pages.
 
 ## Pipeline flowchart
 
@@ -133,6 +133,8 @@ flowchart TD
 python main.py
 ```
 
+BM25 defaults to `retrieval.bm25_backend: inverted`. Choose `rank_bm25` for the original full-scan backend with the same scoring formula. To upgrade existing persisted indexes, run `python rebuild_bm25.py` once. It reuses saved chunks without parsing PDFs or rebuilding FAISS.
+
 Chat is enabled by default. Enter a normal question or `/related Hough transform in computer vision`. Use `exit` to stop. The optional recommendation modes are `titles` (default), `retrieval` (legacy), and `batched` (full statements, requiring higher Azure token quota).
 
 Source PDFs, generated indexes, and `.env` are git-ignored. Conversation history stays in memory. `/related` runs independently of chat history.
@@ -169,4 +171,4 @@ QA evaluates final answers, using the retrieved context only to judge whether th
 
 ## Limitations
 
-Figure interpretation and OCR/scanned content are unsupported. Reading order and table reconstruction can be imperfect, and ambiguous text spans or table structures are flagged and excluded. BM25 scores every chunk rather than using an inverted index. Recommendation relationships remain model judgments. Source checks validate identities and quotes. Azure quota errors and answer truncation remain possible. Conversation sessions are not persisted, and no conversational benchmark is included.
+Figure interpretation and OCR/scanned content are unsupported. Reading order and table reconstruction can be imperfect, and ambiguous text spans or table structures are flagged and excluded. Recommendation relationships remain model judgments. Source checks validate identities and quotes. Azure quota errors and answer truncation remain possible. Conversation sessions are not persisted, and no conversational benchmark is included.

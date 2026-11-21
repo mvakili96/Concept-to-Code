@@ -553,7 +553,9 @@ def build_summary(run, records, metrics):
             "Initialization is excluded; first-use loading, concurrency and network delay can affect timings.", ""]
     lines += [f"Recorded API tokens: `{metrics['token_usage']}`. Local token usage is N/A. "
               "SDK retries or interrupted in-flight calls may not be represented in recorded usage; this is not an Azure bill.", "",
-              "## Pipeline settings", "", "```yaml", yaml.safe_dump(run["config"], sort_keys=False).rstrip(), "```", "",
+              "## Pipeline settings", "",
+              f"BM25 backend: `{run['config'].get('retrieval', {}).get('bm25_backend', 'rank_bm25')}`.", "",
+              "```yaml", yaml.safe_dump(run["config"], sort_keys=False).rstrip(), "```", "",
               "## Annotated-target overlap", "",
               "Secondary diagnostics use the original positive targets, not an exhaustive relevance catalog. "
               "Any source-body overlap counts at chunk stages; it need not contain sufficient explanatory prose.", "",
@@ -721,7 +723,7 @@ def input_fingerprints(config, questions, root=None):
     normalized["indexing"].pop("mode", None)  # Resume reuses artifacts; it never rebuilds.
     files = {name: digest(Path(root) / config["leetcode_recommendation_evaluation"][key]) for name, key in (
         ("questions", "dataset_path"), ("references", "references_path"), ("manifest", "manifest_path"))}
-    files.update({name: digest(Path(root) / name) for name in ("main.py", "pdf_ingestion.py", "pdf_tables.py", "evaluate_leetcode_recommendation.py")})
+    files.update({name: digest(Path(root) / name) for name in ("main.py", "pdf_ingestion.py", "pdf_tables.py", "inverted_bm25.py", "evaluate_leetcode_recommendation.py")})
     manifest = json_read(Path(root) / config["leetcode_recommendation_evaluation"]["manifest_path"])
     corpus = {doc["source"]: digest(Path(root) / doc["relative_path"]) for doc in manifest["documents"]}
     return dict(config_sha256=hashlib.sha256(json.dumps(safe_metadata(normalized), sort_keys=True).encode()).hexdigest(),
