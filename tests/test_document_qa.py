@@ -77,6 +77,7 @@ class PredictionTests(unittest.TestCase):
         if mode=="load":
             glob.assert_not_called()
         predictions=save.call_args.args[1]
+        self.assertEqual(predictions["run"]["bm25_backend"], config["retrieval"]["bm25_backend"])
         self.assertEqual(len(predictions["questions"]),1)
         self.assertNotIn("metric_summaries",predictions)
         self.assertEqual(predictions["questions"][0]["generated_answer"],"Answer")

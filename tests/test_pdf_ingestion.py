@@ -191,6 +191,8 @@ class PipelineIntegrationTests(unittest.TestCase):
         pipeline.config = copy.deepcopy(yaml.safe_load((ROOT / "config.yml").read_text()))
         # The compatibility fixture is pypdf regardless of the user's live parser choice.
         pipeline.config["documents"]["extraction"]["parser"] = "pypdf"
+        pipeline.config["retrieval"]["bm25_backend"] = "rank_bm25"
+        pipeline.use_bm25_retrieval = True
         return pipeline
 
     def test_chunk_offsets_and_element_regions_survive_context_assembly(self):
@@ -227,8 +229,8 @@ class PipelineIntegrationTests(unittest.TestCase):
         pipeline.chunks = pipeline.chunk_documents(pipeline.documents)
         pipeline.page_texts = {("book.pdf", 1): "raw exact PDF text"}
         pipeline.structured_pages = {("book.pdf", 1): {"text": "Structured text", "elements": []}}
-        pipeline.global_bm25 = None
-        pipeline.subset_bm25_cache = {}
+        pipeline.global_bm25 = pipeline.build_bm25(pipeline.chunks)
+        pipeline.subset_bm25_cache = {("book.pdf",): (pipeline.chunks, pipeline.global_bm25)}
         with tempfile.TemporaryDirectory() as temp:
             pipeline.persist_directory = Path(temp)
             for kind in ("flat", "hnsw"):

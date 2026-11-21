@@ -139,6 +139,7 @@ class ReportTests(unittest.TestCase):
             self.assertEqual((row["capped_recall_cutoff"], row["capped_recall"],
                               row["capped_recall_matched_targets"]), ("2", "0.5", "1"))
             summary = (Path(directory) / "summary.md").read_text()
+            self.assertIn("BM25 backend: `rank_bm25`", summary)
             self.assertIn("| Capped recall@2 (macro) | 50.0% |", summary)
             self.assertIn("| Full annotated-target recall (micro) | 2/20 (10.0%) |", summary)
         self.assertEqual(sample, original)

@@ -25,6 +25,7 @@ from rank_bm25 import BM25Okapi
 from transformers import GenerationConfig
 from pdf_ingestion import PDFExtractor, extraction_settings
 from pdf_tables import chunk_table_document
+from inverted_bm25 import InvertedBM25
 
 
 class AzureOpenAILLM:
@@ -129,6 +130,8 @@ class RAGPipeline:
 
         if self.indexing_mode not in ("build", "load"):
             raise ValueError('indexing.mode must be either "build" or "load".')
+        if self.bm25_backend not in ("inverted", "rank_bm25"):
+            raise ValueError('retrieval.bm25_backend must be "inverted" or "rank_bm25".')
         if not self.use_dense_retrieval and not self.use_bm25_retrieval:
             raise ValueError(
                 "At least one of ablation.use_dense_retrieval or "
@@ -157,6 +160,9 @@ class RAGPipeline:
                 for source, chunks in self.source_chunks.items()
             }
             self.save_index_data()
+            if self.bm25_backend == "inverted":
+                # The legacy backend stays on disk for comparisons, not in query-time memory.
+                self.global_bm25, self.subset_bm25_cache = None, {}
         else:
             self.load_index_data()
             self.embedding_model = (
@@ -168,6 +174,15 @@ class RAGPipeline:
 
         self.llm = self.load_llm()
         self.reranker = None
+
+    @property
+    def bm25_backend(self):
+        # Configurations saved before the postings backend used rank_bm25.
+        return self.config["retrieval"].get("bm25_backend", "rank_bm25")
+
+    def sparse_index_settings(self):
+        settings = self.persisted_index_settings()
+        return {key: settings[key] for key in ("bm25", "text_normalization")}
 
     def group_chunks_by_source(self):
         return {
@@ -233,6 +248,9 @@ class RAGPipeline:
         with (self.persist_directory / "corpus.pkl").open("wb") as file:
             pickle.dump(persisted_data, file)
 
+        self.inverted_bm25 = InvertedBM25.from_legacy(self.chunks, self.global_bm25)
+        self.inverted_bm25.save(self.persist_directory, self.sparse_index_settings())
+
         manifest = {
             "format_version": self.PERSISTENCE_FORMAT_VERSION,
             "available_sources": self.available_sources,
@@ -246,7 +264,7 @@ class RAGPipeline:
         )
         print("Saved persisted corpus and indexes to:", self.persist_directory)
 
-    def load_index_data(self):
+    def load_index_data(self, load_sparse=True, allow_bm25_rebuild=False):
         manifest_path = self.persist_directory / "manifest.json"
         corpus_path = self.persist_directory / "corpus.pkl"
 
@@ -263,10 +281,16 @@ class RAGPipeline:
                 'Set indexing.mode to "build" to rebuild it.'
             )
 
-        if manifest.get("index_settings") != self.persisted_index_settings():
+        saved_settings = dict(manifest.get("index_settings", {}))
+        current_settings = self.persisted_index_settings()
+        if allow_bm25_rebuild:
+            saved_settings.pop("bm25", None)
+            current_settings.pop("bm25", None)
+        if saved_settings != current_settings:
             raise ValueError(
                 "PDF extraction, chunking, text normalization, embedding, BM25, or HNSW construction settings changed "
-                "after the indexes were built. Set indexing.mode to \"build\" to rebuild them."
+                "after the indexes were built. For BM25-only changes, run python rebuild_bm25.py. "
+                "Otherwise set indexing.mode to \"build\" to rebuild them."
             )
 
         if set(manifest.get("dense_indexes", [])) != {"flat", "hnsw"}:
@@ -295,6 +319,12 @@ class RAGPipeline:
         self.global_bm25 = persisted_data["global_bm25"]
         self.subset_bm25_cache = persisted_data["subset_bm25_cache"]
         self.source_chunks = self.group_chunks_by_source()
+
+        if load_sparse and self.use_bm25_retrieval and self.bm25_backend == "inverted":
+            self.inverted_bm25 = InvertedBM25.load(
+                self.persist_directory, self.chunks, self.sparse_index_settings()
+            )
+            self.global_bm25, self.subset_bm25_cache = None, {}
 
         for dense_index_type in ("flat", "hnsw"):
             for source in self.available_sources:
@@ -516,6 +546,7 @@ class RAGPipeline:
         # Unlike a vector store, BM25 indexes tokenized words(so here, by token, we mean a word) rather than embeddings.
         # It is built once during ingestion and reused for every query.
         # bm25_corpus is a list of all chunks, each chunk represented with a list of its words as strings
+        # This baseline also supplies term counts when building the inverted backend.
         bm25_corpus = [self.tokenize_for_bm25(chunk.page_content) for chunk in chunks]
         return BM25Okapi(
             bm25_corpus,
@@ -584,6 +615,9 @@ class RAGPipeline:
     print(doc)
 
     To inspect bm25_index:
+
+    These examples describe the rank_bm25 baseline. The inverted backend uses the
+    same formula but reads token postings instead of scanning every chunk dictionary.
 
     Following shows all available attributes/methods you can access with bm25_index.something.
     print(dir(bm25_index))
@@ -881,19 +915,29 @@ class RAGPipeline:
 
         bm25_results_with_scores = []
         if self.use_bm25_retrieval:
-            bm25_chunks, bm25_index = self.bm25_for_sources(sources)
             bm25_query_tokens = list(
                 dict.fromkeys(self.tokenize_for_bm25(expanded_query))
             )
-            bm25_scores = bm25_index.get_scores(bm25_query_tokens)
-            top_bm25_indices = bm25_scores.argsort()[
-                ::-1
-            ][:self.config["retrieval"]["bm25_top_k"]]
-            bm25_results_with_scores = [
-                (bm25_chunks[index], float(bm25_scores[index]))
-                for index in top_bm25_indices
-                if bm25_scores[index] > self.config["retrieval"]["bm25_min_score"]
-            ]
+            if self.bm25_backend == "inverted":
+                bm25_results_with_scores = [
+                    (self.chunks[index], score)
+                    for index, score in self.inverted_bm25.search(
+                        bm25_query_tokens, sources,
+                        self.config["retrieval"]["bm25_top_k"],
+                        self.config["retrieval"]["bm25_min_score"],
+                    )
+                ]
+            else:
+                bm25_chunks, bm25_index = self.bm25_for_sources(sources)
+                bm25_scores = bm25_index.get_scores(bm25_query_tokens)
+                top_bm25_indices = bm25_scores.argsort()[
+                    ::-1
+                ][:self.config["retrieval"]["bm25_top_k"]]
+                bm25_results_with_scores = [
+                    (bm25_chunks[index], float(bm25_scores[index]))
+                    for index in top_bm25_indices
+                    if bm25_scores[index] > self.config["retrieval"]["bm25_min_score"]
+                ]
         bm25_candidate_docs = [doc for doc, _ in bm25_results_with_scores]
 
         """

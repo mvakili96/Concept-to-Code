@@ -463,6 +463,8 @@ text_normalization:
   # Changing this requires rebuilding both dense indexes and BM25. Raw PDF text/IDs stay unchanged.
 
 retrieval:
+  bm25_backend: "inverted"  # "rank_bm25": original full scan. Both use the same BM25 formula.
+  # Existing indexes: run python rebuild_bm25.py once. No PDF parsing or dense rebuild needed.
   dense_index_type: "flat"  # "flat" (exact IndexFlatL2) or "hnsw" (approximate IndexHNSWFlat)
   hnsw_m: 32
   hnsw_ef_construction: 200
